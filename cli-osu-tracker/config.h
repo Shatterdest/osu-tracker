@@ -4,32 +4,6 @@
 #include <string>
 #include <format>  // C++23 for string 
 
-// Example struct
-struct Example {
-	int id;
-	double value;
-	std::string name;
-
-	// Constructor
-	Example(int i, double v, std::string n) : id(i), value(v), name(n) {}
-};
-
-// Helper function to get member names and values from the struct using reflection
-template <typename T>
-auto getStructMembers(const T& obj) {
-	std::vector<std::vector<std::string>> result;
-
-	// Use reflection to iterate over the members of the struct
-	for (const auto& member : std::reflect::members<T>()) {
-		// Member name and value
-		auto name = std::string(member.name());
-		auto value = std::format("{}", member.get(obj));  // Formatting the member value
-
-		result.push_back({ name, value });
-	}
-
-	return result;
-}
 
 
 struct s_application_config {

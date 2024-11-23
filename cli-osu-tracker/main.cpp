@@ -277,23 +277,7 @@ static void inspector_api() {
 int main()
 {
 	// Create a vector of Example structs
-	std::vector<Example> examples = {
-		Example(1, 10.5, "A"),
-		Example(2, 20.7, "B"),
-		Example(3, 30.9, "C")
-	};
-
-	// Iterate over the vector of structs
-	for (const auto& example : examples) {
-		// Get the key-value pairs for each struct
-		auto members = getStructMembers(example);
-
-		// Print the key-value pairs
-		for (const auto& member : members) {
-			std::cout << member[0] << ": " << member[1] << std::endl;
-		}
-		std::cout << "-----" << std::endl;
-	}
+	std::cout << "";
 	return 0;
 
 	getConfig(vec_tracker, "", "");
