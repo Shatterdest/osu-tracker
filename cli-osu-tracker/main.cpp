@@ -294,7 +294,6 @@ int main()
 		}
 		std::cout << "-----" << std::endl;
 	}
-
 	return 0;
 
 	getConfig(vec_tracker, "", "");

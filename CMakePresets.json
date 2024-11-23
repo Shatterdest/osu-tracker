@@ -24,13 +24,14 @@
       "displayName": "x86 Debug",
       "inherits": "windows-base",
       "architecture": {
-        "value": "x86",
+        "value": "x86-debug",
         "strategy": "external"
       },
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
         "CMAKE_C_COMPILER": "C:/winlibs-i686/bin/gcc.exe",
-        "CMAKE_CXX_COMPILER": "C:/winlibs-i686/bin/g++.exe"
+        "CMAKE_CXX_COMPILER": "C:/winlibs-i686/bin/g++.exe",
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/mingw-toolchain.cmake"
       }
     },
     {
@@ -38,18 +39,21 @@
       "displayName": "x86 Release",
       "inherits": "x86-debug",
       "architecture": {
-        "value": "x86",
+        "value": "x86-release",
         "strategy": "external"
+
       },
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
         "CMAKE_C_COMPILER": "C:/winlibs-i686/bin/gcc.exe",
-        "CMAKE_CXX_COMPILER": "C:/winlibs-i686/bin/g++.exe"
+        "CMAKE_CXX_COMPILER": "C:/winlibs-i686/bin/g++.exe",
+        "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/mingw-toolchain.cmake"
       }
     },
     // 64 bit
     {
       "name": "x64-debug",
+      "hidden": true,
       "displayName": "x64 Debug",
       "inherits": "windows-base",
       "architecture": {
@@ -64,9 +68,11 @@
     },
     {
       "name": "x64-release",
+      "hidden": true,
       "displayName": "x64 Release",
       "inherits": "x64-debug",
       "architecture": {
+
         "value": "x64",
         "strategy": "external"
       },
