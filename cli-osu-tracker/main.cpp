@@ -277,13 +277,11 @@ static void inspector_api() {
 int main()
 {
 	// Create a vector of Example structs
-	std::cout << "";
-	return 0;
 
 	getConfig(vec_tracker, "", "");
 	enableVirtualTerminalProcessing();
 	printHeader();
-	
+
 	if (!checkConfig()) {
 		
 		std::string osu_id, client_id, client_secret;

@@ -1,20 +1,12 @@
 ﻿cmake_minimum_required(VERSION 3.15)
 project(cli-osu-tracker LANGUAGES CXX)
-
-# Set the C++ standard
-set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-# Debugging output for architecture
-message(STATUS "CMAKE_GENERATOR_PLATFORM: ${CMAKE_GENERATOR_PLATFORM}")
-message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
-
-SET(GCC_COVERAGE_COMPILE_FLAGS "-std=c++2b")
+set(CMAKE_CXX_SCAN_FOR_MODULES ON)
 
 # Base directories
 set(BASE_INCLUDE_PATH "${CMAKE_SOURCE_DIR}/cli-osu-tracker/includes")
 set(BASE_LIB_PATH "${CMAKE_SOURCE_DIR}/cli-osu-tracker/libs")
-include_directories(“C:/winlibs-i686/include”)
 
 # Debug/Release-specific paths
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -26,10 +18,22 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
 endif()
 
 # Add the include directories for the project
-include_directories(${BASE_INCLUDE_PATH} ${ARCH_INCLUDE_PATH} ${BUILD_INCLUDE_PATH})
+include_directories(${BASE_INCLUDE_PATH} ${BUILD_INCLUDE_PATH})
 
 # Add the library directories for linking
-link_directories(${BASE_LIB_PATH} ${ARCH_LIB_PATH} ${BUILD_LIB_PATH})
+link_directories(${BASE_LIB_PATH} ${BUILD_LIB_PATH})
 
 # Add subdirectories for project(s)
 add_subdirectory(cli-osu-tracker)
+
+# Debugging output for architecture
+message(STATUS "#################################################")
+message(STATUS "#################################################")
+message(STATUS "CMAKE_SYSROOT: ${CMAKE_SYSROOT}")
+message(STATUS "BASE_INCLUDE_PATH: ${BASE_INCLUDE_PATH}")
+message(STATUS "BASE_LIB_PATH: ${BASE_LIB_PATH}")
+message(STATUS "BUILD_INCLUDE_PATH: ${BUILD_INCLUDE_PATH}")
+message(STATUS "BUILD_LIB_PATH: ${BUILD_LIB_PATH}")
+message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
+message(STATUS "#################################################")
+message(STATUS "#################################################")

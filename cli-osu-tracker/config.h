@@ -2,8 +2,6 @@
 #include "ext.h"
 #include <utility>
 #include <string>
-#include <format>  // C++23 for string 
-
 
 
 struct s_application_config {
@@ -112,7 +110,7 @@ void setConfig(std::string key, std::string value) {
 template <typename T>
 std::string getConfig(std::vector<T> vec, std::string key, std::string type = "") {
 	for (auto entry : vec) {
-		
+
 	}
 	return "";
 }
