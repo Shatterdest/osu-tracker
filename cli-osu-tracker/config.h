@@ -4,6 +4,10 @@
 #include <string>
 
 
+enum {
+
+};
+
 struct s_application_config {
 	std::string key;			// key
 	std::string name;			// name
