@@ -1,12 +1,7 @@
 #pragma once
-#include "ext.h"
 #include <utility>
 #include <string>
 
-
-enum {
-
-};
 
 struct s_application_config {
 	std::string key;			// key
@@ -112,7 +107,7 @@ void setConfig(std::string key, std::string value) {
 }
 
 template <typename T>
-std::string getConfig(std::vector<T> vec, std::string key, std::string type = "") {
+std::string getConfig(std::vector<T> vec, std::string key, std::string field) {
 	for (auto entry : vec) {
 
 	}
