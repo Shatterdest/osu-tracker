@@ -1,4 +1,4 @@
-#include "config.h"
+#include "../header/config.h"
 
 std::string auth_token;
 

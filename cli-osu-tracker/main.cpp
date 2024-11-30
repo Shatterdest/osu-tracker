@@ -3,91 +3,11 @@
 #include <string>
 #include <json.hpp>
 #include <cpr/cpr.h>
-#include "api.h"
+#include "../header/api.h"
+#include "../header/console.h"
+#include "../header/ext.h"
 
 std::string version = "v1.0";
-
-bool isNumeric(const std::string& str) {
-	return std::all_of(str.begin(), str.end(), ::isdigit);
-}
-void moveCursorUp(int lines) {
-	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-	if (hConsole == INVALID_HANDLE_VALUE) {
-		std::cerr << "Error getting console handle" << std::endl;
-		return;
-	}
-
-	CONSOLE_SCREEN_BUFFER_INFO csbi;
-	if (!GetConsoleScreenBufferInfo(hConsole, &csbi)) {
-		std::cerr << "Error getting console screen buffer info" << std::endl;
-		return;
-	}
-
-	COORD newPosition = csbi.dwCursorPosition;
-	newPosition.Y -= lines;
-	if (newPosition.Y < 0) {
-		newPosition.Y = 0; // Ensure the cursor doesn't move above the top of the console
-	}
-
-	if (!SetConsoleCursorPosition(hConsole, newPosition)) {
-		std::cerr << "Error setting console cursor position" << std::endl;
-	}
-}
-void clear() {
-	COORD topLeft = { 0, 0 };
-	HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
-	CONSOLE_SCREEN_BUFFER_INFO screen;
-	DWORD written;
-
-	GetConsoleScreenBufferInfo(console, &screen);
-	FillConsoleOutputCharacterA(
-		console, ' ', screen.dwSize.X * screen.dwSize.Y, topLeft, &written
-	);
-	FillConsoleOutputAttribute(
-		console, FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_BLUE,
-		screen.dwSize.X * screen.dwSize.Y, topLeft, &written
-	);
-	SetConsoleCursorPosition(console, topLeft);
-}
-
-static std::string formatNumber(long long num) {
-	std::string str = std::to_string(num);
-	int n = str.length();
-	for (int i = n - 3; i > 0; i -= 3) {
-		str.insert(i, ".");
-	}
-	return str;
-}
-
-// ansi console color codes (probably windows only)
-enum conCol {
-	f_black = 30,
-	f_red = 31,
-	f_green = 32,
-	f_yellow = 33,
-	f_blue = 34,
-	f_mangenta = 35,
-	f_cyan = 36,
-	f_white = 37,
-	f_defaultColor = 39,
-	b_black = 40,
-	b_red = 41,
-	b_green = 42,
-	b_yellow = 43,
-	b_blue = 44,
-	b_mangenta = 45,
-	b_cyan = 46,
-	b_white = 47,
-	b_defaultColor = 49
-};
-
-void setColor(conCol bg = conCol::b_defaultColor, conCol fg = conCol::f_defaultColor) {
-	std::cout << "\033[" << bg << ";" << fg << "m";
-}
-
-void resetColor() {
-	std::cout << "\033[0m";
-}
 
 void enableVirtualTerminalProcessing() {
 	HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -103,77 +23,16 @@ void printHeader() {
 	setColor(conCol::b_defaultColor, conCol::f_white);
 	std::cout << version;
 	resetColor();
-	std::cout << " by _Railgun_\n";
-	std::cout << "-----------------------\n";
+	std::cout << " by _Railgun_\n-----------------------\n";
 }
 
-std::vector<std::string> mainOpt{
+std::vector<std::string> option_main{
 	{"Run Tracker"},
 	{"Settings"},
 	{"Exit Application"}
 };
 
-int drawMenu(int index,std::vector<std::string> menu) {
-	//initial draw
-	for (int i = 0; i < menu.size(); i++) {
-		if (i == index) {
-			setColor(b_white, f_black);
-			std::cout << menu[i];
-			resetColor();
-			std::cout << "\n";
-		}
-		else {
-			resetColor();
-			std::cout << menu[i] << "\n";
-		}
-	}
-	while (true) {
-		if (GetAsyncKeyState(VK_UP) & 0x8000) {
-			// Move up in the array
-			if (index > 0) {
-				index--;
-				moveCursorUp(menu.size());
-				for (int i = 0; i < menu.size(); i++) {
-					if (i == index) {
-						setColor(b_white, f_black);
-						std::cout << menu[i];
-						resetColor();
-						std::cout << "\n";
-					}
-					else {
-						resetColor();
-						std::cout << menu[i] << "\n";
-					}
-				}
-				std::this_thread::sleep_for(std::chrono::milliseconds(100));
-			}
-		}
-		else if (GetAsyncKeyState(VK_DOWN) & 0x8000) {
-			// Move down in the array
-			if (index < menu.size() - 1) {
-				index++;
-				moveCursorUp(menu.size());
-				for (int i = 0; i < menu.size(); i++) {
-					if (i == index) {
-						setColor(b_white, f_black);
-						std::cout << menu[i];
-						resetColor();
-						std::cout << "\n";
-					}
-					else {
-						resetColor();
-						std::cout << menu[i] << "\n";
-					}
-				}
-				std::this_thread::sleep_for(std::chrono::milliseconds(100));
-			}
-		}
-		if (GetAsyncKeyState(VK_RETURN) & 0x8000) {
-			return index;
-		}
-		std::this_thread::sleep_for(std::chrono::milliseconds(16));
-	}
-}
+
 static void respektive_api() {
 	try {
 		std::ofstream myfile;
@@ -272,13 +131,8 @@ static void inspector_api() {
 	}
 }
 
-
-
 int main()
 {
-	// Create a vector of Example structs
-
-	getConfig(vec_tracker, "", "");
 	enableVirtualTerminalProcessing();
 	printHeader();
 
@@ -318,25 +172,12 @@ int main()
 	} else {
 		readConfig();
 	}
-	clear();
+
+	con_clear();
 	printHeader();
-	setColor(b_defaultColor, f_green);
-	std::cout << "[Enter]";
 	resetColor();
-	std::cout << " to select an option | ";
-	setColor(b_defaultColor, f_green);
-	std::cout << "[Arrow Up / Down]";
-	resetColor();
-	std::cout << " to change selection\n";
-	std::cout << "-----------------------\n";
-	int index = drawMenu(0, mainOpt);
+	int index = drawMenu(option_main);
 	
 
 	return 0;
 }
-
-
-
-
-
-

@@ -7,8 +7,11 @@ A CLI based osu! stats/session tracker
 - Save Sessions
 - Compare overall stats between sessions
 - Track any custom stats that are not hardcoded
-- Cross-Plattform
+- Cross-Plattform (not yet)
 - and more...
+
+## Credits
+- Score Inspector API by Amayakase
 
 ## How to build from source:
 - TODO

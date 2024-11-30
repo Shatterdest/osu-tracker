@@ -2,42 +2,21 @@
 #include <utility>
 #include <string>
 
-
-struct s_application_config {
-	std::string key;			// key
-	std::string name;			// name
-	std::string type;			// type
-	std::string def;			// default value upon config creation
-	std::string description;	// description
-	bool secret;				// if value should be shown in console or not
-	// value is still plaintext in config file - DO NOT SHARE
-};
-
-struct s_tracker_config {
-	std::string key;		// key of name
-	std::string name;		// name of value
-	std::string type;		// type of the json value
-	std::string group;		// group name
-	std::string path;		// json path
-	bool track;				// should be tracked or not
-	bool display;			// display in console or not
-};
-
-struct s_api_endpoints {
-	std::string name;	// group name
-	std::string url;	// api url
-};
-
-std::vector<s_application_config> vec_application{
-	// Key					Name					Type	 Default	Description											Secret
+std::vector<std::vector<std::any>> vec_application{
+	{"key",					"name",					"type",		"def",	"description",										"secret"},
+	// Key					Name					Type		Default	Description											Secret
 	{"osu_id",				"User ID",				"int",		"",		"Your osu! user id.",								false},
 	{"client_id",			"Client ID",			"int",		"",		"osu! API V2 Client ID.",							false},
 	{"client_secret",		"Client Secret",		"string",	"",		"osu! API V2 Client Secret ( DO NOT SHARE )!",		true},
 	{"api_refreshInterval",	"API Refresh Interval",	"int",		"8",	"Time in (ms) till api fetches again in the loop.",	false}
 };
 
-std::vector<s_api_endpoints> vec_api{
+std::vector<std::vector<std::any>> vec_api{
 	// group, url
+	{
+		"name",
+		"url"
+	},
 	{
 		"osu",
 		"https://osu.ppy.sh/api/v2/users/"
@@ -56,8 +35,10 @@ std::vector<s_api_endpoints> vec_api{
 	},
 };
 
-std::vector<s_tracker_config> vec_tracker{
-	// key			 name				 type		 group				jsonPath			track?	display?
+std::vector<std::vector<std::any>> vec_tracker{
+
+	{"key",			"name",				"type",		"group",			"path",				"track","display"},
+	// key			name				type		group				jsonPath			track?	display?
 	{"scoreRank",	"Score Rank",		"int",		"respektive_user",	"/0/rank",			true,	true},
 	{"scoreScore",	"res_RankedScore",	"int",		"respektive_user",	"/0/score",			false,	false},
 	{"rankedScore",	"Ranked Score",		"int",		"osu",				"",					true,	true},
