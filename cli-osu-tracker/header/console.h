@@ -39,7 +39,7 @@ void resetColor() {
 	std::cout << "\033[0m";
 }
 
-int drawMenu(std::vector<std::string> menu) {
+int drawMenu(bool head, std::vector<std::string> menu) {
 	for (int i = 0; i < menu.size(); i++) {
 		setColor(b_defaultColor, f_white);
 		std::cout << "[";
@@ -58,7 +58,7 @@ int drawMenu(std::vector<std::string> menu) {
 	std::cin >> index;
 	if (!isNumeric(index)) {
 		con_clear();
-		drawMenu(menu);
+		drawMenu(head,menu);
 	}
 	else {
 		int i_index = std::stoi(index);

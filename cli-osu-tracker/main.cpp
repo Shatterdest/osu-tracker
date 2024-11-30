@@ -32,6 +32,13 @@ std::vector<std::string> option_main{
 	{"Exit Application"}
 };
 
+std::vector<std::string> option_settings{
+	{"Global Config"},
+	{"Tracker Config"},
+	{"API Config"},
+	{"Back"}
+};
+
 
 static void respektive_api() {
 	try {
@@ -176,7 +183,7 @@ int main()
 	con_clear();
 	printHeader();
 	resetColor();
-	int index = drawMenu(option_main);
+	int index = drawMenu(true,option_main);
 	
 
 	return 0;
