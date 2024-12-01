@@ -1,5 +1,4 @@
 #pragma once
-#include "ext.h"
 
 void con_moveCursorUp(int lines) {
 	std::cout << "\033[" << lines << "A" << std::flush;

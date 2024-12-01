@@ -3,9 +3,10 @@
 #include <string>
 #include <json.hpp>
 #include <cpr/cpr.h>
+#include "../header/ext.h"
 #include "../header/api.h"
 #include "../header/console.h"
-#include "../header/ext.h"
+#include "../header/config.h"
 
 std::string version = "v1.0";
 

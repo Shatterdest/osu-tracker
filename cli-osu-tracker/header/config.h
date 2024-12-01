@@ -2,28 +2,28 @@
 #include <utility>
 #include <string>
 
-std::vector<std::vector<std::any>> vec_application{
+static const std::vector<std::vector<std::any>> vec_application_default{
 	{"key",					"name",					"type",		"def",	"description",										"secret"},
-	// Key					Name					Type		Default	Description											Secret
+	
 	{"osu_id",				"User ID",				"int",		"",		"Your osu! user id.",								false},
 	{"client_id",			"Client ID",			"int",		"",		"osu! API V2 Client ID.",							false},
 	{"client_secret",		"Client Secret",		"string",	"",		"osu! API V2 Client Secret ( DO NOT SHARE )!",		true},
 	{"api_refreshInterval",	"API Refresh Interval",	"int",		"8",	"Time in (ms) till api fetches again in the loop.",	false}
 };
 
-std::vector<std::vector<std::any>> vec_api{
-	// group, url
-	{
-		"name",
-		"url"
-	},
+std::vector<std::vector<std::any>> vec_application{
+	{"key", "name", "type", "def","description", "secret"}
+};
+
+static const std::vector<std::vector<std::any>> vec_api_default{
+	{"name","url"},
 	{
 		"osu",
 		"https://osu.ppy.sh/api/v2/users/"
 	},
 	{
 		"inspector",
-		"https://api.kirino.sh/inspector/users/stats/"
+		"https://api.kirino.sh/inspector/users/stats/{osu_id}?skipDailyData=true&skipOsuData=true&skipExtras=true"
 	},
 	{
 		"respektive_user",
@@ -32,13 +32,18 @@ std::vector<std::vector<std::any>> vec_api{
 	{
 		"respektive_rank",
 		"https://score.respektive.pw/rank/{scoreRank}"
-	},
+	}
 };
 
-std::vector<std::vector<std::any>> vec_tracker{
+std::vector<std::vector<std::any>> vec_api{
+	// group, url
+	{"name","url"}
+};
+
+static const std::vector<std::vector<std::any>> vec_tracker_default{
 
 	{"key",			"name",				"type",		"group",			"path",				"track","display"},
-	// key			name				type		group				jsonPath			track?	display?
+
 	{"scoreRank",	"Score Rank",		"int",		"respektive_user",	"/0/rank",			true,	true},
 	{"scoreScore",	"res_RankedScore",	"int",		"respektive_user",	"/0/score",			false,	false},
 	{"rankedScore",	"Ranked Score",		"int",		"osu",				"",					true,	true},
@@ -60,43 +65,28 @@ std::vector<std::vector<std::any>> vec_tracker{
 	{"targetScore",	"Target Score",		"string",	"respektive_rank",	"/0/score",			true,	true}
 };
 
-std::vector<std::string> split(std::string str, char delimiter) {
-	std::vector<std::string> result;
-	size_t start = 0;
-	size_t end = str.find(delimiter);
+std::vector<std::vector<std::any>> vec_tracker{
+	{"key", "name",	"type", "group", "path", "track", "display"}
+};
 
-	while (end != std::string::npos) {
-		result.push_back(str.substr(start, end - start));
-		start = end + 1;
-		end = str.find(delimiter, start);
-	}
-	result.push_back(str.substr(start));
 
-	return result;
-}
-
-std::string boolToString(bool b) {
-	return b ? "true" : "false";
-}
-
-// get set values
-template <typename T>
-void setConfig(std::string key, std::string value) {
+void setConfig(std::vector<std::vector<std::any>> vec, std::string key, std::string value) {
 	//for (int i = 0; i < s_config.size(); i++) {
 	//
 	//}
 }
 
-template <typename T>
-std::string getConfig(std::vector<T> vec, std::string key, std::string field) {
-	for (auto entry : vec) {
+std::any getConfig(std::vector<std::vector<std::any>>& vec, std::string key, std::string field) {
+	std::vector<std::any> fields = vec[0];
 
+	for (int i = 1; i < vec.size(); i++) {
+		if(vec[i])
 	}
-	return "";
+	return;
 }
 
 // config file handling
-void createConfig() {
+void createConfig(bool save) {
 	//std::string input;
 	//input += "//PLEASE DONT MANUALLY EDIT THIS FILE\n//(you still can,but you might break it)\n";
 	//input += "[Config]\n";
