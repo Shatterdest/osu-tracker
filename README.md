@@ -1,7 +1,7 @@
 # cli-osu-tracker
 A CLI based osu! stats/session tracker
 
-## Features (Not all implemented yet):
+## Features (TODO):
 - Powered by Score-Inspector API
 - Overlay (Browser/Text based)
 - Save Sessions
