@@ -1,4 +1,5 @@
 #pragma once
+// HELPER FUNCTIONS
 
 bool isNumeric(const std::string& str) {
 	return std::all_of(str.begin(), str.end(), ::isdigit);
@@ -17,6 +18,15 @@ std::string boolToString(bool b) {
 	return b ? "true" : "false";
 }
 
+bool stringToBool(std::string s) {
+	if (s == "true") {
+		return true;
+	}
+	else {
+		return false;
+	}
+}	
+
 std::vector<std::string> split(std::string str, char delimiter) {
 	std::vector<std::string> result;
 	size_t start = 0;
@@ -31,3 +41,4 @@ std::vector<std::string> split(std::string str, char delimiter) {
 
 	return result;
 }
+

@@ -30,6 +30,7 @@ void printHeader() {
 std::vector<std::string> option_main{
 	{"Run Tracker"},
 	{"Settings"},
+	{"API Status"},
 	{"Debug"},
 	{"Exit Application"}
 };
@@ -38,6 +39,7 @@ std::vector<std::string> option_settings{
 	{"Global Config"},
 	{"Tracker Config"},
 	{"API Config"},
+	{"Set/Edit Custom Config"},
 	{"Back"}
 };
 
@@ -144,7 +146,6 @@ int main()
 {
 	enableVirtualTerminalProcessing();
 	printHeader();
-	
 	if (!checkConfig()) {
 		
 		std::string osu_id, client_id, client_secret;
@@ -170,22 +171,22 @@ int main()
 		std::cout << "Please enter a Client Secret to use the osu! API v2\n>";
 		std::cin >> client_secret;
 
-		//setConfig("osu_id", osu_id);
-		//setConfig("client_id", client_id);
-		//setConfig("client_secret", client_secret);
-		//setConfig("api_refreshInterval", "8");
-
-
-	//	createConfig();
+		setConfig(vec_application, "osu_id", "value", osu_id);
+		setConfig(vec_application, "client_id", "value", client_id);
+		setConfig(vec_application, "client_secret", "value", client_secret);
+		setConfig(vec_application, "api_refreshInterval", "value", "8");
+		writeConfig();
 		readConfig();
 	} else {
 		readConfig();
 	}
-
 	con_clear();
 	printHeader();
 	resetColor();
-	getConfig(vec_tracker, "scoreRank", "display");
+	std::cout << getConfig(vec_application, "osu_id", "value") << "\n";
+	std::cout << getConfig(vec_application, "client_id", "value") << "\n";
+	std::cout << getConfig(vec_application, "client_secret", "value") << "\n";
+
 	int index = drawMenu(true,option_main);
 	
 
