@@ -30,6 +30,7 @@ void printHeader() {
 std::vector<std::string> option_main{
 	{"Run Tracker"},
 	{"Settings"},
+	{"Debug"},
 	{"Exit Application"}
 };
 
@@ -143,7 +144,7 @@ int main()
 {
 	enableVirtualTerminalProcessing();
 	printHeader();
-
+	
 	if (!checkConfig()) {
 		
 		std::string osu_id, client_id, client_secret;
@@ -175,7 +176,7 @@ int main()
 		//setConfig("api_refreshInterval", "8");
 
 
-		createConfig();
+	//	createConfig();
 		readConfig();
 	} else {
 		readConfig();
@@ -184,6 +185,7 @@ int main()
 	con_clear();
 	printHeader();
 	resetColor();
+	getConfig(vec_tracker, "scoreRank", "display");
 	int index = drawMenu(true,option_main);
 	
 

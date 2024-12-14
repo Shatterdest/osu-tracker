@@ -2,20 +2,15 @@
 #include <utility>
 #include <string>
 
-static const std::vector<std::vector<std::any>> vec_application_default{
-	{"key",					"name",					"type",		"def",	"description",										"secret"},
-	
+std::vector<std::vector<std::any>> vec_application{
+	{"key",					"name",					"type",		"val",	"desc",											"secret"},
 	{"osu_id",				"User ID",				"int",		"",		"Your osu! user id.",								false},
 	{"client_id",			"Client ID",			"int",		"",		"osu! API V2 Client ID.",							false},
 	{"client_secret",		"Client Secret",		"string",	"",		"osu! API V2 Client Secret ( DO NOT SHARE )!",		true},
 	{"api_refreshInterval",	"API Refresh Interval",	"int",		"8",	"Time in (ms) till api fetches again in the loop.",	false}
 };
 
-std::vector<std::vector<std::any>> vec_application{
-	{"key", "name", "type", "def","description", "secret"}
-};
-
-static const std::vector<std::vector<std::any>> vec_api_default{
+std::vector<std::vector<std::any>> vec_api{
 	{"name","url"},
 	{
 		"osu",
@@ -35,15 +30,9 @@ static const std::vector<std::vector<std::any>> vec_api_default{
 	}
 };
 
-std::vector<std::vector<std::any>> vec_api{
-	// group, url
-	{"name","url"}
-};
+std::vector<std::vector<std::any>> vec_tracker{
 
-static const std::vector<std::vector<std::any>> vec_tracker_default{
-
-	{"key",			"name",				"type",		"group",			"path",				"track","display"},
-
+	{"key",			"name",				"out",		"group",			"path",				"track","display"},
 	{"scoreRank",	"Score Rank",		"int",		"respektive_user",	"/0/rank",			true,	true},
 	{"scoreScore",	"res_RankedScore",	"int",		"respektive_user",	"/0/score",			false,	false},
 	{"rankedScore",	"Ranked Score",		"int",		"osu",				"",					true,	true},
@@ -65,30 +54,33 @@ static const std::vector<std::vector<std::any>> vec_tracker_default{
 	{"targetScore",	"Target Score",		"string",	"respektive_rank",	"/0/score",			true,	true}
 };
 
-std::vector<std::vector<std::any>> vec_tracker{
-	{"key", "name",	"type", "group", "path", "track", "display"}
-};
+static int appliction = vec_application.size();
+static int api = vec_api.size();
+static int tracker = vec_tracker.size();
 
 
-void setConfig(std::vector<std::vector<std::any>> vec, std::string key, std::string value) {
+void setConfig(std::vector<std::vector<std::any>> vec, std::string key, std::string field, std::any value) {
 	//for (int i = 0; i < s_config.size(); i++) {
 	//
 	//}
 }
 
 std::any getConfig(std::vector<std::vector<std::any>>& vec, std::string key, std::string field) {
-	std::vector<std::any> fields = vec[0];
-
-	for (int i = 1; i < vec.size(); i++) {
-		if(vec[i])
+	for (size_t i = 1; i < vec.size(); i++) {
+		if (std::any_cast<std::string>(vec[i][0]) == key) {
+			for (size_t j = 0; j < vec[i].size(); j++) {
+				if (std::any_cast<std::string>(vec[0][j]) == field) {
+					return vec[i][j];
+				}
+			}
+		}
 	}
-	return;
 }
 
 // config file handling
 void createConfig(bool save) {
-	//std::string input;
-	//input += "//PLEASE DONT MANUALLY EDIT THIS FILE\n//(you still can,but you might break it)\n";
+	std::string input;
+	input += "//PLEASE DONT MANUALLY EDIT THIS FILE\n//(you still can,but you might break it)\n";
 	//input += "[Config]\n";
 	//for (int i = 0; i < s_config.size(); i++) {
 	//	input += "\"" + s_config[i].first + "\"=" + s_config[i].second + "\n";
@@ -135,4 +127,14 @@ bool checkConfig() {
 		return false;
 	}
 	return true;
+}
+
+
+// FEATURE: for custom api settings
+void removeConfig(std::vector<std::vector<std::any>>& vec, std::string key) {
+
+}
+
+void addConfig() {
+
 }
