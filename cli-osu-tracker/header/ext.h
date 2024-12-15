@@ -42,3 +42,14 @@ std::vector<std::string> split(std::string str, char delimiter) {
 	return result;
 }
 
+void getInput(std::string name = "", std::string& var) {
+	std::cin >> var;
+	if (!isNumeric(var)) {
+		std::cout << "Your " << name << " should only contain numbers!\n>";
+		getInput(name, var);
+	}
+}
+
+void getInput(std::string& var) {
+	std::cin >> var;
+}

@@ -155,21 +155,14 @@ int main()
 		std::cout << "13817114";
 		resetColor();
 		std::cout << ")\n>";
-		osuid:
-		std::cin >> osu_id;
-		if (!isNumeric(osu_id)) {
-			std::cout << "Your osu! id should only contain numbers!\n>";
-			goto osuid;
-		}
+
+		getInput("osu! ID", osu_id);
+
 		std::cout << "Please enter a Client ID to use the osu! API v2\n>";
-		clientid:
-		std::cin >> client_id;
-		if (!isNumeric(client_id)) {
-			std::cout << "Your Client ID should only contain numbers!\n>";
-			goto clientid;
-		}
+		getInput("Client ID", client_id);
+
 		std::cout << "Please enter a Client Secret to use the osu! API v2\n>";
-		std::cin >> client_secret;
+		getInput(client_secret);
 
 		setConfig(vec_application, "osu_id", "value", osu_id);
 		setConfig(vec_application, "client_id", "value", client_id);

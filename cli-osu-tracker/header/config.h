@@ -88,23 +88,23 @@ void writeConfig() {
 			 "//(If you want to reset all settings, just delete this file)\n\n";
 	input += "[ApplicationConfig]\n";
 	for (int i = 1; i < vec_application.size(); i++) {
-		// 0 = KEY
-		// 3 = VALUE
+		// 0 = key : 0
+		// 3 = value : 1
 		input += vec_application[i][0] + ";" + vec_application[i][3] + "\n";
 	}
 	input += "\n";
 	input += "[ApiConfig]\n";
 	for (int i = 1; i < vec_api.size(); i++) {
-		// 0 = KEY
-		// 1 = VALUE
+		// 0 = key : 0
+		// 1 = url : 1
 		input += vec_api[i][0] + ";" + vec_api[i][1] + "\n";
 	}
 	input += "\n";
 	input += "[TrackerConfig]\n";
 	for (int i = 1; i < vec_tracker.size(); i++) {
-		// 0 = KEY
-		// 5 = BOOL (TRACK)
-		// 6 = BOOL (DISPLAY)
+		// 0 = key : 0
+		// 5 = track : 1
+		// 6 = display : 2
 		input += vec_tracker[i][0] + ";" + vec_tracker[i][5] + ";" + vec_tracker[i][6] + "\n";
 	}
 	
@@ -118,21 +118,34 @@ void readConfig() {
 	std::ifstream file("config.txt");
 	if (file.is_open()) {
 		std::string line;
+		int configHeader = -1;
+		std::vector<std::string> configLine;
 		while (std::getline(file, line)) {
-			if (!line.starts_with("//") || !line.empty() || !line.starts_with("[")) {
-				if (line[0] == '"') {
-					std::string key = split(line, '"')[0];
-					std::string val = split(line, '=')[1];
-					//setConfig(key, val);
+			if (line.starts_with("[")) {
+				if (line == "[ApplicationConfig]") {
+					configHeader = 0;
 				}
-				else {
-					std::vector<std::string> temp = split(line, '=');
-					if (temp[1] == "true") {
-						//setToggle(temp[0], true);
-					}
-					else {
-						//setToggle(temp[0], false);
-					}
+				if (line == "[ApiConfig]") {
+					configHeader = 1;
+				}
+				if (line == "[TrackerConfig]") {
+					configHeader = 2;
+				}
+			}
+			if (!line.starts_with("//") || !line.empty() || !line.starts_with("[")) {
+				configLine = split(line, ';');
+				switch (configHeader)
+				{
+				case 0:
+					setConfig(vec_application, configLine[0],"value", configLine[1]);
+					break;
+				case 1:
+					setConfig(vec_api, configLine[0], "url", configLine[1]);
+					break;
+				case 2:
+					setConfig(vec_tracker, configLine[0], "track", configLine[1]);
+					setConfig(vec_tracker, configLine[0], "display", configLine[2]);
+					break;
 				}
 			}
 		}
