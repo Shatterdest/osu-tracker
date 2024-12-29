@@ -8,13 +8,16 @@ set(CMAKE_CXX_SCAN_FOR_MODULES ON)
 set(BASE_INCLUDE_PATH "${CMAKE_SOURCE_DIR}/cli-osu-tracker/includes")
 set(BASE_LIB_PATH "${CMAKE_SOURCE_DIR}/cli-osu-tracker/libs")
 
+# STATIC LIB
+option(USE_STATIC_LIB "Use static library" ON)
+
 # Debug/Release-specific paths
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    set(BUILD_INCLUDE_PATH "${CMAKE_SOURCE_DIR}/cli-osu-tracker/includes/Debug/")
-    set(BUILD_LIB_PATH "${CMAKE_SOURCE_DIR}/cli-osu-tracker/libs/Debug/")
+    #set(BUILD_INCLUDE_PATH "${CMAKE_SOURCE_DIR}/cli-osu-tracker/includes/Debug/")
+    set(BUILD_LIB_PATH "${CMAKE_SOURCE_DIR}/cli-osu-tracker/libs/LIB_Debug/")
 elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
-    set(BUILD_INCLUDE_PATH "${CMAKE_SOURCE_DIR}/cli-osu-tracker/includes/Release/")
-    set(BUILD_LIB_PATH "${CMAKE_SOURCE_DIR}/cli-osu-tracker/libs/Release/")
+    #set(BUILD_INCLUDE_PATH "${CMAKE_SOURCE_DIR}/cli-osu-tracker/includes/Release/")
+    set(BUILD_LIB_PATH "${CMAKE_SOURCE_DIR}/cli-osu-tracker/libs/LIB_Release/")
 endif()
 
 # Add the include directories for the project
@@ -23,10 +26,10 @@ include_directories(${BASE_INCLUDE_PATH} ${BUILD_INCLUDE_PATH})
 # Add the library directories for linking
 link_directories(${BASE_LIB_PATH} ${BUILD_LIB_PATH})
 
-# Add subdirectories for project(s)
+# Add subdirectories for project
 add_subdirectory(cli-osu-tracker)
 
-# Debugging output for architecture
+# Debug
 message(STATUS "#################################################")
 message(STATUS "#################################################")
 message(STATUS "CMAKE_SYSROOT: ${CMAKE_SYSROOT}")

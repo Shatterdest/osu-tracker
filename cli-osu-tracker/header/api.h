@@ -19,7 +19,7 @@ static void getUser(std::string user_id, std::string mode) {
 	nlohmann::json request;
 	auto r = cpr::Get(cpr::Url{ "https://osu.ppy.sh/api/v2/users/" + user_id + "/" + mode + "?key=id" },
 		cpr::Header{
-			{ "Content-Type", "application/json" },
+			{ "Content-Type", "apaplication/json" },
 			{ "Accept", "application/json" },
 			{ "Authorization", auth_token }
 		});

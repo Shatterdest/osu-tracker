@@ -162,7 +162,7 @@ int main()
 		getInput("Client ID", client_id);
 
 		std::cout << "Please enter a Client Secret to use the osu! API v2\n>";
-		getInput(client_secret);
+		getInput("Client Secret", client_secret);
 
 		setConfig(vec_application, "osu_id", "value", osu_id);
 		setConfig(vec_application, "client_id", "value", client_id);
