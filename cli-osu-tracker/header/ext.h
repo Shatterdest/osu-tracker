@@ -50,6 +50,6 @@ void getInput(std::string name, std::string& var) {
 	}
 }
 
-void getInput(std::string& var) {
+void getInput(std::string var) {
 	std::cin >> var;
 }

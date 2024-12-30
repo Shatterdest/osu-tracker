@@ -54,17 +54,18 @@ std::vector<std::vector<std::string>> vec_tracker{
 	{"targetScore",	"Target Score",		"string",	"respektive_rank",	"/0/score",			"true",	"true"}
 };
 
-void setConfig(std::vector<std::vector<std::string>>& vec, std::string key, std::string field, std::string value) {
+int setConfig(std::vector<std::vector<std::string>>& vec, std::string key, std::string field, std::string value) {
 	for (size_t i = 1; i < vec.size(); i++) {
 		if (vec[i][0] == key) {
 			for (size_t j = 0; j < vec[i].size(); j++) {
 				if (vec[0][j] == field) {
 					vec[i][j] = value;
-					return;
+					return 0;
 				}
 			}
 		}
 	}
+	return -1;
 }
 
 std::string getConfig(std::vector<std::vector<std::string>>& vec, std::string key, std::string field) {
@@ -77,7 +78,7 @@ std::string getConfig(std::vector<std::vector<std::string>>& vec, std::string ke
 			}
 		}
 	}
-	return "NULL";
+	return "";
 }
 
 // config file handling
@@ -132,7 +133,7 @@ void readConfig() {
 					configHeader = 2;
 				}
 			}
-			if (!line.starts_with("//") || !line.empty() || !line.starts_with("[")) {
+			if (!line.starts_with("//") && !line.empty() && !line.starts_with("[")) {
 				configLine = split(line, ';');
 				switch (configHeader)
 				{
