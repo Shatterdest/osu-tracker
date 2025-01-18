@@ -147,7 +147,7 @@ int main()
 {
 	enableVirtualTerminalProcessing();
 	printHeader();
-	webserver_start();
+	auto app = webserver_start();
 	if (!checkConfig()) {
 		
 		std::string osu_id, client_id, client_secret;
