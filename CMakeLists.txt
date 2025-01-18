@@ -20,6 +20,9 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
     set(BUILD_LIB_PATH "${CMAKE_SOURCE_DIR}/cli-osu-tracker/libs/LIB_Release/")
 endif()
 
+
+file(COPY ${CMAKE_SOURCE_DIR}/cli-osu-tracker/www DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/cli-osu-tracker/")
+
 # Add the include directories for the project
 include_directories(${BASE_INCLUDE_PATH} ${BUILD_INCLUDE_PATH})
 

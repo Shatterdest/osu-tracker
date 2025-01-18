@@ -17,4 +17,3 @@ A CLI based osu! stats/session tracker
 - Compare overall stats between sessions
 - Custom Config Settings
 - Cross-Plattform
-- Get rid of .dll (Static Lib)

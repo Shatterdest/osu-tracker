@@ -13,6 +13,8 @@ std::vector<std::vector<std::string>> vec_application{
 std::vector<std::vector<std::string>> vec_api{
 	{"name","url"},
 	{
+		// If people want to change to a private server and track their stats there
+		// (if private server supports api)
 		"osu",
 		"https://osu.ppy.sh/api/v2/users/"
 	},

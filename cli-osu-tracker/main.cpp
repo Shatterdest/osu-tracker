@@ -7,6 +7,7 @@
 #include "../header/api.h"
 #include "../header/console.h"
 #include "../header/config.h"
+#include "../header/webserver.h"
 
 std::string version = "v1.0";
 
@@ -146,6 +147,7 @@ int main()
 {
 	enableVirtualTerminalProcessing();
 	printHeader();
+	webserver_start();
 	if (!checkConfig()) {
 		
 		std::string osu_id, client_id, client_secret;
