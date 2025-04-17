@@ -25,8 +25,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
         {
             template<typename T, void (T::*)(request&, response&, typename MW::context&) const = &T::before_handle>
             struct get
-            {
-            };
+            {};
         };
 
         template<typename MW>
@@ -34,8 +33,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
         {
             template<typename T, void (T::*)(request&, response&, typename MW::context&) = &T::before_handle>
             struct get
-            {
-            };
+            {};
         };
 
         template<typename MW>
@@ -43,8 +41,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
         {
             template<typename T, void (T::*)(request&, response&, typename MW::context&) const = &T::after_handle>
             struct get
-            {
-            };
+            {};
         };
 
         template<typename MW>
@@ -52,8 +49,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
         {
             template<typename T, void (T::*)(request&, response&, typename MW::context&) = &T::after_handle>
             struct get
-            {
-            };
+            {};
         };
 
         template<typename MW>
@@ -61,8 +57,7 @@ namespace crow // NOTE: Already documented in "crow/app.h"
         {
             template<typename T, typename std::enable_if<T::call_global::value == false, bool>::type = true>
             struct get
-            {
-            };
+            {};
         };
 
         template<typename T>
@@ -111,37 +106,37 @@ namespace crow // NOTE: Already documented in "crow/app.h"
 
         template<typename MW, typename Context, typename ParentContext>
         typename std::enable_if<!is_before_handle_arity_3_impl<MW>::value>::type
-            before_handler_call(MW& mw, request& req, response& res, Context& ctx, ParentContext& /*parent_ctx*/)
+          before_handler_call(MW& mw, request& req, response& res, Context& ctx, ParentContext& /*parent_ctx*/)
         {
             mw.before_handle(req, res, ctx.template get<MW>(), ctx);
         }
 
         template<typename MW, typename Context, typename ParentContext>
         typename std::enable_if<is_before_handle_arity_3_impl<MW>::value>::type
-            before_handler_call(MW& mw, request& req, response& res, Context& ctx, ParentContext& /*parent_ctx*/)
+          before_handler_call(MW& mw, request& req, response& res, Context& ctx, ParentContext& /*parent_ctx*/)
         {
             mw.before_handle(req, res, ctx.template get<MW>());
         }
 
         template<typename MW, typename Context, typename ParentContext>
         typename std::enable_if<!is_after_handle_arity_3_impl<MW>::value>::type
-            after_handler_call(MW& mw, request& req, response& res, Context& ctx, ParentContext& /*parent_ctx*/)
+          after_handler_call(MW& mw, request& req, response& res, Context& ctx, ParentContext& /*parent_ctx*/)
         {
             mw.after_handle(req, res, ctx.template get<MW>(), ctx);
         }
 
         template<typename MW, typename Context, typename ParentContext>
         typename std::enable_if<is_after_handle_arity_3_impl<MW>::value>::type
-            after_handler_call(MW& mw, request& req, response& res, Context& ctx, ParentContext& /*parent_ctx*/)
+          after_handler_call(MW& mw, request& req, response& res, Context& ctx, ParentContext& /*parent_ctx*/)
         {
             mw.after_handle(req, res, ctx.template get<MW>());
         }
 
 
         template<typename CallCriteria,
-            int N, typename Context, typename Container>
+                 int N, typename Context, typename Container>
         typename std::enable_if<(N < std::tuple_size<typename std::remove_reference<Container>::type>::value), bool>::type
-            middleware_call_helper(const CallCriteria& cc, Container& middlewares, request& req, response& res, Context& ctx)
+          middleware_call_helper(const CallCriteria& cc, Container& middlewares, request& req, response& res, Context& ctx)
         {
 
             using CurrentMW = typename std::tuple_element<N, typename std::remove_reference<Container>::type>::type;
@@ -170,14 +165,14 @@ namespace crow // NOTE: Already documented in "crow/app.h"
 
         template<typename CallCriteria, int N, typename Context, typename Container>
         typename std::enable_if<(N >= std::tuple_size<typename std::remove_reference<Container>::type>::value), bool>::type
-            middleware_call_helper(const CallCriteria& /*cc*/, Container& /*middlewares*/, request& /*req*/, response& /*res*/, Context& /*ctx*/)
+          middleware_call_helper(const CallCriteria& /*cc*/, Container& /*middlewares*/, request& /*req*/, response& /*res*/, Context& /*ctx*/)
         {
             return false;
         }
 
         template<typename CallCriteria, int N, typename Context, typename Container>
         typename std::enable_if<(N < 0)>::type
-            after_handlers_call_helper(const CallCriteria& /*cc*/, Container& /*middlewares*/, Context& /*context*/, request& /*req*/, response& /*res*/)
+          after_handlers_call_helper(const CallCriteria& /*cc*/, Container& /*middlewares*/, Context& /*context*/, request& /*req*/, response& /*res*/)
         {
         }
 
@@ -216,10 +211,10 @@ namespace crow // NOTE: Already documented in "crow/app.h"
 
         template<typename F, typename... Args>
         typename std::enable_if<black_magic::CallHelper<F, black_magic::S<Args...>>::value, void>::type
-            wrapped_handler_call(crow::request& /*req*/, crow::response& res, const F& f, Args&&... args)
+          wrapped_handler_call(crow::request& /*req*/, crow::response& res, const F& f, Args&&... args)
         {
             static_assert(!std::is_same<void, decltype(f(std::declval<Args>()...))>::value,
-                "Handler function cannot have void return type; valid return types: string, int, crow::response, crow::returnable");
+                          "Handler function cannot have void return type; valid return types: string, int, crow::response, crow::returnable");
 
             res = crow::response(f(std::forward<Args>(args)...));
             res.end();
@@ -227,13 +222,13 @@ namespace crow // NOTE: Already documented in "crow/app.h"
 
         template<typename F, typename... Args>
         typename std::enable_if<
-            !black_magic::CallHelper<F, black_magic::S<Args...>>::value&&
+          !black_magic::CallHelper<F, black_magic::S<Args...>>::value &&
             black_magic::CallHelper<F, black_magic::S<crow::request&, Args...>>::value,
-            void>::type
-            wrapped_handler_call(crow::request& req, crow::response& res, const F& f, Args&&... args)
+          void>::type
+          wrapped_handler_call(crow::request& req, crow::response& res, const F& f, Args&&... args)
         {
             static_assert(!std::is_same<void, decltype(f(std::declval<crow::request>(), std::declval<Args>()...))>::value,
-                "Handler function cannot have void return type; valid return types: string, int, crow::response, crow::returnable");
+                          "Handler function cannot have void return type; valid return types: string, int, crow::response, crow::returnable");
 
             res = crow::response(f(req, std::forward<Args>(args)...));
             res.end();
@@ -241,29 +236,29 @@ namespace crow // NOTE: Already documented in "crow/app.h"
 
         template<typename F, typename... Args>
         typename std::enable_if<
-            !black_magic::CallHelper<F, black_magic::S<Args...>>::value &&
-            !black_magic::CallHelper<F, black_magic::S<crow::request&, Args...>>::value&&
+          !black_magic::CallHelper<F, black_magic::S<Args...>>::value &&
+            !black_magic::CallHelper<F, black_magic::S<crow::request&, Args...>>::value &&
             black_magic::CallHelper<F, black_magic::S<crow::response&, Args...>>::value,
-            void>::type
-            wrapped_handler_call(crow::request& /*req*/, crow::response& res, const F& f, Args&&... args)
+          void>::type
+          wrapped_handler_call(crow::request& /*req*/, crow::response& res, const F& f, Args&&... args)
         {
             static_assert(std::is_same<void, decltype(f(std::declval<crow::response&>(), std::declval<Args>()...))>::value,
-                "Handler function with response argument should have void return type");
+                          "Handler function with response argument should have void return type");
 
             f(res, std::forward<Args>(args)...);
         }
 
         template<typename F, typename... Args>
         typename std::enable_if<
-            !black_magic::CallHelper<F, black_magic::S<Args...>>::value &&
+          !black_magic::CallHelper<F, black_magic::S<Args...>>::value &&
             !black_magic::CallHelper<F, black_magic::S<crow::request&, Args...>>::value &&
-            !black_magic::CallHelper<F, black_magic::S<crow::response&, Args...>>::value&&
+            !black_magic::CallHelper<F, black_magic::S<crow::response&, Args...>>::value &&
             black_magic::CallHelper<F, black_magic::S<const crow::request&, crow::response&, Args...>>::value,
-            void>::type
-            wrapped_handler_call(crow::request& req, crow::response& res, const F& f, Args&&... args)
+          void>::type
+          wrapped_handler_call(crow::request& req, crow::response& res, const F& f, Args&&... args)
         {
             static_assert(std::is_same<void, decltype(f(std::declval<crow::request&>(), std::declval<crow::response&>(), std::declval<Args>()...))>::value,
-                "Handler function with response argument should have void return type");
+                          "Handler function with response argument should have void return type");
 
             f(req, res, std::forward<Args>(args)...);
         }
@@ -271,30 +266,28 @@ namespace crow // NOTE: Already documented in "crow/app.h"
         // wrapped_handler_call transparently wraps a handler call behind (req, res, args...)
         template<typename F, typename... Args>
         typename std::enable_if<
-            !black_magic::CallHelper<F, black_magic::S<Args...>>::value &&
+          !black_magic::CallHelper<F, black_magic::S<Args...>>::value &&
             !black_magic::CallHelper<F, black_magic::S<crow::request&, Args...>>::value &&
             !black_magic::CallHelper<F, black_magic::S<crow::response&, Args...>>::value &&
             !black_magic::CallHelper<F, black_magic::S<const crow::request&, crow::response&, Args...>>::value,
-            void>::type
-            wrapped_handler_call(crow::request& req, crow::response& res, const F& f, Args&&... args)
+          void>::type
+          wrapped_handler_call(crow::request& req, crow::response& res, const F& f, Args&&... args)
         {
-            //static_assert(std::is_same<void, decltype(f(std::declval<crow::request&>(), std::declval<crow::response&>(), std::declval<Args>()...))>::value,
-            //   "Handler function with response argument should have void return type");
+            static_assert(std::is_same<void, decltype(f(std::declval<crow::request&>(), std::declval<crow::response&>(), std::declval<Args>()...))>::value,
+                          "Handler function with response argument should have void return type");
 
-//            f(req, res, std::forward<Args>(args)...);
+            f(req, res, std::forward<Args>(args)...);
         }
 
         template<bool Reversed>
         struct middleware_call_criteria_dynamic
-        {
-        };
+        {};
 
         template<>
         struct middleware_call_criteria_dynamic<false>
         {
-            middleware_call_criteria_dynamic(const std::vector<int>& indices_) :
-                indices(indices_), slider(0) {
-            }
+            middleware_call_criteria_dynamic(const std::vector<int>& indices_):
+              indices(indices_), slider(0) {}
 
             template<typename>
             bool enabled(int mw_index) const
@@ -315,9 +308,8 @@ namespace crow // NOTE: Already documented in "crow/app.h"
         template<>
         struct middleware_call_criteria_dynamic<true>
         {
-            middleware_call_criteria_dynamic(const std::vector<int>& indices_) :
-                indices(indices_), slider(int(indices_.size()) - 1) {
-            }
+            middleware_call_criteria_dynamic(const std::vector<int>& indices_):
+              indices(indices_), slider(int(indices_.size()) - 1) {}
 
             template<typename>
             bool enabled(int mw_index) const

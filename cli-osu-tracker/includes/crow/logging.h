@@ -46,21 +46,21 @@ namespace crow
             std::string prefix;
             switch (level)
             {
-            case LogLevel::Debug:
-                prefix = "DEBUG   ";
-                break;
-            case LogLevel::Info:
-                prefix = "INFO    ";
-                break;
-            case LogLevel::Warning:
-                prefix = "WARNING ";
-                break;
-            case LogLevel::Error:
-                prefix = "ERROR   ";
-                break;
-            case LogLevel::Critical:
-                prefix = "CRITICAL";
-                break;
+                case LogLevel::Debug:
+                    prefix = "DEBUG   ";
+                    break;
+                case LogLevel::Info:
+                    prefix = "INFO    ";
+                    break;
+                case LogLevel::Warning:
+                    prefix = "WARNING ";
+                    break;
+                case LogLevel::Error:
+                    prefix = "ERROR   ";
+                    break;
+                case LogLevel::Critical:
+                    prefix = "CRITICAL";
+                    break;
             }
             std::cerr << std::string("(") + timestamp() + std::string(") [") + prefix + std::string("] ") + message << std::endl;
         }
@@ -95,16 +95,15 @@ namespace crow
     class logger
     {
     public:
-        logger(LogLevel level) :
-            level_(level)
-        {
-        }
+        logger(LogLevel level):
+          level_(level)
+        {}
         ~logger()
         {
 #ifdef CROW_ENABLE_LOGGING
             if (level_ >= get_current_log_level())
             {
-               // get_handler_ref()->log(stringstream_.str(), level_);
+                get_handler_ref()->log(stringstream_.str(), level_);
             }
 #endif
         }

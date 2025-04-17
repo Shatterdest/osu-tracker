@@ -8,6 +8,7 @@
 #include "../header/console.h"
 #include "../header/config.h"
 #include "../header/webserver.h"
+#include "../header/global.h"
 
 std::string version = "v1.0";
 
@@ -143,11 +144,29 @@ static void inspector_api() {
 	}
 }
 
+void counterThread() {
+	while (true) {
+		valuei++;
+		std::cout << valuei << "\n";
+		update_mustache();
+		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+	}
+}
+
 int main()
 {
+	std::thread t1(counterThread);
 	enableVirtualTerminalProcessing();
 	printHeader();
+
+	// CMakeLists.txt
+	// Set ENABLE_WEBSERVER TO: 1
+	// TO ENABLE IT
+
+#if ENABLE_WEBSERVER == 1
 	auto app = webserver_start();
+#endif // ENABLE_WEBSERVER == 0
+
 	if (!checkConfig()) {
 		
 		std::string osu_id, client_id, client_secret;
