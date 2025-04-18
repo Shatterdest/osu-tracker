@@ -37,7 +37,7 @@ static void respektive_api() {
 		nlohmann::json selfJson;
 		nlohmann::json nextJson;
 
-		auto selfRank = cpr::Get(cpr::Url{ "https://score.respektive.pw/u/osuidhere"},
+		auto selfRank = cpr::Get(cpr::Url{ "https://score.respektive.pw/u/osuidhere" },
 			cpr::Header{ { "Content-Type", "application/json" } });
 		selfJson = nlohmann::json::parse(selfRank.text);
 		long long self_score = selfJson[0]["score"];
@@ -69,7 +69,7 @@ static void inspector_api() {
 
 		auto selfInspector = cpr::Get(cpr::Url{ "https://api.kirino.sh/inspector/users/stats/(osuidhere)?skipDailyData=true&skipOsuData=true&skipExtras=true" },
 			cpr::Header{ { "Content-Type", "application/json" } });
-		
+
 		inspectorJson = nlohmann::json::parse(selfInspector.text);
 
 		new_b = inspectorJson["stats"]["b"];
@@ -112,7 +112,7 @@ static void inspector_api() {
 		myfile.open("d.txt");
 		myfile << ssf.str();
 		myfile.close();
-		
+
 		std::stringstream ssg;
 		ssg << "Completion: ";
 		for (int ii = 0; ii < 6; ii++) {
@@ -122,7 +122,6 @@ static void inspector_api() {
 		myfile.open("completion.txt");
 		myfile << ssg.str();
 		myfile.close();
-		
 	}
 	catch (...) {
 		std::cout << "Error inspector_api()\n";
@@ -131,8 +130,6 @@ static void inspector_api() {
 
 void counterThread() {
 	while (true) {
-		valuei++;
-		std::cout << valuei << "\n";
 		update_mustache();
 		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	}
@@ -140,7 +137,9 @@ void counterThread() {
 
 int main()
 {
+	// WEB SOCKET TEST
 	//std::thread t1(counterThread);
+
 	enableVirtualTerminalProcessing();
 	printHeader();
 
@@ -152,16 +151,20 @@ int main()
 		setConfig(vec_application, "api_refreshInterval", "value", "8");
 		writeConfig();
 		readConfig();
-	} else {
+	}
+	else {
 		writeLog("Config file found");
 		readConfig();
-	}	
+	}
 
 #if OSU_TRACKER_ENABLE_WEBSERVER == 1
-	writeLog("Starting Web Server...");
-	writeLog("Web Server should be accessible under:");
-	std::cout << "-> http://" << OSU_TRACKER_WEBSERVER_IP << ":" << OSU_TRACKER_WEBSERVER_PORT << "\n";
-	webserver_start(); // blocking
-#endif	
+	while (WEB_SERVER) {
+		writeLog("Starting Web Server...");
+		writeLog("Web Server should be accessible under:");
+		std::cout << "-> http://" << OSU_TRACKER_WEBSERVER_IP << ":" << OSU_TRACKER_WEBSERVER_PORT << "\n";
+		webserver_start(); // blocking
+		writeLog("Web Server Terminated...");
+	}
+#endif
 	return 0;
 }

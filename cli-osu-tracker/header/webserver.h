@@ -88,27 +88,45 @@ public:
 	}
 };
 
-int valuei = 1000;
+void webServer_restart(bool shutdown = false) {
+	if (shutdown)
+		WEB_SERVER = FALSE;
+	app.stop();
+}
 
 std::mutex ws_mutex;
 std::unordered_set<crow::websocket::connection*> clients;
 
+json buildJson() {
+	json _j;
+	_j["title"] = OSU_TRACKER_NAME;
+	_j["version"] = OSU_TRACKER_VERSION;
+	_j["hostname"] = OSU_TRACKER_WEBSERVER_IP;
+	_j["port"] = OSU_TRACKER_WEBSERVER_PORT;
+	_j["creator"] = OSU_TRACKER_CREATOR;
+	_j["creator_osu"] = OSU_TRACKER_PROFILE;
+	return _j;
+}
+
+// mustache updater
 void update_mustache()
 {
 	std::lock_guard<std::mutex> lock(ws_mutex);
 
-	json j;
-	j["valuei"] = valuei;
-
+	json j = buildJson();
 	std::string msg = j.dump();
 
+	// Send data to all connected websocket clients
 	for (auto client : clients)
 	{
 		client->send_text(msg);
 	}
 }
 
-void webserver_start()
+/*
+true if shutdown, else restart
+*/
+bool webserver_start()
 {
 	CustomLogger logger;
 	crow::logger::setHandler(&logger);
@@ -125,8 +143,7 @@ void webserver_start()
 		clients.insert(&conn);
 
 		// Send initial state
-		json j;
-		j["valuei"] = std::to_string(valuei);
+		json j = buildJson();
 		conn.send_text(j.dump());
 	})
 
@@ -139,7 +156,8 @@ void webserver_start()
 	// Page routing
 	CROW_ROUTE(app, "/")([]() {
 		crow::mustache::context ctx;
-		ctx["valuei"] = std::to_string(valuei);
+		ctx["title"] = OSU_TRACKER_NAME;
+		ctx["version"] = OSU_TRACKER_VERSION;
 		auto page = crow::mustache::load("index.html").render(ctx);
 		return page;
 	});
@@ -160,4 +178,7 @@ void webserver_start()
 	app.bindaddr(OSU_TRACKER_WEBSERVER_IP)
 		.port(OSU_TRACKER_WEBSERVER_PORT);
 	app.run();
+
+
 }
+
