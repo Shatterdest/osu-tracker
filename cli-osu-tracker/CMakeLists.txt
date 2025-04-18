@@ -5,6 +5,7 @@ add_compile_definitions(OSU_TRACKER_ENABLE_WEBSERVER=1) # Legacy flag due to web
 add_compile_definitions(OSU_TRACKER_WEBSERVER_IP="127.0.0.1")
 add_compile_definitions(OSU_TRACKER_WEBSERVER_PORT=10727)
 add_compile_definitions(OSU_TRACKER_DEBUG_BUILD=true)
+add_compile_definitions(OSU_TRACKER_BUILD_WINDOWS=true) # Set true when building for windows
 add_compile_definitions(OSU_TRACKER_NAME="osu! Tracker")
 add_compile_definitions(OSU_TRACKER_VERSION="v1.0")
 add_compile_definitions(OSU_TRACKER_CREATOR="Railgun")
