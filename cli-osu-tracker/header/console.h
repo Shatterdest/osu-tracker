@@ -34,33 +34,40 @@ void setColor(conCol bg = conCol::b_defaultColor, conCol fg = conCol::f_defaultC
 	std::cout << "\033[" << bg << ";" << fg << "m";
 }
 
+// foreground
+void setColorRGB_f(int red, int green, int blue) {
+	std::cout << "\033[38;2;" << red << ";" << green << ";" << blue << "m";
+}
+
+// background
+void setColorRGB_b(int red, int green, int blue) {
+	std::cout << "\033[48;2;" << red << ";" << green << ";" << blue << "m";
+}
+
 void resetColor() {
 	std::cout << "\033[0m";
 }
 
-int drawMenu(bool head, std::vector<std::string> menu) {
-	for (int i = 0; i < menu.size(); i++) {
-		setColor(b_defaultColor, f_white);
-		std::cout << "[";
-		setColor(b_defaultColor, f_green);
-		std::cout << i;
-		setColor(b_defaultColor, f_white);
-		std::cout << "] - ";
-		setColor(b_defaultColor, f_cyan);
-		std::cout << menu[i];
-		resetColor();
-		std::cout << "\n";
-	}
+void writeLog(std::string msg) {
+	auto currentTime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+	std::tm timeInfo;
+	localtime_s(&timeInfo, &currentTime);
 
-	std::cout << ">";
-	std::string index;
-	std::cin >> index;
-	if (!isNumeric(index)) {
-		con_clear();
-		drawMenu(head,menu);
-	}
-	else {
-		int i_index = std::stoi(index);
-		return i_index;
-	}
+	char dateBuffer[20];
+	strftime(dateBuffer, sizeof(dateBuffer), "%Y-%m-%d", &timeInfo);
+
+	char timeBuffer[9];
+	strftime(timeBuffer, sizeof(timeBuffer), "%H:%M:%S", &timeInfo);
+	setColorRGB_f(100, 100, 100);
+
+	std::cout << (std::string)dateBuffer + " " + timeBuffer << " ";
+	resetColor();
+	std::cout << "[";
+	setColorRGB_f(100, 100, 100);
+	std::cout << "Internal";
+	resetColor();
+	std::cout << "] ";
+	setColorRGB_f(255, 255, 255);
+	std::cout << msg << "\n";
+	resetColor();
 }

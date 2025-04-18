@@ -8,9 +8,6 @@
 #include "../header/console.h"
 #include "../header/config.h"
 #include "../header/webserver.h"
-#include "../header/global.h"
-
-std::string version = "v1.0";
 
 void enableVirtualTerminalProcessing() {
 	HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -22,30 +19,18 @@ void enableVirtualTerminalProcessing() {
 
 void printHeader() {
 	setColor(conCol::b_defaultColor, conCol::f_cyan);
-	std::cout << "CLI osu! Tracker ";
+	std::cout << OSU_TRACKER_NAME << " ";
 	setColor(conCol::b_defaultColor, conCol::f_white);
-	std::cout << version;
+	std::cout << OSU_TRACKER_VERSION;
+#if OSU_TRACKER_DEBUG_BUILD == true
+	setColor(conCol::b_defaultColor, conCol::f_red);
+	std::cout << " DEBUG";
+#endif
 	resetColor();
-	std::cout << " by _Railgun_\n-----------------------\n";
+	std::cout << " by " << OSU_TRACKER_CREATOR << "\n---------------------- - \n";
 }
 
-std::vector<std::string> option_main{
-	{"Run Tracker"},
-	{"Settings"},
-	{"API Status"},
-	{"Debug"},
-	{"Exit Application"}
-};
-
-std::vector<std::string> option_settings{
-	{"Global Config"},
-	{"Tracker Config"},
-	{"API Config"},
-	{"Set/Edit Custom Config"},
-	{"Back"}
-};
-
-
+// TODO: MOVE AWAY + REFACTOR
 static void respektive_api() {
 	try {
 		std::ofstream myfile;
@@ -155,54 +140,28 @@ void counterThread() {
 
 int main()
 {
-	std::thread t1(counterThread);
+	//std::thread t1(counterThread);
 	enableVirtualTerminalProcessing();
 	printHeader();
 
-	// CMakeLists.txt
-	// Set ENABLE_WEBSERVER TO: 1
-	// TO ENABLE IT
-
-#if ENABLE_WEBSERVER == 1
-	auto app = webserver_start();
-#endif // ENABLE_WEBSERVER == 0
-
 	if (!checkConfig()) {
-		
-		std::string osu_id, client_id, client_secret;
-		std::cout << "It seems like, you launched the tracker for the first time.\n";
-		std::cout << "Please enter your osu! user ID (example: osu.ppy.sh/users/";
-		setColor(conCol::b_defaultColor, conCol::f_cyan);
-		std::cout << "13817114";
-		resetColor();
-		std::cout << ")\n>";
-
-		getInput("osu! ID", osu_id);
-
-		std::cout << "Please enter a Client ID to use the osu! API v2\n>";
-		getInput("Client ID", client_id);
-
-		std::cout << "Please enter a Client Secret to use the osu! API v2\n>";
-		getInput("Client Secret");
-
-		setConfig(vec_application, "osu_id", "value", osu_id);
-		setConfig(vec_application, "client_id", "value", client_id);
-		setConfig(vec_application, "client_secret", "value", client_secret);
+		writeLog("Config file not found");
+		setConfig(vec_application, "osu_id", "value", "Your osu! 'user id'");
+		setConfig(vec_application, "client_id", "value", "Your API v2 'Client ID'");
+		setConfig(vec_application, "client_secret", "value", "Your API v2 'Client Secret'");
 		setConfig(vec_application, "api_refreshInterval", "value", "8");
 		writeConfig();
 		readConfig();
 	} else {
+		writeLog("Config file found");
 		readConfig();
-	}
-	con_clear();
-	printHeader();
-	resetColor();
-	std::cout << getConfig(vec_application, "osu_id", "value") << "\n";
-	std::cout << getConfig(vec_application, "client_id", "value") << "\n";
-	std::cout << getConfig(vec_application, "client_secret", "value") << "\n";
+	}	
 
-	int index = drawMenu(true,option_main);
-	
-
+#if OSU_TRACKER_ENABLE_WEBSERVER == 1
+	writeLog("Starting Web Server...");
+	writeLog("Web Server should be accessible under:");
+	std::cout << "-> http://" << OSU_TRACKER_WEBSERVER_IP << ":" << OSU_TRACKER_WEBSERVER_PORT << "\n";
+	webserver_start(); // blocking
+#endif	
 	return 0;
 }

@@ -1,6 +1,7 @@
 #pragma once
 #include <utility>
 #include <string>
+#include "../header/console.h"
 
 std::vector<std::vector<std::string>> vec_application {
 	{"key",					"name",					"value",	"desc",											   "secret"},
@@ -98,7 +99,6 @@ std::vector<std::vector<std::string>> vec_data {
 };
 
 // STATS READ/WRITE
-
 int setStats(std::string key, std::string value) {
 	for (size_t i = 1; i < vec_data.size(); i++) {
 		if (vec_data[i][0] == key) {
@@ -117,9 +117,6 @@ std::string getStats(std::string key) {
 	}
 	return "";
 }
-
-
-
 
 /*
 *	1: vector that has string vectors
@@ -161,6 +158,7 @@ std::string getConfig(std::vector<std::vector<std::string>>& vec, std::string ke
 
 // config file handling
 void writeConfig() {
+	writeLog("Writing config file...");
 	std::string input;
 	input += "//PLEASE DONT MANUALLY EDIT THIS FILE\n"
 			 "//(you still can,but you might break it)\n"
@@ -191,12 +189,14 @@ void writeConfig() {
 	file.open("config.txt");
 	file << input;
 	file.close();
+	writeLog("Config written");
 }
 
 // read config
 void readConfig() {
 	std::ifstream file("config.txt");
 	if (file.is_open()) {
+		writeLog("Reading config file...");
 		std::string line;
 		int configHeader = -1;
 		std::vector<std::string> configLine;
@@ -230,6 +230,9 @@ void readConfig() {
 			}
 		}
 		file.close();
+	}
+	else {
+		writeLog("Error reading config file");
 	}
 }
 
