@@ -1,5 +1,5 @@
 # Project-specific CMakeLists.txt
-add_executable(cli-osu-tracker main.cpp "header/webserver.h"  "includes/crow/middleware.h" )
+add_executable(osu-tracker main.cpp "header/webserver.h"  "includes/crow/middleware.h" )
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "osu! Tracker")
 add_compile_definitions(OSU_TRACKER_ENABLE_WEBSERVER=1) # Legacy flag due to webserver was an optional feature
 add_compile_definitions(OSU_TRACKER_WEBSERVER_IP="127.0.0.1")

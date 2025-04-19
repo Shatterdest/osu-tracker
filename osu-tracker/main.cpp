@@ -158,11 +158,12 @@ int main()
 	}
 
 #if OSU_TRACKER_ENABLE_WEBSERVER == 1
-	while (WEB_SERVER) {
+	bool webServer_run = true;
+	while (webServer_run) {
 		writeLog("Starting Web Server...");
 		writeLog("Web Server should be accessible under:");
 		std::cout << "-> http://" << OSU_TRACKER_WEBSERVER_IP << ":" << OSU_TRACKER_WEBSERVER_PORT << "\n";
-		webserver_start(); // blocking
+		webServer_run != webserver_start(); // blocking
 		writeLog("Web Server Terminated...");
 	}
 #endif

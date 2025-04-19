@@ -1,27 +1,27 @@
 ﻿cmake_minimum_required(VERSION 3.15)
-project(cli-osu-tracker LANGUAGES CXX)
+project(osu-tracker LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_SCAN_FOR_MODULES ON)
 
 # Base directories
-set(BASE_INCLUDE_PATH "${CMAKE_SOURCE_DIR}/cli-osu-tracker/includes")
-set(BASE_LIB_PATH "${CMAKE_SOURCE_DIR}/cli-osu-tracker/libs")
+set(BASE_INCLUDE_PATH "${CMAKE_SOURCE_DIR}/osu-tracker/includes")
+set(BASE_LIB_PATH "${CMAKE_SOURCE_DIR}/osu-tracker/libs")
 
 # STATIC LIB
 option(USE_STATIC_LIB "Use static library" ON)
 
 # Debug/Release-specific paths
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    #set(BUILD_INCLUDE_PATH "${CMAKE_SOURCE_DIR}/cli-osu-tracker/includes/Debug/")
-    set(BUILD_LIB_PATH "${CMAKE_SOURCE_DIR}/cli-osu-tracker/libs/LIB_Debug/")
+    #set(BUILD_INCLUDE_PATH "${CMAKE_SOURCE_DIR}/osu-tracker/includes/Debug/")
+    set(BUILD_LIB_PATH "${CMAKE_SOURCE_DIR}/osu-tracker/libs/LIB_Debug/")
 elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
-    #set(BUILD_INCLUDE_PATH "${CMAKE_SOURCE_DIR}/cli-osu-tracker/includes/Release/")
-    set(BUILD_LIB_PATH "${CMAKE_SOURCE_DIR}/cli-osu-tracker/libs/LIB_Release/")
+    #set(BUILD_INCLUDE_PATH "${CMAKE_SOURCE_DIR}/osu-tracker/includes/Release/")
+    set(BUILD_LIB_PATH "${CMAKE_SOURCE_DIR}/osu-tracker/libs/LIB_Release/")
 endif()
 
 
-file(COPY ${CMAKE_SOURCE_DIR}/cli-osu-tracker/www DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/cli-osu-tracker/")
+file(COPY ${CMAKE_SOURCE_DIR}/osu-tracker/www DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/osu-tracker/")
 
 # Add the include directories for the project
 include_directories(${BASE_INCLUDE_PATH} ${BUILD_INCLUDE_PATH})
@@ -30,7 +30,7 @@ include_directories(${BASE_INCLUDE_PATH} ${BUILD_INCLUDE_PATH})
 link_directories(${BASE_LIB_PATH} ${BUILD_LIB_PATH})
 
 # Add subdirectories for project
-add_subdirectory(cli-osu-tracker)
+add_subdirectory(osu-tracker)
 
 # Debug
 message(STATUS "#################################################")

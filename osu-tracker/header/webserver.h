@@ -7,6 +7,8 @@
 #include <unordered_set>
 #include <mutex>
 
+bool shutdown_webServer = false;
+
 using json = nlohmann::json;
 crow::SimpleApp app;
 
@@ -87,12 +89,6 @@ public:
 		}
 	}
 };
-
-void webServer_restart(bool shutdown = false) {
-	if (shutdown)
-		WEB_SERVER = FALSE;
-	app.stop();
-}
 
 std::mutex ws_mutex;
 std::unordered_set<crow::websocket::connection*> clients;
@@ -179,6 +175,6 @@ bool webserver_start()
 		.port(OSU_TRACKER_WEBSERVER_PORT);
 	app.run();
 
-
+	return shutdown_webServer;
 }
 
