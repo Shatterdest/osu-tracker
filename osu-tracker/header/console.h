@@ -48,7 +48,7 @@ void resetColor() {
 	std::cout << "\033[0m";
 }
 
-void writeLog(std::string msg) {
+void writeLog(std::string msg, int r = 255, int g = 255, int b = 255) {
 	auto currentTime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 	std::tm timeInfo;
 	localtime_s(&timeInfo, &currentTime);
@@ -67,7 +67,31 @@ void writeLog(std::string msg) {
 	std::cout << "Internal";
 	resetColor();
 	std::cout << "] ";
-	setColorRGB_f(255, 255, 255);
+	setColorRGB_f(r, g, b);
 	std::cout << msg << "\n";
 	resetColor();
 }
+/*
+void writeLog(std::string msg, int r, int g, int b) {
+	auto currentTime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+	std::tm timeInfo;
+	localtime_s(&timeInfo, &currentTime);
+
+	char dateBuffer[20];
+	strftime(dateBuffer, sizeof(dateBuffer), "%Y-%m-%d", &timeInfo);
+
+	char timeBuffer[9];
+	strftime(timeBuffer, sizeof(timeBuffer), "%H:%M:%S", &timeInfo);
+	setColorRGB_f(100, 100, 100);
+
+	std::cout << (std::string)dateBuffer + " " + timeBuffer << " ";
+	resetColor();
+	std::cout << "[";
+	setColorRGB_f(100, 100, 100);
+	std::cout << "Internal";
+	resetColor();
+	std::cout << "] ";
+	setColorRGB_f(r, g, b);
+	std::cout << msg << "\n";
+	resetColor();
+}*/

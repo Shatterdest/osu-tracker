@@ -88,55 +88,55 @@
             <li class="list-group-item list-group-item-dark list-group-item-action">
                 <div class="ms-2 me-auto">
                     <div class="fw-bold">Generator</div>
-                    {{OSU_TRACKER_CMAKE_GENERATOR}}
+                    <span>{{OSU_TRACKER_CMAKE_GENERATOR}}</span>
                 </div>
             </li>
             <li class="list-group-item list-group-item-dark list-group-item-action">
                 <div class="ms-2 me-auto">
                     <div class="fw-bold">C++ Standard</div>
-                    {{OSU_TRACKER_CMAKE_CXX_STANDARD}}
+                    <span>{{OSU_TRACKER_CMAKE_CXX_STANDARD}}</span>
                 </div>
             </li>
             <li class="list-group-item list-group-item-dark list-group-item-action">
                 <div class="ms-2 me-auto">
                     <div class="fw-bold">CMake Version</div>
-                    {{OSU_TRACKER_CMAKE_VERSION}}
+                    <span>{{OSU_TRACKER_CMAKE_VERSION}}</span>
                 </div>
             </li>
             <li class="list-group-item list-group-item-dark list-group-item-action">
                 <div class="ms-2 me-auto">
                     <div class="fw-bold">CMake Minimum Required Version</div>
-                    {{OSU_TRACKER_CMAKE_MINIMUM_REQUIRED_VERSION}}
+                    <span>{{OSU_TRACKER_CMAKE_MINIMUM_REQUIRED_VERSION}}</span>
                 </div>
             </li>
             <li class="list-group-item list-group-item-dark list-group-item-action">
                 <div class="ms-2 me-auto">
                     <div class="fw-bold">Compiler</div>
-                    {{OSU_TRACKER_CMAKE_CXX_COMPILER_ID}}
+                    <span>{{OSU_TRACKER_CMAKE_CXX_COMPILER_ID}}</span>
                 </div>
             </li>
             <li class="list-group-item list-group-item-dark list-group-item-action">
                 <div class="ms-2 me-auto">
                     <div class="fw-bold">Compiler Version</div>
-                    {{OSU_TRACKER_CMAKE_CXX_COMPILER_VERSION}}
+                    <span>{{OSU_TRACKER_CMAKE_CXX_COMPILER_VERSION}}</span>
                 </div>
             </li>
             <li class="list-group-item list-group-item-dark list-group-item-action">
                 <div class="ms-2 me-auto">
                     <div class="fw-bold">Build Arch</div>
-                    {{OSU_TRACKER_CMAKE_CXX_COMPILER_ARCHITECTURE_ID}}
+                    <span>{{OSU_TRACKER_CMAKE_CXX_COMPILER_ARCHITECTURE_ID}}</span>
                 </div>
             </li>
             <li class="list-group-item list-group-item-dark list-group-item-action">
                 <div class="ms-2 me-auto">
                     <div class="fw-bold">Compiler Path</div>
-                    {{OSU_TRACKER_CMAKE_CXX_COMPILER}}
+                    <span class="text-break">{{OSU_TRACKER_CMAKE_CXX_COMPILER}}</span>
                 </div>
             </li>
             <li class="list-group-item list-group-item-dark list-group-item-action">
                 <div class="ms-2 me-auto">
                     <div class="fw-bold">Build System</div>
-                    {{OSU_TRACKER_CMAKE_SYSTEM_NAME}}
+                    <span>{{OSU_TRACKER_CMAKE_SYSTEM_NAME}}</span>
                 </div>
             </li>
         </ul>
@@ -145,32 +145,56 @@
         <ul class="list-group mb-5">
             <a href="{{crow_repo_url}}" target="_blank" class="list-group-item list-group-item-dark list-group-item-action">
                 <div class="ms-2 me-auto">
-                    <div class="fw-bold">crow</div>
-                    {{crow_version}}
+                    <div class="fw-bold">
+                        <span>crow</span>
+                        <span class="badge rounded-pill text-bg-primary">{{crow_version}}</span>
+                    </div>
+                    <span>A Fast and Easy to use microframework for the web.</span>
                 </div>
             </a>
             <a href="{{libcurl_repo_url}}" target="_blank" class="list-group-item list-group-item-dark list-group-item-action">
                 <div class="ms-2 me-auto">
-                    <div class="fw-bold">libcurl</div>
-                    {{libcurl_version}}
+                    <div class="fw-bold">
+                        <span>libcurl</span>
+                        <span class="badge rounded-pill text-bg-primary">{{libcurl_version}}</span>
+                    </div>
+                    <span>A command line tool and library for transferring data with URL syntax, libcurl offers a myriad of powerful features</span>
                 </div>
             </a>
             <a href="{{asio_repo_url}}" target="_blank" class="list-group-item list-group-item-dark list-group-item-action">
                 <div class="ms-2 me-auto">
-                    <div class="fw-bold">asio</div>
-                    {{asio_version}}
+                    <div class="fw-bold">
+                        <span>asio</span>
+                        <span class="badge rounded-pill text-bg-primary">{{asio_version}}</span>
+                    </div>
+                    <span>Asio C++ Library</span>
                 </div>
             </a>
             <a href="{{cpr_repo_url}}" target="_blank" class="list-group-item list-group-item-dark list-group-item-action">
                 <div class="ms-2 me-auto">
-                    <div class="fw-bold">cpr</div>
-                    {{cpr_version}}
+                    <div class="fw-bold">
+                        <span>cpr</span>
+                        <span class="badge rounded-pill text-bg-primary">{{cpr_version}}</span>
+                    </div>
+                    <span>C++ Requests: Curl for People, a spiritual port of Python Requests.</span>
                 </div>
             </a>
             <a href="{{zlib_repo_url}}" target="_blank" class="list-group-item list-group-item-dark list-group-item-action">
                 <div class="ms-2 me-auto">
-                    <div class="fw-bold">zlib</div>
-                    {{zlib_version}}
+                    <div class="fw-bold">
+                        <span>zlib</span>
+                        <span class="badge rounded-pill text-bg-primary">{{zlib_version}}</span>
+                    </div>
+                    <span>A massively spiffy yet delicately unobtrusive compression library.</span>
+                </div>
+            </a>
+            <a href="{{nlohmannJson_repo_url}}" target="_blank" class="list-group-item list-group-item-dark list-group-item-action">
+                <div class="ms-2 me-auto">
+                    <div class="fw-bold">
+                        <span>nlohmann json</span>
+                        <span class="badge rounded-pill text-bg-primary">{{nlohmannJson_version}}</span>
+                    </div>
+                    <span>JSON for Modern C++</span>
                 </div>
             </a>
         </ul>

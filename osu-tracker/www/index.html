@@ -16,7 +16,7 @@
         let socket;
 
         function connectWebSocket() {
-            socket = new WebSocket("ws://{{hostname}}:{{port}}/ws/");
+            socket = new WebSocket("ws://{{hostname}}:{{port}}/ws/main/");
 
             socket.onmessage = (event) => {
                 const data = JSON.parse(event.data);
@@ -33,7 +33,11 @@
         }
 
         function sendMessage(cmd) {
-            socket.send(cmd);
+            // Object created
+            let array = {};
+            array["cmd"] = cmd;
+            
+            socket.send(JSON.stringify(array));
         }
         window.onload = connectWebSocket;
     </script>

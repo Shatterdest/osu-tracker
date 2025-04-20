@@ -27,7 +27,7 @@ void printHeader() {
 	std::cout << " DEBUG";
 #endif
 	resetColor();
-	std::cout << " by " << OSU_TRACKER_CREATOR << "\n---------------------- - \n";
+	std::cout << " by " << OSU_TRACKER_CREATOR << "\n-------------------------\n";
 }
 
 // TODO: MOVE AWAY + REFACTOR
@@ -128,18 +128,8 @@ static void inspector_api() {
 	}
 }
 
-void counterThread() {
-	while (true) {
-		update_mustache();
-		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-	}
-}
-
 int main()
 {
-	// WEB SOCKET TEST
-	//std::thread t1(counterThread);
-
 	enableVirtualTerminalProcessing();
 	printHeader();
 

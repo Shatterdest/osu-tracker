@@ -94,9 +94,13 @@ public:
 
 std::mutex ws_mutex;
 std::unordered_set<crow::websocket::connection*> clients;
+std::unordered_set<crow::websocket::connection*> clients_settings;
 
-json buildJson() {
+json mainJson() {
+	// test json
+	// not needed as all variables are static mustache, that never get updated
 	json _j;
+	_j["ctx"] = "main";
 	_j["title"] = OSU_TRACKER_NAME;
 	_j["version"] = OSU_TRACKER_VERSION;
 	_j["hostname"] = OSU_TRACKER_WEBSERVER_IP;
@@ -106,22 +110,41 @@ json buildJson() {
 	return _j;
 }
 
-// mustache updater
-void update_mustache()
+json settingsJson() {
+	json _j;
+	_j["ctx"] = "setting";
+	_j["osu_id"] = getConfig(vec_application,"osu_id","value");
+	_j["client_id"] = getConfig(vec_application, "client_id", "value");
+	_j["client_secret"] = getConfig(vec_application, "client_secret", "value");
+	_j["api_refreshInterval"] = getConfig(vec_application, "api_refreshInterval", "value");
+	return _j;
+}
+
+/*
+Mustache Updater
+int: jsonInt
+1 - mainJson
+2 - settingsJson
+*/
+void update_mustache(int jsonInt, crow::websocket::connection& conn)
 {
 	std::lock_guard<std::mutex> lock(ws_mutex);
-
-	json j = buildJson();
-	std::string msg = j.dump();
-
-	// Send data to all connected websocket clients
-	for (auto client : clients)
-	{
-		client->send_text(msg);
+	json j;
+	switch (jsonInt) {
+		case 1:
+			j = mainJson();
+			break;
+		case 2:
+			j = settingsJson();
+			break;
 	}
+
+	std::string json_string = j.dump();
+	conn.send_text(json_string);
 }
 
 void restartWebServer(bool shutdown = false) {
+	writeLog("Web Server termination initiated...", 255, 255, 0);
 	shutdown_webServer = shutdown;
 	app.stop();
 }
@@ -139,15 +162,11 @@ void webserver_start()
 	crow::mustache::set_base("./www/");
 	crow::mustache::set_global_base("./www/");
 
-	CROW_WEBSOCKET_ROUTE(app, "/ws/")
+	CROW_WEBSOCKET_ROUTE(app, "/ws/main/")
 	.onopen([&](crow::websocket::connection& conn) {
 		// Add & Open WS Connection
 		std::lock_guard<std::mutex> _(ws_mutex);
 		clients.insert(&conn);
-
-		// Send initial state
-		json j = buildJson();
-		conn.send_text(j.dump());
 	})
 
 	.onclose([&](crow::websocket::connection& conn, const std::string& reason, uint16_t) {
@@ -155,14 +174,17 @@ void webserver_start()
 		std::lock_guard<std::mutex> _(ws_mutex);
 		clients.erase(&conn);
 	})
-	.onmessage([&](crow::websocket::connection& /*conn*/, const std::string& data, bool is_binary) {
+	.onmessage([&](crow::websocket::connection& conn, const std::string& data, bool is_binary) {
 		std::lock_guard<std::mutex> _(ws_mutex);
-		writeLog("WebSocket Message received: " + data);
+		nlohmann::json j = json::parse(data);
 
-		if (data[0] == '#') {
-			if(data == "#restart")
+		std::string cmd = j["cmd"];
+		writeLog("Command received: " + cmd);
+		
+		if (cmd[0] == '#') {
+			if(cmd == "#restart")
 				restartWebServer();
-			if(data == "#shutdown")
+			if(cmd == "#shutdown")
 				restartWebServer(true);
 		}
 
@@ -172,6 +194,43 @@ void webserver_start()
 		}
 		*/
 	});
+
+	CROW_WEBSOCKET_ROUTE(app, "/ws/settings/")
+		.onopen([&](crow::websocket::connection& conn) {
+			// Add & Open WS Connection
+			std::lock_guard<std::mutex> _(ws_mutex);
+			clients_settings.insert(&conn);
+
+			// Send initial state
+			json j = settingsJson();
+			conn.send_text(j.dump());
+		})
+
+		.onclose([&](crow::websocket::connection& conn, const std::string& reason, uint16_t) {
+			// Close Websocket Connection
+			std::lock_guard<std::mutex> _(ws_mutex);
+			clients_settings.erase(&conn);
+		})
+
+		.onmessage([&](crow::websocket::connection& conn, const std::string& data, bool is_binary) {
+			std::lock_guard<std::mutex> _(ws_mutex);
+			nlohmann::json j = json::parse(data);
+			std::string cmd = j["cmd"];
+			writeLog("Command received: " + cmd);
+
+			if (cmd[0] == '#') {
+				if (cmd == "#saveSettings") {
+
+				}
+			}
+
+			/* Send back to all clients
+			for (auto client : clients_settings){
+				client->send_text(data);
+			}
+			*/
+		});
+
 
 	// Page routing
 	CROW_ROUTE(app, "/")([]() {
@@ -232,6 +291,8 @@ void webserver_start()
 		ctx["zlib_version"] = "Unknown";
 		ctx["zlib_repo_url"] = ZLIB_REPOSITORY_URL;
 		
+		ctx["nlohmannJson_version"] = "3.11.2";
+		ctx["nlohmannJson_repo_url"] = NLOHMANNJSON_REPOSITORY_URL;
 
 		// CMAKE INFO
 		ctx["OSU_TRACKER_CMAKE_GENERATOR"] = OSU_TRACKER_CMAKE_GENERATOR;
@@ -244,7 +305,7 @@ void webserver_start()
 		ctx["OSU_TRACKER_CMAKE_CXX_COMPILER"] = OSU_TRACKER_CMAKE_CXX_COMPILER;
 		ctx["OSU_TRACKER_CMAKE_SYSTEM_NAME"] = OSU_TRACKER_CMAKE_SYSTEM_NAME;
 
-
+		
 		auto page = crow::mustache::load("info.html").render(ctx);
 		return page;
 		});
@@ -256,9 +317,14 @@ void webserver_start()
 	while (!shutdown_webServer) {
 		writeLog("Starting Web Server...");
 		writeLog("Web Server should be accessible under:");
-		std::cout << "-> http://" << OSU_TRACKER_WEBSERVER_IP << ":" << OSU_TRACKER_WEBSERVER_PORT << "\n";
+		writeLog("#####################", 255, 255, 0);
+		std::string url = "http://";
+		url += OSU_TRACKER_WEBSERVER_IP;
+		url += ":" + std::to_string(OSU_TRACKER_WEBSERVER_PORT);
+		writeLog(url, 0, 140, 255);
+		writeLog("#####################", 255, 255, 0);
 		app.run(); // blocking
-		writeLog("Web Server Terminated...");
+		writeLog("Web Server Terminated" , 255, 0, 0);
 	}
 }
 
