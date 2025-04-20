@@ -6,6 +6,8 @@
 #include "json.hpp"
 #include <unordered_set>
 #include <mutex>
+#include <curl/curl.h>
+#include "config.h"
 
 bool shutdown_webServer = false;
 
@@ -35,7 +37,7 @@ public:
 		std::cout << (std::string)dateBuffer + " " + timeBuffer << " ";
 		resetColor();
 		switch (level) {
-			#if OSU_TRACKER_DEBUG_BUILD == true
+			#ifdef DEBUG_BUILD
 				case crow::LogLevel::Debug:
 					std::cout << "[";
 					setColor(conCol::b_defaultColor, conCol::f_white);
@@ -119,10 +121,15 @@ void update_mustache()
 	}
 }
 
+void restartWebServer(bool shutdown = false) {
+	shutdown_webServer = shutdown;
+	app.stop();
+}
+
 /*
 true if shutdown, else restart
 */
-bool webserver_start()
+void webserver_start()
 {
 	CustomLogger logger;
 	crow::logger::setHandler(&logger);
@@ -132,7 +139,7 @@ bool webserver_start()
 	crow::mustache::set_base("./www/");
 	crow::mustache::set_global_base("./www/");
 
-	CROW_WEBSOCKET_ROUTE(app, "/ws/mustache")
+	CROW_WEBSOCKET_ROUTE(app, "/ws/")
 	.onopen([&](crow::websocket::connection& conn) {
 		// Add & Open WS Connection
 		std::lock_guard<std::mutex> _(ws_mutex);
@@ -147,6 +154,23 @@ bool webserver_start()
 		// Close Websocket Connection
 		std::lock_guard<std::mutex> _(ws_mutex);
 		clients.erase(&conn);
+	})
+	.onmessage([&](crow::websocket::connection& /*conn*/, const std::string& data, bool is_binary) {
+		std::lock_guard<std::mutex> _(ws_mutex);
+		writeLog("WebSocket Message received: " + data);
+
+		if (data[0] == '#') {
+			if(data == "#restart")
+				restartWebServer();
+			if(data == "#shutdown")
+				restartWebServer(true);
+		}
+
+		/* Send back to all clients
+		for (auto client : clients){
+			client->send_text(data);
+		}
+		*/
 	});
 
 	// Page routing
@@ -154,6 +178,8 @@ bool webserver_start()
 		crow::mustache::context ctx;
 		ctx["title"] = OSU_TRACKER_NAME;
 		ctx["version"] = OSU_TRACKER_VERSION;
+		ctx["hostname"] = OSU_TRACKER_WEBSERVER_IP;
+		ctx["port"] = OSU_TRACKER_WEBSERVER_PORT;
 		auto page = crow::mustache::load("index.html").render(ctx);
 		return page;
 	});
@@ -165,16 +191,74 @@ bool webserver_start()
 	});
 	CROW_ROUTE(app, "/settings")([]() {
 		crow::mustache::context ctx;
-
+		ctx["title"] = OSU_TRACKER_NAME;
+		ctx["version"] = OSU_TRACKER_VERSION;
+		ctx["hostname"] = OSU_TRACKER_WEBSERVER_IP;
+		ctx["port"] = OSU_TRACKER_WEBSERVER_PORT;
 		auto page = crow::mustache::load("settings.html").render(ctx);
 		return page;
 	});
+	
+	CROW_ROUTE(app, "/info")([]() {
+		crow::mustache::context ctx;
+		// PROJECT
+		ctx["title"] = OSU_TRACKER_NAME;
+		ctx["version"] = OSU_TRACKER_VERSION;
+		ctx["hostname"] = OSU_TRACKER_WEBSERVER_IP;
+		ctx["port"] = OSU_TRACKER_WEBSERVER_PORT;
+		ctx["thread_count"] = std::to_string(app.concurrency());
+		ctx["websocket_max_payload"] = std::to_string(app.websocket_max_payload());
+		ctx["github"] = OSU_TRACKER_GITHUB;
+		ctx["creator"] = OSU_TRACKER_CREATOR;
+		ctx["profile"] = OSU_TRACKER_PROFILE;
+		
+		// BUILD INFO
+		ctx["build_type"] = OSU_TRACKER_CMAKE_BUILD_TYPE;
+		ctx["release_type"] = OSU_TRACKER_RELEASE_TYPE;
+
+		// Libraries
+		ctx["crow_version"] = crow::VERSION;
+		ctx["crow_repo_url"] = CROW_REPOSITORY_URL;
+
+		ctx["libcurl_version"] = LIBCURL_VERSION;
+		ctx["libcurl_repo_url"] = LIBCURL_REPOSITORY_URL;
+
+		ctx["asio_version"] = "10.30.02";
+		ctx["asio_repo_url"] = ASIO_REPOSITORY_URL;
+
+		ctx["cpr_version"] = CPR_VERSION;
+		ctx["cpr_repo_url"] = CPR_REPOSITORY_URL;
+
+		ctx["zlib_version"] = "Unknown";
+		ctx["zlib_repo_url"] = ZLIB_REPOSITORY_URL;
+		
+
+		// CMAKE INFO
+		ctx["OSU_TRACKER_CMAKE_GENERATOR"] = OSU_TRACKER_CMAKE_GENERATOR;
+		ctx["OSU_TRACKER_CMAKE_CXX_STANDARD"] = OSU_TRACKER_CMAKE_CXX_STANDARD;
+		ctx["OSU_TRACKER_CMAKE_VERSION"] = OSU_TRACKER_CMAKE_VERSION;
+		ctx["OSU_TRACKER_CMAKE_MINIMUM_REQUIRED_VERSION"] = OSU_TRACKER_CMAKE_MINIMUM_REQUIRED_VERSION;
+		ctx["OSU_TRACKER_CMAKE_CXX_COMPILER_ID"] = OSU_TRACKER_CMAKE_CXX_COMPILER_ID;
+		ctx["OSU_TRACKER_CMAKE_CXX_COMPILER_VERSION"] = OSU_TRACKER_CMAKE_CXX_COMPILER_VERSION;
+		ctx["OSU_TRACKER_CMAKE_CXX_COMPILER_ARCHITECTURE_ID"] = OSU_TRACKER_CMAKE_CXX_COMPILER_ARCHITECTURE_ID;
+		ctx["OSU_TRACKER_CMAKE_CXX_COMPILER"] = OSU_TRACKER_CMAKE_CXX_COMPILER;
+		ctx["OSU_TRACKER_CMAKE_SYSTEM_NAME"] = OSU_TRACKER_CMAKE_SYSTEM_NAME;
+
+
+		auto page = crow::mustache::load("info.html").render(ctx);
+		return page;
+		});
 	app.add_static_dir();
 
 	app.bindaddr(OSU_TRACKER_WEBSERVER_IP)
 		.port(OSU_TRACKER_WEBSERVER_PORT);
-	app.run();
 
-	return shutdown_webServer;
+	while (!shutdown_webServer) {
+		writeLog("Starting Web Server...");
+		writeLog("Web Server should be accessible under:");
+		std::cout << "-> http://" << OSU_TRACKER_WEBSERVER_IP << ":" << OSU_TRACKER_WEBSERVER_PORT << "\n";
+		app.run(); // blocking
+		writeLog("Web Server Terminated...");
+	}
 }
 

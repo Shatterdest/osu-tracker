@@ -21,8 +21,8 @@ void printHeader() {
 	setColor(conCol::b_defaultColor, conCol::f_cyan);
 	std::cout << OSU_TRACKER_NAME << " ";
 	setColor(conCol::b_defaultColor, conCol::f_white);
-	std::cout << OSU_TRACKER_VERSION;
-#if OSU_TRACKER_DEBUG_BUILD == true
+	std::cout << OSU_TRACKER_VERSION << " " << OSU_TRACKER_RELEASE_TYPE;
+#ifdef DEBUG_BUILD
 	setColor(conCol::b_defaultColor, conCol::f_red);
 	std::cout << " DEBUG";
 #endif
@@ -158,14 +158,7 @@ int main()
 	}
 
 #if OSU_TRACKER_ENABLE_WEBSERVER == 1
-	bool webServer_run = true;
-	while (webServer_run) {
-		writeLog("Starting Web Server...");
-		writeLog("Web Server should be accessible under:");
-		std::cout << "-> http://" << OSU_TRACKER_WEBSERVER_IP << ":" << OSU_TRACKER_WEBSERVER_PORT << "\n";
-		webServer_run != webserver_start(); // blocking
-		writeLog("Web Server Terminated...");
-	}
+	webserver_start(); // blocking
 #endif
 	return 0;
 }
