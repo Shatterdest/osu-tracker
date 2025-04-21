@@ -96,27 +96,14 @@ std::mutex ws_mutex;
 std::unordered_set<crow::websocket::connection*> clients;
 std::unordered_set<crow::websocket::connection*> clients_settings;
 
-json mainJson() {
-	// test json
-	// not needed as all variables are static mustache, that never get updated
-	json _j;
-	_j["ctx"] = "main";
-	_j["title"] = OSU_TRACKER_NAME;
-	_j["version"] = OSU_TRACKER_VERSION;
-	_j["hostname"] = OSU_TRACKER_WEBSERVER_IP;
-	_j["port"] = OSU_TRACKER_WEBSERVER_PORT;
-	_j["creator"] = OSU_TRACKER_CREATOR;
-	_j["creator_osu"] = OSU_TRACKER_PROFILE;
-	return _j;
-}
-
 json settingsJson() {
 	json _j;
 	_j["ctx"] = "setting";
-	_j["osu_id"] = getConfig(vec_application,"osu_id","value");
-	_j["client_id"] = getConfig(vec_application, "client_id", "value");
-	_j["client_secret"] = getConfig(vec_application, "client_secret", "value");
-	_j["api_refreshInterval"] = getConfig(vec_application, "api_refreshInterval", "value");
+
+	_j["osu_id"] = vec_application[1][2];
+	_j["client_id"] = vec_application[2][2];
+	_j["client_secret"] = vec_application[3][2];
+	_j["api_refreshInterval"] = vec_application[4][2];
 	return _j;
 }
 
@@ -132,15 +119,13 @@ void update_mustache(int jsonInt, crow::websocket::connection& conn)
 	json j;
 	switch (jsonInt) {
 		case 1:
-			j = mainJson();
+			// no dynamic content
+			return;
 			break;
 		case 2:
-			j = settingsJson();
+			conn.send_text(settingsJson().dump());
 			break;
-	}
-
-	std::string json_string = j.dump();
-	conn.send_text(json_string);
+	}	
 }
 
 void restartWebServer(bool shutdown = false) {
@@ -150,7 +135,7 @@ void restartWebServer(bool shutdown = false) {
 }
 
 /*
-true if shutdown, else restart
+blocking function
 */
 void webserver_start()
 {
@@ -250,14 +235,37 @@ void webserver_start()
 	});
 	CROW_ROUTE(app, "/settings")([]() {
 		crow::mustache::context ctx;
+
+		// navbar
 		ctx["title"] = OSU_TRACKER_NAME;
 		ctx["version"] = OSU_TRACKER_VERSION;
+		
+		// websocket connection
 		ctx["hostname"] = OSU_TRACKER_WEBSERVER_IP;
 		ctx["port"] = OSU_TRACKER_WEBSERVER_PORT;
+
+		// config
+		ctx["osu_id_name"] = vec_application[1][1];
+		ctx["osu_id_val"] = vec_application[1][2];
+		ctx["osu_id_desc"] = vec_application[1][3];
+
+		ctx["client_id_name"] = vec_application[2][1];
+		ctx["client_id_val"] = vec_application[2][2];
+		ctx["client_id_desc"] = vec_application[2][3];
+
+		ctx["client_secret_name"] = vec_application[3][1];
+		ctx["client_secret_val"] = vec_application[3][2];
+		ctx["client_secret_desc"] = vec_application[3][3];
+
+		ctx["api_refreshInterval_name"] = vec_application[4][1];
+		ctx["api_refreshInterval_val"] = vec_application[4][2];
+		ctx["api_refreshInterval_desc"] = vec_application[4][3];
+
 		auto page = crow::mustache::load("settings.html").render(ctx);
 		return page;
 	});
 	
+	// Info Page
 	CROW_ROUTE(app, "/info")([]() {
 		crow::mustache::context ctx;
 		// PROJECT
@@ -319,8 +327,7 @@ void webserver_start()
 		writeLog("Web Server should be accessible under:");
 		writeLog("#####################", 255, 255, 0);
 		std::string url = "http://";
-		url += OSU_TRACKER_WEBSERVER_IP;
-		url += ":" + std::to_string(OSU_TRACKER_WEBSERVER_PORT);
+		url += OSU_TRACKER_WEBSERVER_IP + std::to_string(':') + std::to_string(OSU_TRACKER_WEBSERVER_PORT);
 		writeLog(url, 0, 140, 255);
 		writeLog("#####################", 255, 255, 0);
 		app.run(); // blocking

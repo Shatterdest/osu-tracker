@@ -138,7 +138,7 @@ int main()
 		setConfig(vec_application, "osu_id", "value", "Your osu! 'user id'");
 		setConfig(vec_application, "client_id", "value", "Your API v2 'Client ID'");
 		setConfig(vec_application, "client_secret", "value", "Your API v2 'Client Secret'");
-		setConfig(vec_application, "api_refreshInterval", "value", "8");
+		setConfig(vec_application, "api_refreshInterval", "value", "8000");
 		writeConfig();
 		readConfig();
 	}

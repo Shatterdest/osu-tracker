@@ -5,7 +5,7 @@
 
 std::vector<std::vector<std::string>> vec_application {
 	{"key",					"name",					"value",	"desc",											   "secret"},
-	{"osu_id",				"User ID",				"",			"Your osu! user id.",								"false"},
+	{"osu_id",				"osu! User ID",			"",			"Your osu! user id.",								"false"},
 	{"client_id",			"Client ID",			"",			"osu! API V2 Client ID.",							"false"},
 	{"client_secret",		"Client Secret",		"",			"osu! API V2 Client Secret ( DO NOT SHARE )!",		 "true"},
 	{"api_refreshInterval",	"API Refresh Interval",	"8",		"Time in (ms) till api fetches again in the loop.",	"false"}
@@ -35,26 +35,26 @@ std::vector<std::vector<std::string>> vec_api {
 
 std::vector<std::vector<std::string>> vec_tracker {
 
-	{"key",			"name",				"output",	"group",			"path",				"track",	"display"},
-	{"scoreRank",	"Score Rank",		"int",		"respektive_user",	"/0/rank",			"true",		"true"},
-	{"scoreScore",	"res_RankedScore",	"int",		"respektive_user",	"/0/score",			"false",	"false"},
-	{"rankedScore",	"Ranked Score",		"int",		"osu",				"",					"true",		"true"},
-	{"totalScore",	"Total Score",		"int",		"osu",				"",					"true",		"true"},
-	{"level",		"Lvl",				"float",	"osu",				"",					"true",		"true"},
-	{"pp",			"PP",				"int",		"osu",				"",					"true",		"true"},
-	{"silverSS",	"Silver SS",		"int",		"osu",				"",					"true",		"true"},
-	{"goldSS",		"Gold SS",			"int",		"osu",				"",					"true",		"true"},
-	{"silverS",		"Silver S",			"int",		"osu",				"",					"true",		"true"},
-	{"goldS",		"Gold S",			"int",		"osu",				"",					"true",		"true"},
-	{"a",			"A",				"int",		"osu",				"",					"true",		"true"},
-	{"playcount",	"Playcount",		"int",		"osu",				"",					"true",		"true"},
-	{"b",			"B",				"int",		"inspector",		"/stats/b",			"true",		"true"},
-	{"c",			"C",				"int",		"inspector",		"/stats/c",			"true",		"true"},
-	{"d",			"D",				"int",		"inspector",		"/stats/d",			"true",		"true"},
-	{"completionP",	"Completion%",		"float",	"inspector",		"/stats/completion","true",		"true"},
-	{"targetRank",	"Target Rank",		"string",	"respektive_rank",	"/0/rank",			"true",		"true"},
-	{"targetUser",	"Target User",		"string",	"respektive_rank",	"/0/username",		"true",		"true"},
-	{"targetScore",	"Target Score",		"string",	"respektive_rank",	"/0/score",			"true",		"true"}
+	{"key",			"name",				"output",	"group",			"path",				"display"},
+	{"scoreRank",	"Score Rank",		"int",		"respektive_user",	"/0/rank",			"true"},
+	{"scoreScore",	"res_RankedScore",	"int",		"respektive_user",	"/0/score",			"false"},
+	{"rankedScore",	"Ranked Score",		"int",		"osu",				"",					"true"},
+	{"totalScore",	"Total Score",		"int",		"osu",				"",					"true"},
+	{"level",		"Lvl",				"float",	"osu",				"",					"true"},
+	{"pp",			"PP",				"int",		"osu",				"",					"true"},
+	{"silverSS",	"Silver SS",		"int",		"osu",				"",					"true"},
+	{"goldSS",		"Gold SS",			"int",		"osu",				"",					"true"},
+	{"silverS",		"Silver S",			"int",		"osu",				"",					"true"},
+	{"goldS",		"Gold S",			"int",		"osu",				"",					"true"},
+	{"a",			"A",				"int",		"osu",				"",					"true"},
+	{"playcount",	"Playcount",		"int",		"osu",				"",					"true"},
+	{"b",			"B",				"int",		"inspector",		"/stats/b",			"true"},
+	{"c",			"C",				"int",		"inspector",		"/stats/c",			"true"},
+	{"d",			"D",				"int",		"inspector",		"/stats/d",			"true"},
+	{"completionP",	"Completion%",		"float",	"inspector",		"/stats/completion","true"},
+	{"targetRank",	"Target Rank",		"string",	"respektive_rank",	"/0/rank",			"true"},
+	{"targetUser",	"Target User",		"string",	"respektive_rank",	"/0/username",		"true"},
+	{"targetScore",	"Target Score",		"string",	"respektive_rank",	"/0/score",			"true"}
 };
 
 std::vector<std::vector<std::string>> vec_data {
@@ -180,9 +180,8 @@ void writeConfig() {
 	input += "[TrackerConfig]\n";
 	for (int i = 1; i < vec_tracker.size(); i++) {
 		// 0 = key : 0
-		// 5 = track : 1
-		// 6 = display : 2
-		input += vec_tracker[i][0] + ";" + vec_tracker[i][5] + ";" + vec_tracker[i][6] + "\n";
+		// 5 = display : 1
+		input += vec_tracker[i][0] + ";" + vec_tracker[i][5] + "\n";
 	}
 	
 	std::ofstream file;
@@ -223,7 +222,6 @@ void readConfig() {
 					setConfig(vec_api, configLine[0], "url", configLine[1]);
 					break;
 				case 2:
-					setConfig(vec_tracker, configLine[0], "track", configLine[1]);
 					setConfig(vec_tracker, configLine[0], "display", configLine[2]);
 					break;
 				}
@@ -232,7 +230,7 @@ void readConfig() {
 		file.close();
 	}
 	else {
-		writeLog("Error reading config file");
+		writeLog("Error reading config file", 255,0,0);
 	}
 }
 

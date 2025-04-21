@@ -66,12 +66,37 @@
 
 
     <div class="container" style="margin-top:50px">
-        <h1>osu! Tracker</h1>
-        <div class="card">
-            <h5 class="card-header">Maintenance</h5>
-            <div class="card-body">
-                <a href="#" class="btn btn-warning" onclick="sendMessage('#restart')">Restart osu! Tracker</a>
-                <a href="#" class="btn btn-danger" onclick="sendMessage('#shutdown')">Shutdown osu! Tracker</a>
+        <h1 class="mb-5">Settings</h1>
+
+        <h5>Application Config</h5>
+        <div class="mb-5">
+            <div class="mb-3">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text" id="inputGroup-sizing-sm">{{osu_id_name}}</span>
+                    <input type="number" class="form-control" aria-describedby="inputGroup-sizing-sm" value="{{osu_id_val}}">
+                </div>
+                <div class="form-text">{{osu_id_desc}}</div>
+            </div>
+            <div class="mb-3">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text" id="inputGroup-sizing-sm">{{client_id_name}}</span>
+                    <input type="number" class="form-control" aria-describedby="inputGroup-sizing-sm" value="{{client_id_val}}">
+                </div>
+                <div class="form-text">{{client_id_desc}}</div>
+            </div>
+            <div class="mb-3">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text" id="inputGroup-sizing-sm">{{client_secret_name}}</span>
+                    <input type="password" class="form-control" aria-describedby="inputGroup-sizing-sm" value="{{client_secret_val}}">
+                </div>
+                <div class="form-text">{{client_secret_desc}}</div>
+            </div>
+            <div class="mb-3">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text" id="inputGroup-sizing-sm">{{api_refreshInterval_name}}</span>
+                    <input type="number" class="form-control" aria-describedby="inputGroup-sizing-sm" value="{{api_refreshInterval_val}}">
+                </div>
+                <div class="form-text">{{api_refreshInterval_desc}}</div>
             </div>
         </div>
     </div>
