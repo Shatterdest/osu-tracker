@@ -19,14 +19,21 @@
             socket = new WebSocket("ws://{{hostname}}:{{port}}/ws/main/");
 
             socket.onmessage = (event) => {
+                const el = document.getElementById(`ws-conn-lost`);
+                el.hidden = true;
                 const data = JSON.parse(event.data);
                 for (const key in data) {
                     const el = document.getElementById(`${key}-display`);
                     if (el) el.textContent = data[key];
                 }
             };
-
+            socket.onopen = () => {
+                const el = document.getElementById(`ws-conn-lost`);
+                el.hidden = true;
+            }
             socket.onclose = () => {
+                const el = document.getElementById(`ws-conn-lost`);
+                el.hidden = false;
                 console.log("WebSocket disconnected. Retrying...");
                 setTimeout(connectWebSocket, 1000);
             };
@@ -63,8 +70,9 @@
             </div>
         </div>
     </nav>
-
-
+    <div id="ws-conn-lost" class="alert alert-warning rounded-0" role="alert" hidden>
+        <span>Websocket connection got closed, reconnecting...</span>
+    </div>
     <div class="container" style="margin-top:50px">
         <h1>osu! Tracker</h1>
         <div class="card">

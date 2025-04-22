@@ -125,6 +125,9 @@ std::string getStats(std::string key) {
 *	4: value to set
 */
 int setConfig(std::vector<std::vector<std::string>>& vec, std::string key, std::string field, std::string value) {
+	for()
+
+
 	for (size_t i = 1; i < vec.size(); i++) {
 		if (vec[i][0] == key) {
 			for (size_t j = 0; j < vec[i].size(); j++) {
@@ -240,6 +243,12 @@ bool checkConfig() {
 		return false;
 	}
 	return true;
+}
+
+bool rmConfig() {
+	std::filesystem::remove("config.txt");
+	setConfig(vec_application,)
+	writeConfig();
 }
 
 // FEATURE: for custom api settings

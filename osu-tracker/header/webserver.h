@@ -205,7 +205,14 @@ void webserver_start()
 
 			if (cmd[0] == '#') {
 				if (cmd == "#saveSettings") {
-
+				}
+				
+				if (cmd == "#resetSettings") {
+					bool rmConfigReturn = rmConfig();
+					nlohmann::json _j;
+					_j["cmd"] = "resetSettings";
+					_j["return"] = boolToString(rmConfigReturn);
+					conn.send_text(_j);
 				}
 			}
 
@@ -326,8 +333,7 @@ void webserver_start()
 		writeLog("Starting Web Server...");
 		writeLog("Web Server should be accessible under:");
 		writeLog("#####################", 255, 255, 0);
-		std::string url = "http://";
-		url += OSU_TRACKER_WEBSERVER_IP + std::to_string(':') + std::to_string(OSU_TRACKER_WEBSERVER_PORT);
+		std::string url = "http://" + (std::string)OSU_TRACKER_WEBSERVER_IP + ":" + std::to_string(OSU_TRACKER_WEBSERVER_PORT);
 		writeLog(url, 0, 140, 255);
 		writeLog("#####################", 255, 255, 0);
 		app.run(); // blocking

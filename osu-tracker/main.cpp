@@ -135,6 +135,7 @@ int main()
 
 	if (!checkConfig()) {
 		writeLog("Config file not found");
+
 		setConfig(vec_application, "osu_id", "value", "Your osu! 'user id'");
 		setConfig(vec_application, "client_id", "value", "Your API v2 'Client ID'");
 		setConfig(vec_application, "client_secret", "value", "Your API v2 'Client Secret'");
