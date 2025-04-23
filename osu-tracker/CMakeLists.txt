@@ -1,9 +1,83 @@
-# ----------------------------------- #
-# | Project-specific CMakeLists.txt | #
-# ----------------------------------- #
+cmake_minimum_required(VERSION 3.15)
+project(osu-tracker LANGUAGES C CXX)
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_C_STANDARD 99)
+
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_SCAN_FOR_MODULES ON)
+
+# Base directories
+set(BASE_INCLUDE_PATH "${CMAKE_SOURCE_DIR}/includes")
+
+# STATIC LIB
+option(USE_STATIC_LIB "Use static library" ON)
+
+# zlib
+file(GLOB ZLIB_SRC CONFIGURE_DEPENDS
+    ${CMAKE_SOURCE_DIR}/lib/zlib/*.c
+)
+
+add_library(zlib STATIC ${ZLIB_SRC})
+target_include_directories(zlib PUBLIC ${CMAKE_SOURCE_DIR}/lib/zlib)
+
+# curl
+file(GLOB CURL_SRC CONFIGURE_DEPENDS
+    ${CMAKE_SOURCE_DIR}/lib/curl/lib/*.c
+)
+
+add_library(curl STATIC ${CURL_SRC})
+target_include_directories(curl PUBLIC
+    ${CMAKE_SOURCE_DIR}/lib/curl/include
+    ${CMAKE_SOURCE_DIR}/lib/curl/lib
+)
+
+target_compile_definitions(curl PUBLIC CURL_STATICLIB)
+target_link_libraries(curl PUBLIC zlib)
+
+# cpr
+file(GLOB CPR_SRC CONFIGURE_DEPENDS
+    ${CMAKE_SOURCE_DIR}/lib/cpr/cpr/*.cpp
+)
+
+add_library(cpr STATIC ${CPR_SRC})
+target_include_directories(cpr PUBLIC
+    ${CMAKE_SOURCE_DIR}/lib/cpr/include
+    ${CMAKE_SOURCE_DIR}/lib/cpr
+)
+
+target_link_libraries(cpr PUBLIC curl)
+
+# Debug/Release-specific paths
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    #set(BUILD_INCLUDE_PATH "${CMAKE_SOURCE_DIR}/osu-tracker/includes/Debug/")
+    #set(BUILD_LIB_PATH "${CMAKE_SOURCE_DIR}/osu-tracker/libs/LIB_Debug/")
+elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
+    #set(BUILD_INCLUDE_PATH "${CMAKE_SOURCE_DIR}/osu-tracker/includes/Release/")
+    #set(BUILD_LIB_PATH "${CMAKE_SOURCE_DIR}/osu-tracker/libs/LIB_Release/")
+endif()
+
+file(COPY ${CMAKE_SOURCE_DIR}/www DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/osu-tracker/")
+
+# Add the include directories for the project
+include_directories(${BASE_INCLUDE_PATH} ${BUILD_INCLUDE_PATH})
+
+# Debug
+message(STATUS "#################################################")
+message(STATUS "#################################################")
+message(STATUS "CMAKE_SYSROOT: ${CMAKE_SYSROOT}")
+message(STATUS "BASE_INCLUDE_PATH: ${BASE_INCLUDE_PATH}")
+message(STATUS "BASE_LIB_PATH: ${BASE_LIB_PATH}")
+message(STATUS "BUILD_INCLUDE_PATH: ${BUILD_INCLUDE_PATH}")
+message(STATUS "BUILD_LIB_PATH: ${BUILD_LIB_PATH}")
+message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
+message(STATUS "#################################################")
+message(STATUS "#################################################") 
+
 
 # OUTPUT
-add_executable(osu-tracker main.cpp "header/webserver.h"  "includes/crow/middleware.h" )
+add_executable(osu-tracker main.cpp "header/webserver.h" "includes/crow/middleware.h")
+target_link_libraries(osu-tracker PRIVATE cpr zlib curl pthread dl)
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "osu! Tracker")
 
 # WEB SERVER DEFINITIONS 
@@ -15,6 +89,14 @@ add_compile_definitions(OSU_TRACKER_WEBSERVER_PORT=727)
 add_compile_definitions(OSU_TRACKER_CMAKE_BUILD_TYPE="${CMAKE_BUILD_TYPE}")
 if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
 	add_compile_definitions(DEBUG_BUILD)
+endif()
+
+# No MacOS support
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+	add_compile_definitions(WINDOWS)
+	add_compile_definitions(_WIN32)
+elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+	add_compile_definitions(LINUX)
 endif()
 
 add_compile_definitions(OSU_TRACKER_CMAKE_GENERATOR="${CMAKE_GENERATOR}")
