@@ -11,8 +11,11 @@ A web server based osu! stats/session tracker
   - Visual Studio (Recommended)
 - Linux
   - Use bash scripts
-    - "build-release.sh"
-    - "build-debug.sh"
+    - "release.sh"
+    - "debug.sh"
+    - Usage
+      - ./release.sh configure [//]: # (Configure CMake)
+      - ./release.sh build [//]: # (Build Project)
 
 ## TODO:
 - Overlay (Browser/Text based)
