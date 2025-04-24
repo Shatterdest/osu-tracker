@@ -1,3 +1,5 @@
+#define NOMINMAX
+
 #include "cpr/threadpool.h"
 #include <algorithm>
 #include <chrono>

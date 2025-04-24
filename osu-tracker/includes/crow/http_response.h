@@ -9,7 +9,13 @@
 #if defined(_MSC_VER)
 #define _CRT_INTERNAL_NONSTDC_NAMES 1
 #endif
+
+#ifdef _WIN32
+#include <sys/types.h>
 #include <sys/stat.h>
+#define stat _stat64
+#endif
+
 #if !defined(S_ISREG) && defined(S_IFMT) && defined(S_IFREG)
 #define S_ISREG(m) (((m) & S_IFMT) == S_IFREG)
 #endif

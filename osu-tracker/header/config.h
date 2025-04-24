@@ -129,13 +129,15 @@ int setConfig(std::vector<std::vector<std::string>>& vec, std::string key, std::
 	int fieldIndex = -1;
 
 	for (size_t i = 0; i < vec[0].size(); i++) {
-		if (vec[0][i] == key) {
+		if (vec[0][i] == field) {
 			fieldIndex = i;
+			break;
 		}
 	}
 	for (size_t i = 1; i < vec.size(); i++) {
 		if (vec[i][0] == key) {
 			keyIndex = i;
+			break;
 		}
 	}
 
@@ -245,7 +247,7 @@ void readConfig() {
 					setConfig(vec_api, configLine[0], "url", configLine[1]);
 					break;
 				case 2:
-					setConfig(vec_tracker, configLine[0], "display", configLine[2]);
+					setConfig(vec_tracker, configLine[0], "display", configLine[1]);
 					break;
 				}
 			}

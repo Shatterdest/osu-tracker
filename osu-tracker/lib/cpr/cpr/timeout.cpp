@@ -1,3 +1,4 @@
+#define NOMINMAX
 #include "cpr/timeout.h"
 
 #include <chrono>
