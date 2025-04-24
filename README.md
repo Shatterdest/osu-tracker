@@ -19,4 +19,3 @@ A web server based osu! stats/session tracker
 - Save Sessions
 - Compare overall stats between sessions
 - Custom Config Settings
-- Linux Support
