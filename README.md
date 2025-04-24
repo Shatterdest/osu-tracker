@@ -8,9 +8,9 @@ A web server based osu! stats/session tracker
 
 ## How to build from source:
 - Windows
-  -> Visual Studio (Recommended)
+  - Visual Studio (Recommended)
 - Linux
-  -> Use bash scripts
+  - Use bash scripts
     - "build-release.sh"
     - "build-debug.sh"
 
