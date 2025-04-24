@@ -23,8 +23,11 @@ public:
 
 		// Convert to a time structure
 		std::tm timeInfo;
+		#ifdef _WIN32
 		localtime_s(&timeInfo, &currentTime);
-
+		#elif __linux__
+		localtime_r(&currentTime, &timeInfo);
+		#endif
 		// Format the date and time as strings
 		char dateBuffer[20];
 		strftime(dateBuffer, sizeof(dateBuffer), "%Y-%m-%d", &timeInfo);
@@ -94,6 +97,18 @@ public:
 std::mutex ws_mutex;
 std::unordered_set<crow::websocket::connection*> clients;
 std::unordered_set<crow::websocket::connection*> clients_settings;
+
+void closeConnections() {
+	std::lock_guard<std::mutex> lock(ws_mutex);
+	for (auto client : clients) {
+		client->close();
+	}
+	clients.clear();
+	for (auto client : clients_settings) {
+		client->close();
+	}
+	clients_settings.clear();
+}
 
 json settingsJson() {
 	json _j;
@@ -334,8 +349,11 @@ void webserver_start()
 		std::string url = "http://" + (std::string)OSU_TRACKER_WEBSERVER_IP + ":" + std::to_string(OSU_TRACKER_WEBSERVER_PORT);
 		writeLog(url, 0, 140, 255);
 		writeLog("#####################", 255, 255, 0);
-		app.run(); // blocking
+		app.multithreaded().run(); // blocking
 		writeLog("Web Server Terminated" , 255, 0, 0);
+		writeLog("Closing all connections...", 255, 255, 0);
+		closeConnections();
+		writeLog("All connections closed", 255, 255, 255);
 	}
 }
 

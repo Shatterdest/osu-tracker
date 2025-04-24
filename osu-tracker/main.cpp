@@ -9,6 +9,7 @@
 #include "../header/config.h"
 #include "../header/webserver.h"
 
+#ifdef _WIN32
 void enableVirtualTerminalProcessing() {
 	HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
 	DWORD dwMode = 0;
@@ -16,6 +17,7 @@ void enableVirtualTerminalProcessing() {
 	dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
 	SetConsoleMode(hOut, dwMode);
 }
+#endif
 
 void printHeader() {
 	setColor(conCol::b_defaultColor, conCol::f_cyan);
@@ -130,7 +132,9 @@ static void inspector_api() {
 
 int main()
 {
-	enableVirtualTerminalProcessing();
+	#ifdef _WIN32
+		enableVirtualTerminalProcessing();
+	#endif
 	printHeader();
 
 	if (!checkConfig()) {

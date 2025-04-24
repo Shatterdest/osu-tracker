@@ -42,48 +42,67 @@ file(GLOB_RECURSE CPR_HEADERS CONFIGURE_DEPENDS lib/cpr/*.h)
 file(GLOB_RECURSE CURL_HEADERS CONFIGURE_DEPENDS lib/curl/lib/*.h)
 file(GLOB_RECURSE ZLIB_HEADERS CONFIGURE_DEPENDS lib/zlib/*.h)
 
-# Include Source and headers
-include_directories(
-	${CMAKE_SOURCE_DIR}/lib/cpr/cpr
-	${CMAKE_SOURCE_DIR}/lib/cpr/include
-	${CMAKE_SOURCE_DIR}/lib/curl/lib
-	${CMAKE_SOURCE_DIR}/lib/curl/include
-	${CMAKE_SOURCE_DIR}/lib/zlib
-)
-
 # OUTPUT
-add_executable(osu-tracker main.cpp
-# Sources
-	${CPR_SOURCES}
-	${CURL_SOURCES}
-	${ZLIB_SOURCES}
-# Headers
-	${CPR_HEADERS}
-	${CURL_HEADERS}
-	${ZLIB_HEADERS}
-)
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+	add_executable(osu-tracker main.cpp
+		${CPR_SOURCES}
+		${CPR_HEADERS}
+		${CURL_SOURCES}
+		${ZLIB_SOURCES}
+		${CURL_HEADERS}
+		${ZLIB_HEADERS}
+	)
+elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+	add_executable(osu-tracker main.cpp
+		${CPR_SOURCES}
+		${CPR_HEADERS}
+	)
+endif()
+
+
+# Find system-installed CURL and ZLIB libraries on Linux
+if(UNIX AND NOT APPLE)
+    find_package(CURL REQUIRED)
+    find_package(ZLIB REQUIRED)
+    # Include system headers
+    include_directories(${CURL_INCLUDE_DIRS} ${ZLIB_INCLUDE_DIRS})
+    target_link_libraries(osu-tracker PRIVATE ${CURL_LIBRARIES} ${ZLIB_LIBRARIES})
+	include_directories(
+        ${CMAKE_SOURCE_DIR}/lib/cpr/cpr
+        ${CMAKE_SOURCE_DIR}/lib/cpr/include
+    )
+else()
+    # Include bundled libraries
+    include_directories(
+        ${CMAKE_SOURCE_DIR}/lib/cpr/cpr
+        ${CMAKE_SOURCE_DIR}/lib/cpr/include
+        ${CMAKE_SOURCE_DIR}/lib/curl/lib
+        ${CMAKE_SOURCE_DIR}/lib/curl/include
+        ${CMAKE_SOURCE_DIR}/lib/zlib
+    )
+endif()
+
 add_definitions(-DCURL_DISABLE_LDAP)
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "osu! Tracker" RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/osu-tracker")
 
 # WEB SERVER DEFINITIONS 
 add_compile_definitions(OSU_TRACKER_ENABLE_WEBSERVER=1) # Legacy flag due to webserver was an optional feature
 add_compile_definitions(OSU_TRACKER_WEBSERVER_IP="127.0.0.1")
-add_compile_definitions(OSU_TRACKER_WEBSERVER_PORT=727)
+add_compile_definitions(OSU_TRACKER_WEBSERVER_PORT=10727)
 
 # CMAKE BUILD AND COMPILER DEFINITIONS
 add_compile_definitions(OSU_TRACKER_CMAKE_BUILD_TYPE="${CMAKE_BUILD_TYPE}")
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-	add_compile_definitions(DEBUG_BUILD)
+    add_compile_definitions(DEBUG_BUILD)
 elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
-	add_compile_definitions(RELEASE_BUILD)
+    add_compile_definitions(RELEASE_BUILD)
 endif()
 
 # No MacOS support
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-	add_compile_definitions(WINDOWS)
-	add_compile_definitions(_WIN32) # for curl
+    add_compile_definitions(_WIN32)
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-	add_compile_definitions(LINUX)
+    add_compile_definitions(__linux__)
 endif()
 
 add_compile_definitions(OSU_TRACKER_CMAKE_GENERATOR="${CMAKE_GENERATOR}")

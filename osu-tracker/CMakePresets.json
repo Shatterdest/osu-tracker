@@ -42,7 +42,6 @@
                 "CMAKE_BUILD_TYPE": "Release"
             }
         },
-        // Linux Base Preset
         {
             "name": "linux-base",
             "hidden": true,

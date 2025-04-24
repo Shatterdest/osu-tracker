@@ -51,7 +51,11 @@ void resetColor() {
 void writeLog(std::string msg, int r = 255, int g = 255, int b = 255) {
 	auto currentTime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 	std::tm timeInfo;
-	localtime_s(&timeInfo, &currentTime);
+	#ifdef _WIN32
+		localtime_s(&timeInfo, &currentTime);
+		#elif __linux__
+		localtime_r(&currentTime, &timeInfo);
+		#endif
 
 	char dateBuffer[20];
 	strftime(dateBuffer, sizeof(dateBuffer), "%Y-%m-%d", &timeInfo);
