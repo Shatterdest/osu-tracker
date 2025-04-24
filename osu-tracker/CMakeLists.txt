@@ -13,26 +13,15 @@ set(CMAKE_CXX_SCAN_FOR_MODULES ON)
 # Base directories
 set(BASE_INCLUDE_PATH "${CMAKE_SOURCE_DIR}/includes")
 
-# STATIC LIB
+# OPTIONS
 option(USE_STATIC_LIB "Use static library" ON)
+option(BUILD_TEST "Build Test" ON)
 
 file(COPY ${CMAKE_SOURCE_DIR}/www DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/osu-tracker/")
 file(COPY ${CMAKE_SOURCE_DIR}/tracker_txt DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/osu-tracker/")
 
 # Add the include directories for the project
 include_directories(${BASE_INCLUDE_PATH} ${BUILD_INCLUDE_PATH})
-
-# Debug
-message(STATUS "#################################################")
-message(STATUS "#################################################")
-message(STATUS "CMAKE_SYSROOT: ${CMAKE_SYSROOT}")
-message(STATUS "BASE_INCLUDE_PATH: ${BASE_INCLUDE_PATH}")
-message(STATUS "BASE_LIB_PATH: ${BASE_LIB_PATH}")
-message(STATUS "BUILD_INCLUDE_PATH: ${BUILD_INCLUDE_PATH}")
-message(STATUS "BUILD_LIB_PATH: ${BUILD_LIB_PATH}")
-message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
-message(STATUS "#################################################")
-message(STATUS "#################################################") 
 
 file(GLOB_RECURSE CPR_SOURCES CONFIGURE_DEPENDS lib/cpr/*.cpp)
 file(GLOB_RECURSE CURL_SOURCES CONFIGURE_DEPENDS lib/curl/lib/*.c)
@@ -52,11 +41,29 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 		${CURL_HEADERS}
 		${ZLIB_HEADERS}
 	)
+	if(BUILD_TEST)
+		add_executable(test-tracker test.cpp
+			${CPR_SOURCES}
+			${CPR_HEADERS}
+			${CURL_SOURCES}
+			${ZLIB_SOURCES}
+			${CURL_HEADERS}
+			${ZLIB_HEADERS}
+			includes/catch_amalgamated.cpp
+		)
+	endif()
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 	add_executable(osu-tracker main.cpp
 		${CPR_SOURCES}
 		${CPR_HEADERS}
 	)
+	if(BUILD_TEST)
+		add_executable(test-tracker test.cpp
+			${CPR_SOURCES}
+			${CPR_HEADERS}
+			includes/catch_amalgamated.cpp
+		)
+	endif()
 endif()
 
 
@@ -67,6 +74,9 @@ if(UNIX AND NOT APPLE)
     # Include system headers
     include_directories(${CURL_INCLUDE_DIRS} ${ZLIB_INCLUDE_DIRS})
     target_link_libraries(osu-tracker PRIVATE ${CURL_LIBRARIES} ${ZLIB_LIBRARIES})
+	if(BUILD_TEST)
+    	target_link_libraries(test-tracker PRIVATE ${CURL_LIBRARIES} ${ZLIB_LIBRARIES})
+	endif()
 	include_directories(
         ${CMAKE_SOURCE_DIR}/lib/cpr/cpr
         ${CMAKE_SOURCE_DIR}/lib/cpr/include
@@ -83,7 +93,10 @@ else()
 endif()
 
 add_definitions(-DCURL_DISABLE_LDAP)
-set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "osu! Tracker" RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/osu-tracker")
+set_target_properties(osu-tracker PROPERTIES OUTPUT_NAME "osu-tracker" RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/osu-tracker")
+if(BUILD_TEST)
+	set_target_properties(test-tracker PROPERTIES OUTPUT_NAME "osu-tracker-test" RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/osu-tracker")
+endif()
 
 # WEB SERVER DEFINITIONS 
 add_compile_definitions(OSU_TRACKER_ENABLE_WEBSERVER=1) # Legacy flag due to webserver was an optional feature

@@ -1,6 +1,8 @@
 #!/bin/bash
 
 if [ "$1" == "configure" ]; then
+    echo "Cleaning up previous CMake configuration..."
+    rm -rf out/build/x86-linux-debug
     echo "Configuring the CMake project..."
     cmake --preset x86-linux-debug
 elif [ "$1" == "build" ]; then
