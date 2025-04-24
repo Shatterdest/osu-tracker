@@ -1,9 +1,5 @@
 #ifndef __CURL_CURL_H
 #define __CURL_CURL_H
-
-#ifndef CURL_EXTERN
-#  define CURL_EXTERN extern
-#endif
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |

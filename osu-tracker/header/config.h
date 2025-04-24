@@ -125,9 +125,29 @@ std::string getStats(std::string key) {
 *	4: value to set
 */
 int setConfig(std::vector<std::vector<std::string>>& vec, std::string key, std::string field, std::string value) {
-	for()
+	int keyIndex = -1;
+	int fieldIndex = -1;
 
+	for (size_t i = 0; i < vec[0].size(); i++) {
+		if (vec[0][i] == key) {
+			fieldIndex = i;
+		}
+	}
+	for (size_t i = 1; i < vec.size(); i++) {
+		if (vec[i][0] == key) {
+			keyIndex = i;
+		}
+	}
 
+	if (keyIndex == -1 || fieldIndex == -1) {
+		return -1;
+	}
+	else {
+		vec[keyIndex][fieldIndex] = value;
+		return 0;
+	}
+
+	// OLD VERSION
 	for (size_t i = 1; i < vec.size(); i++) {
 		if (vec[i][0] == key) {
 			for (size_t j = 0; j < vec[i].size(); j++) {
@@ -245,9 +265,12 @@ bool checkConfig() {
 	return true;
 }
 
-bool rmConfig() {
+void rmConfig() {
 	std::filesystem::remove("config.txt");
-	setConfig(vec_application,)
+	setConfig(vec_application, "osu_id", "value", "");
+	setConfig(vec_application, "client_id", "value", "");
+	setConfig(vec_application, "client_secret", "value", "");
+	setConfig(vec_application, "api_refreshInterval", "value", "8000");
 	writeConfig();
 }
 

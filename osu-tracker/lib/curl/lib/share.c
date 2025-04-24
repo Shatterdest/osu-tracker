@@ -32,8 +32,7 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
-struct Curl_share *
-curl_share_init(void)
+CURLSH *curl_share_init(void)
 {
   struct Curl_share *share = calloc(1, sizeof(struct Curl_share));
   if(share) {

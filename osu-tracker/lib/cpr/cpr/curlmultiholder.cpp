@@ -3,7 +3,6 @@
 #include <curl/multi.h>
 
 namespace cpr {
-
 CurlMultiHolder::CurlMultiHolder() : handle{curl_multi_init()} {
     assert(handle);
 }

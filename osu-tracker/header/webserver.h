@@ -6,7 +6,6 @@
 #include "json.hpp"
 #include <unordered_set>
 #include <mutex>
-#include <curl/curl.h>
 #include "config.h"
 
 bool shutdown_webServer = false;
@@ -208,10 +207,9 @@ void webserver_start()
 				}
 				
 				if (cmd == "#resetSettings") {
-					bool rmConfigReturn = rmConfig();
+					rmConfig();
 					nlohmann::json _j;
 					_j["cmd"] = "resetSettings";
-					_j["return"] = boolToString(rmConfigReturn);
 					conn.send_text(_j);
 				}
 			}

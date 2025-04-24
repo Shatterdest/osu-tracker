@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.15)
 project(osu-tracker LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD 23)
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_SCAN_FOR_MODULES ON)
@@ -27,8 +27,16 @@ file(GLOB CURL_SRC CONFIGURE_DEPENDS
 )
 
 add_library(curl STATIC ${CURL_SRC})
-target_include_directories(curl PUBLIC
+
+#target_include_directories(curl PUBLIC
+#    ${CMAKE_SOURCE_DIR}/lib/curl/include
+#    ${CMAKE_SOURCE_DIR}/lib/curl/lib
+#)
+
+target_include_directories(curl
+  PUBLIC
     ${CMAKE_SOURCE_DIR}/lib/curl/include
+  PRIVATE
     ${CMAKE_SOURCE_DIR}/lib/curl/lib
 )
 
@@ -77,7 +85,7 @@ message(STATUS "#################################################")
 
 # OUTPUT
 add_executable(osu-tracker main.cpp "header/webserver.h" "includes/crow/middleware.h")
-target_link_libraries(osu-tracker PRIVATE cpr zlib curl pthread dl)
+target_link_libraries(osu-tracker PRIVATE cpr zlib curl)
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "osu! Tracker")
 
 # WEB SERVER DEFINITIONS 
