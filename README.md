@@ -7,7 +7,12 @@ A web server based osu! stats/session tracker
 - Score Rank API by Respektive
 
 ## How to build from source:
-- CMake
+- Windows
+  -> Visual Studio (Recommended)
+- Linux
+  -> Use bash scripts
+    - "build-release.sh"
+    - "build-debug.sh"
 
 ## TODO:
 - Overlay (Browser/Text based)
