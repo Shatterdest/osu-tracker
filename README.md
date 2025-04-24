@@ -14,8 +14,10 @@ A web server based osu! stats/session tracker
     - "release.sh"
     - "debug.sh"
     - Usage
-      - ./release.sh configure > (Configure CMake)
-      - ./release.sh build > (Build Project)
+      > (Configure CMake)
+      - ./release.sh configure
+      > (Build Project)
+      - ./release.sh build
 
 ## TODO:
 - Overlay (Browser/Text based)
