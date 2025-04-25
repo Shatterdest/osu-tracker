@@ -121,6 +121,12 @@ json settingsJson() {
 	return _j;
 }
 
+json messageJson(std::string msg) {
+	json _j;
+	_j["cmd"] = msg;
+	return _j;
+}
+
 /*
 Mustache Updater
 int: jsonInt
@@ -148,11 +154,13 @@ void restartWebServer(bool shutdown = false) {
 	app.stop();
 }
 
+crow::json::wvalue global_ctx;
+
 /*
 blocking function
 */
 void webserver_start()
-{
+{	
 	CustomLogger logger;
 	crow::logger::setHandler(&logger);
 
@@ -182,7 +190,11 @@ void webserver_start()
 		
 		if (cmd[0] == '#') {
 			if(cmd == "#restart")
-				restartWebServer();
+				#ifdef _WIN32 
+					restartWebServer();
+				#elif __linux__
+					conn.send_text(messageJson("notSupported").dump());
+				#endif
 			if(cmd == "#shutdown")
 				restartWebServer(true);
 		}
@@ -244,11 +256,17 @@ void webserver_start()
 		ctx["version"] = OSU_TRACKER_VERSION;
 		ctx["hostname"] = OSU_TRACKER_WEBSERVER_IP;
 		ctx["port"] = OSU_TRACKER_WEBSERVER_PORT;
+		ctx["notSupported"] = (std::string)"This feature is not supported on " + OSU_TRACKER_CMAKE_SYSTEM_NAME + " yet.";
 		auto page = crow::mustache::load("index.html").render(ctx);
 		return page;
 	});
 	CROW_ROUTE(app, "/tracker")([]() {
 		crow::mustache::context ctx;
+		ctx["title"] = OSU_TRACKER_NAME;
+		ctx["version"] = OSU_TRACKER_VERSION;
+		ctx["hostname"] = OSU_TRACKER_WEBSERVER_IP;
+		ctx["port"] = OSU_TRACKER_WEBSERVER_PORT;
+		ctx["notSupported"] = (std::string)"This feature is not supported on " + OSU_TRACKER_CMAKE_SYSTEM_NAME + " yet.";
 
 		auto page = crow::mustache::load("tracker.html").render(ctx);
 		return page;
@@ -256,13 +274,13 @@ void webserver_start()
 	CROW_ROUTE(app, "/settings")([]() {
 		crow::mustache::context ctx;
 
-		// navbar
+		// global context
 		ctx["title"] = OSU_TRACKER_NAME;
 		ctx["version"] = OSU_TRACKER_VERSION;
-		
-		// websocket connection
 		ctx["hostname"] = OSU_TRACKER_WEBSERVER_IP;
 		ctx["port"] = OSU_TRACKER_WEBSERVER_PORT;
+		ctx["notSupported"] = (std::string)"This feature is not supported on " + OSU_TRACKER_CMAKE_SYSTEM_NAME + " yet.";
+
 
 		// config
 		ctx["osu_id_name"] = vec_application[1][1];
@@ -288,11 +306,13 @@ void webserver_start()
 	// Info Page
 	CROW_ROUTE(app, "/info")([]() {
 		crow::mustache::context ctx;
-		// PROJECT
 		ctx["title"] = OSU_TRACKER_NAME;
 		ctx["version"] = OSU_TRACKER_VERSION;
 		ctx["hostname"] = OSU_TRACKER_WEBSERVER_IP;
 		ctx["port"] = OSU_TRACKER_WEBSERVER_PORT;
+		ctx["notSupported"] = (std::string)"This feature is not supported on " + OSU_TRACKER_CMAKE_SYSTEM_NAME + " yet.";
+
+		// PROJECT
 		ctx["thread_count"] = std::to_string(app.concurrency());
 		ctx["websocket_max_payload"] = std::to_string(app.websocket_max_payload());
 		ctx["github"] = OSU_TRACKER_GITHUB;
@@ -349,7 +369,7 @@ void webserver_start()
 		std::string url = "http://" + (std::string)OSU_TRACKER_WEBSERVER_IP + ":" + std::to_string(OSU_TRACKER_WEBSERVER_PORT);
 		writeLog(url, 0, 140, 255);
 		writeLog("#####################", 255, 255, 0);
-		app.multithreaded().run(); // blocking
+		app.run(); // blocking
 		writeLog("Web Server Terminated" , 255, 0, 0);
 		writeLog("Closing all connections...", 255, 255, 0);
 		closeConnections();
