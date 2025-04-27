@@ -9,6 +9,9 @@ on:
 jobs:
   build:
     runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: osu-tracker
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
@@ -59,6 +62,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          path: .
 
       - name: Initialize submodules
         run: git submodule update --init --recursive
