@@ -25,10 +25,10 @@ jobs:
         run: ls -R ${{ github.workspace }}/osu-tracker
 
       - name: Install CMake
-        uses: lukka/get-cmake@latest
+        uses: lukka/get-cmake@4.0.1
 
       - name: Configure
-        uses: lukka/run-cmake@10
+        uses: lukka/run-cmake@v10.8
         with:
           cmakeListsTxtPath: '${{ github.workspace }}/osu-tracker/CMakeLists.txt'
           configurePreset: '${{ matrix.os }}-${{ matrix.build_type }}'
