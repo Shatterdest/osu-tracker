@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
+option(ENABLE_VCPKG OFF)
 project(osu-tracker LANGUAGES C CXX)
 
 # Threads to use
