@@ -13,19 +13,28 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest]
         build_type: [debug, release]
+        c_compiler: [gcc, cl]
         include:
-        - os: ubuntu-latest
-          build_type: debug
-          preset: x86-debug-linux
-        - os: ubuntu-latest
-          build_type: release
-          preset: x86-release-linux
-        - os: windows-latest
-          build_type: debug
-          preset: x86-debug-windows
-        - os: windows-latest
-          build_type: release
-          preset: x86-release-windows
+          - os: ubuntu-latest
+            build_type: debug
+            preset: x86-debug-linux
+            c_compiler: gcc
+            cpp_compiler: g++
+          - os: ubuntu-latest
+            build_type: release
+            preset: x86-release-linux
+            c_compiler: gcc
+            cpp_compiler: g++
+          - os: windows-latest
+            build_type: debug
+            preset: x86-debug-windows
+            c_compiler: cl
+            cpp_compiler: cl
+          - os: windows-latest
+            build_type: release
+            preset: x86-release-windows
+            c_compiler: cl
+            cpp_compiler: cl
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
