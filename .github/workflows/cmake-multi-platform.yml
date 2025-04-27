@@ -92,9 +92,8 @@ jobs:
         with:
           cmakeListsTxtPath: '/home/runner/work/osu-tracker/osu-tracker/osu-tracker/CMakeLists.txt'
           configurePreset: '${{ matrix.preset }}'
-          cmakeArgs: |
-            -DVCPKG_TARGET_TRIPLET=OFF
-            -DCMAKE_TOOLCHAIN_FILE=OFF
+        env:
+          VCPKG_MANIFEST_MODE: 'OFF'
       
       - name: Configure-Windows
         if: runner.os == 'Windows'
@@ -102,9 +101,8 @@ jobs:
         with:
           cmakeListsTxtPath: 'D:\a\osu-tracker\osu-tracker\osu-tracker\CMakeLists.txt'
           configurePreset: '${{ matrix.preset }}'
-          cmakeArgs: |
-            -DVCPKG_TARGET_TRIPLET=OFF
-            -DCMAKE_TOOLCHAIN_FILE=OFF
+        env:
+          VCPKG_MANIFEST_MODE: 'OFF'
       
       - name: Build-Linux
         if: runner.os == 'Linux'
@@ -112,9 +110,14 @@ jobs:
         with:
           cmakeListsTxtPath: '/home/runner/work/osu-tracker/osu-tracker/osu-tracker/CMakeLists.txt'
           buildPreset: '${{ matrix.preset }}'
+        env:
+          VCPKG_MANIFEST_MODE: 'OFF'
+
       - name: Build-Windows
         if: runner.os == 'Windows'
         uses: lukka/run-cmake@v10.8
         with:
           cmakeListsTxtPath: 'D:\a\osu-tracker\osu-tracker\osu-tracker\CMakeLists.txt'
           buildPreset: '${{ matrix.preset }}'
+        env:
+          VCPKG_MANIFEST_MODE: 'OFF'
