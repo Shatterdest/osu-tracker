@@ -1,3 +1,5 @@
+[![Build osu-tracker](https://github.com/nyaruku/osu-tracker/actions/workflows/cmake-multi-platform.yml/badge.svg?branch=master&event=release)](https://github.com/nyaruku/osu-tracker/actions/workflows/cmake-multi-platform.yml)
+
 # osu-tracker
 A web server based osu! stats/session tracker
 
