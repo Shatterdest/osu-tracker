@@ -10,7 +10,6 @@ jobs:
   build:
     runs-on: ${{ matrix.os }}
     strategy:
-      fail-fast: false
       matrix:
         os: [ubuntu-24.04, windows-latest]
         build_type: [Release]
@@ -19,15 +18,22 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Initialize submodules
+        run: git submodule update --init --recursive
+
+      - name: List files in osu-tracker directory
+        run: ls -R ${{ github.workspace }}/osu-tracker
+
       - name: Install CMake
         uses: lukka/get-cmake@latest
 
       - name: Configure
         uses: lukka/run-cmake@v10
         with:
-          configurePreset: ${{ matrix.os }}-${{ matrix.build_type }}
+          cmakeListsTxtPath: '${{ github.workspace }}/osu-tracker/CMakeLists.txt'
+          configurePreset: '${{ matrix.os }}-${{ matrix.build_type }}'
 
       - name: Build
         uses: lukka/run-cmake@v10
         with:
-          buildPreset: ${{ matrix.os }}-${{ matrix.build_type }}
+          buildPreset: '${{ matrix.os }}-${{ matrix.build_type }}'
