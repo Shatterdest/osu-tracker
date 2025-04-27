@@ -92,8 +92,6 @@ jobs:
         with:
           cmakeListsTxtPath: '/home/runner/work/osu-tracker/osu-tracker/osu-tracker/CMakeLists.txt'
           configurePreset: '${{ matrix.preset }}'
-        env:
-          VCPKG_MANIFEST_MODE: 'OFF'
       
       - name: Configure-Windows
         if: runner.os == 'Windows'
@@ -102,7 +100,7 @@ jobs:
           cmakeListsTxtPath: 'D:\a\osu-tracker\osu-tracker\osu-tracker\CMakeLists.txt'
           configurePreset: '${{ matrix.preset }}'
         env:
-          VCPKG_MANIFEST_MODE: 'OFF'
+          VCPKG_ROOT:
       
       - name: Build-Linux
         if: runner.os == 'Linux'
@@ -110,8 +108,6 @@ jobs:
         with:
           cmakeListsTxtPath: '/home/runner/work/osu-tracker/osu-tracker/osu-tracker/CMakeLists.txt'
           buildPreset: '${{ matrix.preset }}'
-        env:
-          VCPKG_MANIFEST_MODE: 'OFF'
 
       - name: Build-Windows
         if: runner.os == 'Windows'
@@ -120,4 +116,4 @@ jobs:
           cmakeListsTxtPath: 'D:\a\osu-tracker\osu-tracker\osu-tracker\CMakeLists.txt'
           buildPreset: '${{ matrix.preset }}'
         env:
-          VCPKG_MANIFEST_MODE: 'OFF'
+          VCPKG_ROOT:
