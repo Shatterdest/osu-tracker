@@ -57,9 +57,9 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 		# static libcurl
 		add_definitions(-DCURL_STATICLIB)
 		# static link for tracker
-		target_link_libraries(osu-tracker PRIVATE crypt32 advapi32 ${LIBCURL_LIBRARY} ${LIBCRYPTO_LIBRARY} ${LIBSSL_LIBRARY})
+		target_link_libraries(osu-tracker PRIVATE crypt32 advapi32 ${LIBCRYPTO_LIBRARY} ${LIBSSL_LIBRARY} ${LIBCURL_LIBRARY})
 		# static link for test, ws2_32 is required for catch2
-		target_link_libraries(test-tracker PRIVATE ws2_32 crypt32 advapi32 ${LIBCURL_LIBRARY} ${LIBCRYPTO_LIBRARY} ${LIBSSL_LIBRARY})
+		target_link_libraries(test-tracker PRIVATE ws2_32 crypt32 advapi32 ${LIBCRYPTO_LIBRARY} ${LIBSSL_LIBRARY} ${LIBCURL_LIBRARY} )
 	endif()
 	# Include bundled libraries
     include_directories(
