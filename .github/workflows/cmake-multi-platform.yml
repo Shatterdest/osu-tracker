@@ -57,6 +57,8 @@ jobs:
             cpp_compiler: cl
 
     steps:
+      - name: Find all CMakeLists.txt files
+        run: find ${{ github.workspace }} -name CMakeLists.txt
       - name: Checkout repository
         uses: actions/checkout@v4
 
