@@ -84,7 +84,7 @@ jobs:
       - name: Configure
         uses: lukka/run-cmake@v10.8
         with:
-          cmakeListsTxtPath: '${{ github.workspace }}/osu-tracker/CMakeLists.txt'
+          cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
           configurePreset: '${{ matrix.preset }}'
 
       - name: Build
