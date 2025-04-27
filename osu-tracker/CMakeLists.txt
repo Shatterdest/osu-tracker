@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD 20) # Set the C++ standard to C++20
 set(CMAKE_C_STANDARD 23) # Set the C standard to C23
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_SCAN_FOR_MODULES ON)
+set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
 
 # Base directories
 set(BASE_INCLUDE_PATH "${CMAKE_SOURCE_DIR}/includes")
