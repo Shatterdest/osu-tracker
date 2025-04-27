@@ -57,11 +57,6 @@ jobs:
             cpp_compiler: cl
 
     steps:
-      - name: Debug - List Files
-        run: |
-          echo "Listing files in ${{ github.workspace }}:"
-          ls -alR ${{ github.workspace }}
-
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -89,7 +84,7 @@ jobs:
       - name: Configure
         uses: lukka/run-cmake@v10.8
         with:
-          cmakeListsTxtPath: '${{ github.workspace }}/CMakeLists.txt'
+          cmakeListsTxtPath: '${{ github.workspace }}/osu-tracker/osu-tracker/CMakeLists.txt'
           configurePreset: '${{ matrix.preset }}'
 
       - name: Build
