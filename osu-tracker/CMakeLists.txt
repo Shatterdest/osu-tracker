@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 project(osu-tracker LANGUAGES C CXX)
 
-# CPU Threads to use
+# Threads to use
 set(CMAKE_BUILD_PARALLEL_LEVEL 4)
 
 set(CMAKE_CXX_STANDARD 20) # Set the C++ standard to C++20
@@ -12,46 +12,62 @@ set(CMAKE_CXX_SCAN_FOR_MODULES ON)
 
 # Base directories
 set(BASE_INCLUDE_PATH "${CMAKE_SOURCE_DIR}/includes")
+# Add the include directories for the project
+include_directories(${BASE_INCLUDE_PATH})
 
-# OPTIONS
+# CMAKE
 option(USE_STATIC_LIB "Use static library" ON)
-option(BUILD_TEST "Build Test" ON)
+option(BUILD_TEST "Build Test" ON) # You can disable compilation of test executable
 
 file(COPY ${CMAKE_SOURCE_DIR}/www DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/osu-tracker/")
 file(COPY ${CMAKE_SOURCE_DIR}/tracker_txt DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/osu-tracker/")
 
-# Add the include directories for the project
-include_directories(${BASE_INCLUDE_PATH} ${BUILD_INCLUDE_PATH})
-
+# Sources
 file(GLOB_RECURSE CPR_SOURCES CONFIGURE_DEPENDS lib/cpr/*.cpp)
-file(GLOB_RECURSE CURL_SOURCES CONFIGURE_DEPENDS lib/curl/lib/*.c)
 file(GLOB_RECURSE ZLIB_SOURCES CONFIGURE_DEPENDS lib/zlib/*.c)
 
+# Headers
 file(GLOB_RECURSE CPR_HEADERS CONFIGURE_DEPENDS lib/cpr/*.h)
 file(GLOB_RECURSE CURL_HEADERS CONFIGURE_DEPENDS lib/curl/lib/*.h)
 file(GLOB_RECURSE ZLIB_HEADERS CONFIGURE_DEPENDS lib/zlib/*.h)
 
 # OUTPUT
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+	# Static libcurl, libcrypto and libssl (windows only)
+	# Using system curl and zlib on linux
+	set(LIBCURL_LIBRARY "${CMAKE_SOURCE_DIR}/lib/static/libcurl.lib")
+	set(LIBCRYPTO_LIBRARY "${CMAKE_SOURCE_DIR}/lib/static/libcrypto_static.lib")
+	set(LIBSSL_LIBRARY "${CMAKE_SOURCE_DIR}/lib/static/libssl_static.lib")
 	add_executable(osu-tracker main.cpp
 		${CPR_SOURCES}
 		${CPR_HEADERS}
-		${CURL_SOURCES}
-		${ZLIB_SOURCES}
 		${CURL_HEADERS}
+		${ZLIB_SOURCES}
 		${ZLIB_HEADERS}
 	)
 	if(BUILD_TEST)
 		add_executable(test-tracker test.cpp
 			${CPR_SOURCES}
 			${CPR_HEADERS}
-			${CURL_SOURCES}
-			${ZLIB_SOURCES}
 			${CURL_HEADERS}
+			${ZLIB_SOURCES}
 			${ZLIB_HEADERS}
 			includes/catch_amalgamated.cpp
 		)
+		# static libcurl
+		add_definitions(-DCURL_STATICLIB)
+		# static link for tracker
+		target_link_libraries(osu-tracker PRIVATE crypt32 advapi32 ${LIBCURL_LIBRARY} ${LIBCRYPTO_LIBRARY} ${LIBSSL_LIBRARY})
+		# static link for test, ws2_32 is required for catch2
+		target_link_libraries(test-tracker PRIVATE ws2_32 crypt32 advapi32 ${LIBCURL_LIBRARY} ${LIBCRYPTO_LIBRARY} ${LIBSSL_LIBRARY})
 	endif()
+	# Include bundled libraries
+    include_directories(
+        ${CMAKE_SOURCE_DIR}/lib/cpr/cpr
+        ${CMAKE_SOURCE_DIR}/lib/cpr/include
+        ${CMAKE_SOURCE_DIR}/lib/curl/include
+        ${CMAKE_SOURCE_DIR}/lib/zlib
+    )
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 	add_executable(osu-tracker main.cpp
 		${CPR_SOURCES}
@@ -63,45 +79,24 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 			${CPR_HEADERS}
 			includes/catch_amalgamated.cpp
 		)
+		target_link_libraries(test-tracker PRIVATE ${CURL_LIBRARIES} ${ZLIB_LIBRARIES})
 	endif()
-endif()
 
-
-# Find system-installed CURL and ZLIB libraries on Linux
-if(UNIX AND NOT APPLE)
-    find_package(CURL REQUIRED)
+	find_package(CURL REQUIRED)
     find_package(ZLIB REQUIRED)
     # Include system headers
     include_directories(${CURL_INCLUDE_DIRS} ${ZLIB_INCLUDE_DIRS})
     target_link_libraries(osu-tracker PRIVATE ${CURL_LIBRARIES} ${ZLIB_LIBRARIES})
-	if(BUILD_TEST)
-    	target_link_libraries(test-tracker PRIVATE ${CURL_LIBRARIES} ${ZLIB_LIBRARIES})
-	endif()
 	include_directories(
         ${CMAKE_SOURCE_DIR}/lib/cpr/cpr
         ${CMAKE_SOURCE_DIR}/lib/cpr/include
     )
-else()
-    # Include bundled libraries
-    include_directories(
-        ${CMAKE_SOURCE_DIR}/lib/cpr/cpr
-        ${CMAKE_SOURCE_DIR}/lib/cpr/include
-        ${CMAKE_SOURCE_DIR}/lib/curl/lib
-        ${CMAKE_SOURCE_DIR}/lib/curl/include
-        ${CMAKE_SOURCE_DIR}/lib/zlib
-    )
 endif()
 
-add_definitions(-DCURL_DISABLE_LDAP)
 set_target_properties(osu-tracker PROPERTIES OUTPUT_NAME "osu-tracker" RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/osu-tracker")
 if(BUILD_TEST)
 	set_target_properties(test-tracker PROPERTIES OUTPUT_NAME "osu-tracker-test" RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/osu-tracker")
 endif()
-
-# WEB SERVER DEFINITIONS 
-add_compile_definitions(OSU_TRACKER_ENABLE_WEBSERVER=1) # Legacy flag due to webserver was an optional feature
-add_compile_definitions(OSU_TRACKER_WEBSERVER_IP="127.0.0.1")
-add_compile_definitions(OSU_TRACKER_WEBSERVER_PORT=10727)
 
 # CMAKE BUILD AND COMPILER DEFINITIONS
 add_compile_definitions(OSU_TRACKER_CMAKE_BUILD_TYPE="${CMAKE_BUILD_TYPE}")
@@ -118,6 +113,14 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     add_compile_definitions(__linux__)
 endif()
 
+add_definitions(-DCURL_DISABLE_LDAP)
+
+# WEB SERVER DEFINITIONS 
+add_compile_definitions(OSU_TRACKER_ENABLE_WEBSERVER=1) # Legacy flag due to webserver was an optional feature
+add_compile_definitions(OSU_TRACKER_WEBSERVER_IP="127.0.0.1")
+add_compile_definitions(OSU_TRACKER_WEBSERVER_PORT=10727)
+
+# CMAKE Info
 add_compile_definitions(OSU_TRACKER_CMAKE_GENERATOR="${CMAKE_GENERATOR}")
 add_compile_definitions(OSU_TRACKER_CMAKE_CXX_STANDARD="C++ ${CMAKE_CXX_STANDARD}")
 add_compile_definitions(OSU_TRACKER_CMAKE_VERSION="${CMAKE_VERSION}")
