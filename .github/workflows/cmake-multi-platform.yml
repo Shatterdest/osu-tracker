@@ -86,18 +86,6 @@ jobs:
         with:
           arch: x64
 
-      - name: Configure
-        uses: lukka/run-cmake@v10.8
-        with:
-          cmakeListsTxtPath: 'CMakeLists.txt'
-          configurePreset: '${{ matrix.preset }}'
-
-      - name: Build
-        uses: lukka/run-cmake@v10
-        with:
-          buildPreset: '${{ matrix.preset }}'
-
-
       - name: Configure CMake
         run: >
           cmake --preset ${{ matrix.preset }}
