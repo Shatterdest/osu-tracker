@@ -90,7 +90,7 @@ jobs:
         if: runner.os == 'Linux'
         uses: lukka/run-cmake@v10.8
         with:
-          cmakeListsTxtPath: ${{ github.workspace }}/osu-tracker/CMakeLists.txt'
+          cmakeListsTxtPath: .${{ github.workspace }}/osu-tracker/CMakeLists.txt'
           configurePreset: '${{ matrix.preset }}'
       - name: Configure-Windows
         if: runner.os == 'Windows'
