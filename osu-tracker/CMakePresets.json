@@ -23,7 +23,7 @@
             }
         },
         {
-            "name": "x86-debug",
+            "name": "x86-debug-windows",
             "displayName": "x86 Debug",
             "inherits": "windows-base",
             "architecture": {
@@ -35,9 +35,9 @@
             }
         },
         {
-            "name": "x86-release",
+            "name": "x86-release-windows",
             "displayName": "x86 Release",
-            "inherits": "x86-debug",
+            "inherits": "x86-debug-windows",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release"
             }
@@ -55,7 +55,7 @@
             }
         },
         {
-            "name": "x86-linux-debug",
+            "name": "x86-debug-linux",
             "displayName": "x86 Linux Debug",
             "inherits": "linux-base",
             "architecture": {
@@ -69,9 +69,9 @@
             }
         },
         {
-            "name": "x86-linux-release",
+            "name": "x86-release-linux",
             "displayName": "x86 Linux Release",
-            "inherits": "x86-linux-debug",
+            "inherits": "x86-debug-linux",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release",
                 "CMAKE_C_COMPILER": "gcc",
@@ -82,20 +82,20 @@
     ],
     "buildPresets": [
         {
-            "name": "x86-release",
-            "configurePreset": "x86-release"
+            "name": "x86-release-windows",
+            "configurePreset": "x86-release-windows"
         },
         {
-            "name": "x86-debug",
-            "configurePreset": "x86-debug"
+            "name": "x86-debug-windows",
+            "configurePreset": "x86-debug-windows"
         },
         {
-            "name": "x86-linux-release",
-            "configurePreset": "x86-linux-release"
+            "name": "x86-release-linux",
+            "configurePreset": "x86-release-linux"
         },
         {
-            "name": "x86-linux-debug",
-            "configurePreset": "x86-linux-debug"
+            "name": "x86-debug-linux",
+            "configurePreset": "x86-debug-linux"
         }
     ]
 }
