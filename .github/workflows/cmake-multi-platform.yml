@@ -98,16 +98,16 @@ jobs:
         with:
           cmakeListsTxtPath: 'CMakeLists.txt'
           configurePreset: '${{ matrix.preset }}'
-        
-      - name: Build
-        uses: lukka/run-cmake@v10
+      
+      - name: Build-Linux
+        if: runner.os == 'Linux'
+        uses: lukka/run-cmake@v10.8
         with:
+          cmakeListsTxtPath: '/home/runner/work/osu-tracker/osu-tracker/osu-tracker/CMakeLists.txt'
           buildPreset: '${{ matrix.preset }}'
-
-
-      - name: Configure CMake
-        run: >
-          cmake --preset ${{ matrix.preset }}
-      - name: Build
-        # Build your program with the given configuration. Note that --config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
-        run: cmake --build ${{ github.workspace }}/osu-tracker/out/build/${{ matrix.preset }}
+      - name: Build-Windows
+        if: runner.os == 'Windows'
+        uses: lukka/run-cmake@v10.8
+        with:
+          cmakeListsTxtPath: 'CMakeLists.txt'
+          buildPreset: '${{ matrix.preset }}'
