@@ -60,7 +60,7 @@ jobs:
       - name: Debug - List Files
         run: |
           echo "Listing files in ${{ github.workspace }}:"
-          ls -R ${{ github.workspace }}
+          ls -alR ${{ github.workspace }}
 
       - name: Checkout repository
         uses: actions/checkout@v4
