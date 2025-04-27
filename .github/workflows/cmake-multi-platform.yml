@@ -14,6 +14,7 @@ jobs:
         os: [ubuntu-latest, windows-latest]
         build_type: [debug, release]
         c_compiler: [gcc, cl]
+        cpp_compiler: [g++, cl]
         include:
           - os: ubuntu-latest
             build_type: debug
@@ -58,6 +59,12 @@ jobs:
 
       - name: Install CMake
         uses: lukka/get-cmake@v4.0.1
+
+      - name: Set up MSVC environment
+        if: runner.os == 'Windows'
+        uses: TheMrMilchmann/setup-msvc-dev@v3
+        with:
+          arch: x64
 
       - name: Configure
         uses: lukka/run-cmake@v10.8
