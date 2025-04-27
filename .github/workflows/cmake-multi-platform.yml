@@ -25,7 +25,7 @@ jobs:
         run: ls -R ${{ github.workspace }}/osu-tracker
 
       - name: Install CMake
-        uses: lukka/get-cmake@4.0.1
+        uses: lukka/get-cmake@v4.0.1
 
       - name: Configure
         uses: lukka/run-cmake@v10.8
