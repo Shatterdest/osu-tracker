@@ -69,6 +69,9 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
         ${CMAKE_SOURCE_DIR}/lib/zlib
     )
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+	find_package(CURL REQUIRED)
+	find_package(ZLIB REQUIRED)
+
 	add_executable(osu-tracker main.cpp
 		${CPR_SOURCES}
 		${CPR_HEADERS}
@@ -82,8 +85,6 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 		target_link_libraries(test-tracker PRIVATE ${CURL_LIBRARIES} ${ZLIB_LIBRARIES})
 	endif()
 
-	find_package(CURL REQUIRED)
-    find_package(ZLIB REQUIRED)
     # Include system headers
     include_directories(${CURL_INCLUDE_DIRS} ${ZLIB_INCLUDE_DIRS})
     target_link_libraries(osu-tracker PRIVATE ${CURL_LIBRARIES} ${ZLIB_LIBRARIES})
