@@ -31,7 +31,7 @@ jobs:
         uses: lukka/run-cmake@v10.8
         with:
           cmakeListsTxtPath: '${{ github.workspace }}/osu-tracker/CMakeLists.txt'
-          configurePreset: '${{ matrix.os }}-${{ matrix.build_type }}'
+          configurePreset: 'x86-${{ matrix.build_type }}-${{ matrix.os }}'
 
       - name: Build
         uses: lukka/run-cmake@v10
