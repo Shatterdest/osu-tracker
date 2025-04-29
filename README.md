@@ -12,6 +12,10 @@ A web server based osu! stats/session tracker
 - Windows
   - Visual Studio (Recommended)
 - Linux
+  - Make sure u have these installed:
+    - cmake
+    - libcurl4-openssl-dev (provides lib files for linking)
+    - ninja
   - Use bash scripts
     - "release.sh" , "debug.sh"
     - Usage
