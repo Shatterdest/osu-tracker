@@ -37,7 +37,6 @@ namespace crow // NOTE: Already documented in "crow/app.h"
     using error_code = asio::error_code;
 #endif
     using tcp = asio::ip::tcp;
-
     template<typename Handler, typename Adaptor = SocketAdaptor, typename... Middlewares>
     class Server
     {
@@ -161,7 +160,6 @@ namespace crow // NOTE: Already documented in "crow/app.h"
                           << " server is running at " << (handler_->ssl_used() ? "https://" : "http://")
                           << acceptor_.local_endpoint().address() << ":" << acceptor_.local_endpoint().port() << " using " << concurrency_ << " threads";
             CROW_LOG_INFO << "Call `app.loglevel(crow::LogLevel::Warning)` to hide Info level logs.";
-
             signals_.async_wait(
               [&](const error_code& /*error*/, int /*signal_number*/) {
                   stop();
@@ -184,6 +182,16 @@ namespace crow // NOTE: Already documented in "crow/app.h"
         void stop()
         {
             shutting_down_ = true; // Prevent the acceptor from taking new connections
+
+            // Explicitly close the acceptor
+            // else asio will throw an exception (linux only), when trying to start server again: 
+            // what():  bind: Address already in use
+            if (acceptor_.is_open())
+            {
+                CROW_LOG_INFO << "Closing acceptor. " << &acceptor_;
+                acceptor_.close();
+            }
+
             for (auto& io_context : io_context_pool_)
             {
                 if (io_context != nullptr)

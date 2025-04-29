@@ -137,7 +137,7 @@ int main()
 	#endif
 	printHeader();
 
-	if (!checkConfig()) {
+	if (!std::filesystem::exists("config.txt")) {
 		writeLog("Config file not found");
 
 		setConfig(vec_application, "osu_id", "value", "Your osu! 'user id'");

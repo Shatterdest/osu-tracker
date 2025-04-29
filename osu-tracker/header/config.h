@@ -259,14 +259,6 @@ void readConfig() {
 	}
 }
 
-// checks if config file exists
-bool checkConfig() {
-	if (!std::filesystem::exists("config.txt")) {
-		return false;
-	}
-	return true;
-}
-
 void rmConfig() {
 	std::filesystem::remove("config.txt");
 	setConfig(vec_application, "osu_id", "value", "");

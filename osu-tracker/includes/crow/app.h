@@ -572,6 +572,7 @@ namespace crow
                 }
                 if (server_) { server_->stop(); }
             }
+            
         }
 
         void add_websocket(crow::websocket::connection* conn)

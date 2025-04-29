@@ -98,18 +98,6 @@ std::mutex ws_mutex;
 std::unordered_set<crow::websocket::connection*> clients;
 std::unordered_set<crow::websocket::connection*> clients_settings;
 
-void closeConnections() {
-	std::lock_guard<std::mutex> lock(ws_mutex);
-	for (auto client : clients) {
-		client->close();
-	}
-	clients.clear();
-	for (auto client : clients_settings) {
-		client->close();
-	}
-	clients_settings.clear();
-}
-
 json settingsJson() {
 	json _j;
 	_j["ctx"] = "setting";
@@ -154,11 +142,11 @@ void restartWebServer(bool shutdown = false) {
 	app.stop();
 }
 
-crow::json::wvalue global_ctx;
-
 /*
 blocking function
 */
+
+//conn.send_text(messageJson("notSupported").dump());
 void webserver_start()
 {	
 	CustomLogger logger;
@@ -190,20 +178,10 @@ void webserver_start()
 		
 		if (cmd[0] == '#') {
 			if(cmd == "#restart")
-				#ifdef _WIN32 
-					restartWebServer();
-				#elif __linux__
-					conn.send_text(messageJson("notSupported").dump());
-				#endif
+				restartWebServer();
 			if(cmd == "#shutdown")
 				restartWebServer(true);
 		}
-
-		/* Send back to all clients
-		for (auto client : clients){
-			client->send_text(data);
-		}
-		*/
 	});
 
 	CROW_WEBSOCKET_ROUTE(app, "/ws/settings/")
@@ -356,7 +334,7 @@ void webserver_start()
 		
 		auto page = crow::mustache::load("info.html").render(ctx);
 		return page;
-		});
+	});
 	app.add_static_dir();
 
 	app.bindaddr(OSU_TRACKER_WEBSERVER_IP)
@@ -370,10 +348,7 @@ void webserver_start()
 		writeLog(url, 0, 140, 255);
 		writeLog("#####################", 255, 255, 0);
 		app.run(); // blocking
-		writeLog("Web Server Terminated" , 255, 0, 0);
-		writeLog("Closing all connections...", 255, 255, 0);
-		closeConnections();
-		writeLog("All connections closed", 255, 255, 255);
+		writeLog("Web Server Terminated" , 255, 0, 0);		
 	}
 }
 
