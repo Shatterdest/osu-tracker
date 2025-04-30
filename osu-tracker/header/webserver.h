@@ -209,6 +209,7 @@ void webserver_start()
 
 			if (cmd[0] == '#') {
 				if (cmd == "#saveSettings") {
+				
 				}
 				
 				if (cmd == "#resetSettings") {
@@ -218,14 +219,7 @@ void webserver_start()
 					conn.send_text(_j);
 				}
 			}
-
-			/* Send back to all clients
-			for (auto client : clients_settings){
-				client->send_text(data);
-			}
-			*/
 		});
-
 
 	// Page routing
 	CROW_ROUTE(app, "/")([]() {

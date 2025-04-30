@@ -1,11 +1,6 @@
 #pragma once
-
-void con_moveCursorUp(int lines) {
-	std::cout << "\033[" << lines << "A" << std::flush;
-}
-void con_clear() {
-	std::cout << "\033[2J\033[H" << std::flush;
-}
+#include <sstream>
+std::string application_log;
 
 // ansi console color codes
 enum conCol {
@@ -29,7 +24,6 @@ enum conCol {
 	b_defaultColor = 49
 };
 
-
 void setColor(conCol bg = conCol::b_defaultColor, conCol fg = conCol::f_defaultColor) {
 	std::cout << "\033[" << bg << ";" << fg << "m";
 }
@@ -48,38 +42,16 @@ void resetColor() {
 	std::cout << "\033[0m";
 }
 
-void writeLog(std::string msg, int r = 255, int g = 255, int b = 255) {
+// True by default
+void writeLog(std::string msg, bool debug = true, int r = 255, int g = 255, int b = 255) {
+#if DEBUG_BUILD && debug == false
 	auto currentTime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 	std::tm timeInfo;
-	#ifdef _WIN32
-		localtime_s(&timeInfo, &currentTime);
-		#elif __linux__
-		localtime_r(&currentTime, &timeInfo);
-		#endif
-
-	char dateBuffer[20];
-	strftime(dateBuffer, sizeof(dateBuffer), "%Y-%m-%d", &timeInfo);
-
-	char timeBuffer[9];
-	strftime(timeBuffer, sizeof(timeBuffer), "%H:%M:%S", &timeInfo);
-	setColorRGB_f(100, 100, 100);
-
-	std::cout << (std::string)dateBuffer + " " + timeBuffer << " ";
-	resetColor();
-	std::cout << "[";
-	setColorRGB_f(100, 100, 100);
-	std::cout << "Internal";
-	resetColor();
-	std::cout << "] ";
-	setColorRGB_f(r, g, b);
-	std::cout << msg << "\n";
-	resetColor();
-}
-/*
-void writeLog(std::string msg, int r, int g, int b) {
-	auto currentTime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-	std::tm timeInfo;
+#ifdef _WIN32
 	localtime_s(&timeInfo, &currentTime);
+#elif __linux__
+	localtime_r(&currentTime, &timeInfo);
+#endif
 
 	char dateBuffer[20];
 	strftime(dateBuffer, sizeof(dateBuffer), "%Y-%m-%d", &timeInfo);
@@ -87,6 +59,8 @@ void writeLog(std::string msg, int r, int g, int b) {
 	char timeBuffer[9];
 	strftime(timeBuffer, sizeof(timeBuffer), "%H:%M:%S", &timeInfo);
 	setColorRGB_f(100, 100, 100);
+
+	
 
 	std::cout << (std::string)dateBuffer + " " + timeBuffer << " ";
 	resetColor();
@@ -98,4 +72,5 @@ void writeLog(std::string msg, int r, int g, int b) {
 	setColorRGB_f(r, g, b);
 	std::cout << msg << "\n";
 	resetColor();
-}*/
+#endif
+}

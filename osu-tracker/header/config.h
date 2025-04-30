@@ -160,7 +160,6 @@ int setConfig(std::vector<std::vector<std::string>>& vec, std::string key, std::
 			}
 		}
 	}
-	return -1;
 }
 
 /*
