@@ -1,6 +1,7 @@
 #pragma once
 #include <sstream>
-std::string application_log;
+
+std::vector<std::string> vec_log;
 
 // ansi console color codes
 enum conCol {
@@ -42,26 +43,15 @@ void resetColor() {
 	std::cout << "\033[0m";
 }
 
-// True by default
-void writeLog(std::string msg, bool debug = true, int r = 255, int g = 255, int b = 255) {
-#if DEBUG_BUILD && debug == false
-	auto currentTime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-	std::tm timeInfo;
-#ifdef _WIN32
-	localtime_s(&timeInfo, &currentTime);
-#elif __linux__
-	localtime_r(&currentTime, &timeInfo);
-#endif
-
+void writeLog(std::string msg, int r = 255, int g = 255, int b = 255) {
+#ifdef DEBUG_BUILD
+	time_t currentTime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+	std::tm* timeInfo = localtime(&currentTime);
 	char dateBuffer[20];
-	strftime(dateBuffer, sizeof(dateBuffer), "%Y-%m-%d", &timeInfo);
-
+	strftime(dateBuffer, sizeof(dateBuffer), "%Y-%m-%d", timeInfo);
 	char timeBuffer[9];
-	strftime(timeBuffer, sizeof(timeBuffer), "%H:%M:%S", &timeInfo);
+	strftime(timeBuffer, sizeof(timeBuffer), "%H:%M:%S", timeInfo);
 	setColorRGB_f(100, 100, 100);
-
-	
-
 	std::cout << (std::string)dateBuffer + " " + timeBuffer << " ";
 	resetColor();
 	std::cout << "[";
@@ -72,5 +62,8 @@ void writeLog(std::string msg, bool debug = true, int r = 255, int g = 255, int 
 	setColorRGB_f(r, g, b);
 	std::cout << msg << "\n";
 	resetColor();
+	std::stringstream ss;
+	ss << (std::string)dateBuffer + " " + timeBuffer << " " << "[" << "Internal" << "] " << msg;
+	vec_log.push_back(ss.str());
 #endif
 }

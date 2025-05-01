@@ -17,25 +17,13 @@ class CustomLogger : public crow::ILogHandler {
 public:
 	CustomLogger() {}
 	void log(std::string message, crow::LogLevel level) {
-
-		// Get the current system time
 		auto currentTime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-
-		// Convert to a time structure
-		std::tm timeInfo;
-		#ifdef _WIN32
-		localtime_s(&timeInfo, &currentTime);
-		#elif __linux__
-		localtime_r(&currentTime, &timeInfo);
-		#endif
-		// Format the date and time as strings
+		std::tm* timeInfo = localtime(&currentTime);;
 		char dateBuffer[20];
-		strftime(dateBuffer, sizeof(dateBuffer), "%Y-%m-%d", &timeInfo);
-
+		strftime(dateBuffer, sizeof(dateBuffer), "%Y-%m-%d", timeInfo);
 		char timeBuffer[9];
-		strftime(timeBuffer, sizeof(timeBuffer), "%H:%M:%S", &timeInfo);
+		strftime(timeBuffer, sizeof(timeBuffer), "%H:%M:%S", timeInfo);
 		setColorRGB_f(100, 100, 100);
-
 		std::cout << (std::string)dateBuffer + " " + timeBuffer << " ";
 		resetColor();
 		switch (level) {
