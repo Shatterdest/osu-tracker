@@ -47,6 +47,11 @@
 
             socket.send(JSON.stringify(array));
         }
+
+        function tracker() {
+            window.open("/tracker", "osu! Tracker", "popup").resizeBy(400, 800);
+        }
+
         window.onload = connectWebSocket;
     </script>
 </head>
@@ -64,9 +69,8 @@
             <div class="collapse navbar-collapse" id="navbarTogglerDemo02">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/tracker">Tracker</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#" onclick="tracker()">Tracker</a></li>
                     <li class="nav-item"><a class="nav-link active" aria-current="page" href="/settings">Settings</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/status">API Status</a></li>
                     <li class="nav-item"><a class="nav-link" href="/info">Info</a></li>
                     <li class="nav-item"><a class="nav-link" href="/log">Log</a></li>
                 </ul>

@@ -233,8 +233,6 @@ bool webserver_start(bool skipInit = false)
 			// Add & Open WS Connection
 			std::lock_guard<std::mutex> _(ws_mutex);
 			clients_settings.insert(&conn);
-			// populate log string
-			std::string logString;
 			nlohmann::json _j;
 			for (size_t t = 0; t < vec_log.size(); t++) {
 				_j[t] = vec_log[t];
@@ -263,6 +261,7 @@ bool webserver_start(bool skipInit = false)
 			auto page = crow::mustache::load("index.html").render(ctx);
 			return page;
 		});
+
 		CROW_ROUTE(app, "/tracker")([]() {
 			crow::mustache::context ctx;
 			ctx["title"] = OSU_TRACKER_NAME;
@@ -302,7 +301,7 @@ bool webserver_start(bool skipInit = false)
 			auto page = crow::mustache::load("settings.html").render(ctx);
 			return page;
 		});
-	
+			
 		CROW_ROUTE(app, "/log")([]() {
 			crow::mustache::context ctx;
 			ctx["title"] = OSU_TRACKER_NAME;

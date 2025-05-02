@@ -1,7 +1,7 @@
 #pragma once
 #include <utility>
 #include <string>
-#include "../header/console.h"
+#include "console.h"
 
 std::vector<std::vector<std::string>> vec_application {
 	{"key",					"name",					"value",	"desc",											   "secret"},
@@ -21,15 +21,15 @@ std::vector<std::vector<std::string>> vec_api {
 	},
 	{
 		"inspector",
-		"https://api.kirino.sh/inspector/users/stats/{osu_id}?skipDailyData=true&skipOsuData=true&skipExtras=true"
+		"https://api.kirino.sh/inspector/users/stats/{{osu_id}}?skipDailyData=true&skipOsuData=true&skipExtras=true"
 	},
 	{
 		"respektive_user",
-		"https://score.respektive.pw/u/{osu_id}"
+		"https://score.respektive.pw/u/{{osu_id}}"
 	},
 	{
 		"respektive_rank",
-		"https://score.respektive.pw/rank/{scoreRank}"
+		"https://score.respektive.pw/rank/{{scoreRank}}"
 	}
 };
 
@@ -147,18 +147,6 @@ int setConfig(std::vector<std::vector<std::string>>& vec, std::string key, std::
 	else {
 		vec[keyIndex][fieldIndex] = value;
 		return 0;
-	}
-
-	// OLD VERSION
-	for (size_t i = 1; i < vec.size(); i++) {
-		if (vec[i][0] == key) {
-			for (size_t j = 0; j < vec[i].size(); j++) {
-				if (vec[0][j] == field) {
-					vec[i][j] = value;
-					return 0;
-				}
-			}
-		}
 	}
 }
 
