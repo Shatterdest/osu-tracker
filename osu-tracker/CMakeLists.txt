@@ -31,8 +31,10 @@ file(GLOB_RECURSE CPR_HEADERS CONFIGURE_DEPENDS lib/cpr/*.h)
 file(GLOB_RECURSE CURL_HEADERS CONFIGURE_DEPENDS lib/curl/lib/*.h)
 file(GLOB_RECURSE ZLIB_HEADERS CONFIGURE_DEPENDS lib/zlib/*.h)
 
-# OUTPUT
+# No MacOS support
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+	add_compile_definitions(_WIN32)
+	add_compile_definitions(OSU_TRACKER_CMAKE_CXX_COMPILER_ARCHITECTURE_ID="${CMAKE_CXX_COMPILER_ARCHITECTURE_ID}")
 	# Static libcurl, libcrypto and libssl (windows only)
 	# Using system curl and zlib on linux
 	set(LIBCURL_LIBRARY "${CMAKE_SOURCE_DIR}/lib/static/libcurl.lib")
@@ -62,13 +64,15 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 		target_link_libraries(test-tracker PRIVATE ws2_32 crypt32 advapi32 ${LIBCRYPTO_LIBRARY} ${LIBSSL_LIBRARY} ${LIBCURL_LIBRARY} )
 	endif()
 	# Include bundled libraries
-    include_directories(
-        ${CMAKE_SOURCE_DIR}/lib/cpr/cpr
-        ${CMAKE_SOURCE_DIR}/lib/cpr/include
-        ${CMAKE_SOURCE_DIR}/lib/curl/include
-        ${CMAKE_SOURCE_DIR}/lib/zlib
-    )
+	include_directories(
+		${CMAKE_SOURCE_DIR}/lib/cpr/cpr
+		${CMAKE_SOURCE_DIR}/lib/cpr/include
+		${CMAKE_SOURCE_DIR}/lib/curl/include
+		${CMAKE_SOURCE_DIR}/lib/zlib
+	)
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+	add_compile_definitions(__linux__)
+	add_compile_definitions(OSU_TRACKER_CMAKE_CXX_COMPILER_ARCHITECTURE_ID="${CMAKE_SYSTEM_PROCESSOR}")
 	find_package(CURL REQUIRED)
 	find_package(ZLIB REQUIRED)
 
@@ -85,13 +89,13 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 		target_link_libraries(test-tracker PRIVATE ${CURL_LIBRARIES} ${ZLIB_LIBRARIES})
 	endif()
 
-    # Include system headers
-    include_directories(${CURL_INCLUDE_DIRS} ${ZLIB_INCLUDE_DIRS})
-    target_link_libraries(osu-tracker PRIVATE ${CURL_LIBRARIES} ${ZLIB_LIBRARIES})
+	# Include system headers
+	include_directories(${CURL_INCLUDE_DIRS} ${ZLIB_INCLUDE_DIRS})
+	target_link_libraries(osu-tracker PRIVATE ${CURL_LIBRARIES} ${ZLIB_LIBRARIES})
 	include_directories(
-        ${CMAKE_SOURCE_DIR}/lib/cpr/cpr
-        ${CMAKE_SOURCE_DIR}/lib/cpr/include
-    )
+		${CMAKE_SOURCE_DIR}/lib/cpr/cpr
+		${CMAKE_SOURCE_DIR}/lib/cpr/include
+	)
 endif()
 
 set_target_properties(osu-tracker PROPERTIES OUTPUT_NAME "osu-tracker" RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/osu-tracker")
@@ -105,16 +109,21 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_compile_definitions(DEBUG_BUILD)
 elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
     add_compile_definitions(RELEASE_BUILD)
-endif()
 
-# No MacOS support
-if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-    add_compile_definitions(_WIN32)
-elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-    add_compile_definitions(__linux__)
+	if(MSVC)
+        # Windows (MSVC) specific optimizations
+        set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /O2 /GL")
+        set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /O2 /GL")
+        set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /LTCG")
+        set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} /LTCG")
+    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+        # Linux (GCC/Clang) specific optimizations
+        set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -march=native -flto")
+        set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O3 -march=native -flto")
+        set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -flto")
+        set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} -flto")
+    endif()
 endif()
-
-add_definitions(-DCURL_DISABLE_LDAP)
 
 # WEB SERVER DEFINITIONS 
 add_compile_definitions(OSU_TRACKER_ENABLE_WEBSERVER=1) # Legacy flag due to webserver was an optional feature
@@ -128,7 +137,6 @@ add_compile_definitions(OSU_TRACKER_CMAKE_VERSION="${CMAKE_VERSION}")
 add_compile_definitions(OSU_TRACKER_CMAKE_MINIMUM_REQUIRED_VERSION="${CMAKE_MINIMUM_REQUIRED_VERSION}")
 add_compile_definitions(OSU_TRACKER_CMAKE_CXX_COMPILER_ID="${CMAKE_CXX_COMPILER_ID}")
 add_compile_definitions(OSU_TRACKER_CMAKE_CXX_COMPILER_VERSION="${CMAKE_CXX_COMPILER_VERSION}")
-add_compile_definitions(OSU_TRACKER_CMAKE_CXX_COMPILER_ARCHITECTURE_ID="${CMAKE_CXX_COMPILER_ARCHITECTURE_ID}")
 add_compile_definitions(OSU_TRACKER_CMAKE_CXX_COMPILER="${CMAKE_CXX_COMPILER}")
 add_compile_definitions(OSU_TRACKER_CMAKE_SYSTEM_NAME="${CMAKE_SYSTEM_NAME}")
 
@@ -139,6 +147,7 @@ add_compile_definitions(OSU_TRACKER_RELEASE_TYPE="Alpha")
 add_compile_definitions(OSU_TRACKER_CREATOR="Railgun")
 add_compile_definitions(OSU_TRACKER_PROFILE="https://osu.ppy.sh/users/13817114")
 add_compile_definitions(OSU_TRACKER_GITHUB="https://github.com/nyaruku/osu-tracker")
+add_compile_definitions(OSU_TRACKER_DISCORD="https://discord.gg/FN6vauFTGA")
 
 # LIBRARY INFO
 add_compile_definitions(CROW_REPOSITORY_URL="https://github.com/CrowCpp/Crow/tree/e8b125159ec5e61384187e36bbf6d14f1fad504f")

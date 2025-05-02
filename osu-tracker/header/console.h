@@ -43,14 +43,23 @@ void resetColor() {
 	std::cout << "\033[0m";
 }
 
-void writeLog(std::string msg, int r = 255, int g = 255, int b = 255) {
-#ifdef DEBUG_BUILD
+void writeLog(std::string msg, bool alwaysPrint = false, int r = 255, int g = 255, int b = 255) {
 	time_t currentTime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 	std::tm* timeInfo = localtime(&currentTime);
 	char dateBuffer[20];
 	strftime(dateBuffer, sizeof(dateBuffer), "%Y-%m-%d", timeInfo);
 	char timeBuffer[9];
 	strftime(timeBuffer, sizeof(timeBuffer), "%H:%M:%S", timeInfo);
+	std::stringstream ss;
+	ss << (std::string)dateBuffer + " " + timeBuffer << " " << "[" << "Internal" << "] " << msg;
+	vec_log.push_back(ss.str());
+
+	#if RELEASE_BUILD
+		// Dont print on release if not explicity
+		if(!alwaysPrint)
+			return;
+	#endif
+
 	setColorRGB_f(100, 100, 100);
 	std::cout << (std::string)dateBuffer + " " + timeBuffer << " ";
 	resetColor();
@@ -62,8 +71,4 @@ void writeLog(std::string msg, int r = 255, int g = 255, int b = 255) {
 	setColorRGB_f(r, g, b);
 	std::cout << msg << "\n";
 	resetColor();
-	std::stringstream ss;
-	ss << (std::string)dateBuffer + " " + timeBuffer << " " << "[" << "Internal" << "] " << msg;
-	vec_log.push_back(ss.str());
-#endif
 }

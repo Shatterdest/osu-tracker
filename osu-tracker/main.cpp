@@ -137,23 +137,27 @@ int main()
 	#endif
 	printHeader();
 
-	if (!std::filesystem::exists("config.txt")) {
-		writeLog("Config file not found");
+	bool run = true;
+	bool skipInit = false;
+	while (run) {
+		if (!std::filesystem::exists("config.txt")) {
+			writeLog("Config file not found");
 
-		setConfig(vec_application, "osu_id", "value", "Your osu! 'user id'");
-		setConfig(vec_application, "client_id", "value", "Your API v2 'Client ID'");
-		setConfig(vec_application, "client_secret", "value", "Your API v2 'Client Secret'");
-		setConfig(vec_application, "api_refreshInterval", "value", "8000");
-		writeConfig();
-		readConfig();
-	}
-	else {
-		writeLog("Config file found");
-		readConfig();
-	}
-
-#if OSU_TRACKER_ENABLE_WEBSERVER == 1
-	webserver_start(); // blocking
-#endif
+			setConfig(vec_application, "osu_id", "value", "Your osu! 'user id'");
+			setConfig(vec_application, "client_id", "value", "Your API v2 'Client ID'");
+			setConfig(vec_application, "client_secret", "value", "Your API v2 'Client Secret'");
+			setConfig(vec_application, "api_refreshInterval", "value", "8000");
+			writeConfig();
+			readConfig();
+		}
+		else {
+			writeLog("Config file found");
+			readConfig();
+		}
+		#if OSU_TRACKER_ENABLE_WEBSERVER == 1
+			run = !webserver_start(skipInit); // blocking
+			skipInit = true;
+		#endif
+		}
 	return 0;
 }
