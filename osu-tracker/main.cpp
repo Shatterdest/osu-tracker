@@ -7,11 +7,11 @@
 #include <string>
 #include <json.hpp>
 #include <cpr/cpr.h>
-#include "./header/ext.h"
-#include "./header/api.h"
-#include "./header/console.h"
-#include "./header/config.h"
-#include "./header/webServer.h"
+#include "../header/ext.h"
+#include "../header/api.h"
+#include "../header/console.h"
+#include "../header/config.h"
+#include "../header/webserver.h"
 
 #ifdef _WIN32
 void enableVirtualTerminalProcessing() {
