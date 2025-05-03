@@ -1,13 +1,17 @@
+// suppress warnings bc they spam output
+#pragma warning( disable : 4305)
+#pragma warning( disable : 4566)
+
 #include <iostream>
 #include <vector>
 #include <string>
 #include <json.hpp>
 #include <cpr/cpr.h>
-#include "../header/ext.h"
-#include "../header/api.h"
-#include "../header/console.h"
-#include "../header/config.h"
-#include "../header/webserver.h"
+#include "./header/ext.h"
+#include "./header/api.h"
+#include "./header/console.h"
+#include "./header/config.h"
+#include "./header/webServer.h"
 
 #ifdef _WIN32
 void enableVirtualTerminalProcessing() {
@@ -132,8 +136,8 @@ static void inspector_api() {
 
 int main()
 {
-	#ifdef _WIN32
-		enableVirtualTerminalProcessing();
+	#ifdef _WIN32 
+		enableVirtualTerminalProcessing(); //poopoo cmd.exe 
 	#endif
 	printHeader();
 

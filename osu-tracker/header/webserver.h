@@ -140,6 +140,13 @@ void shutdownWebServer(bool shutdown = false) {
 
 int counter = 0;
 
+// Signal handler for SIGINT
+void handleSigint(int signal) {
+	if (signal == SIGINT) {
+		writeLog("SIGINT received. Shutting down the server...", 255, 255, 0);
+		shutdownWebServer(true);
+	}
+}
 
 /*
 * blocking function
@@ -264,10 +271,19 @@ bool webserver_start(bool skipInit = false)
 
 		CROW_ROUTE(app, "/tracker")([]() {
 			crow::mustache::context ctx;
-			ctx["title"] = OSU_TRACKER_NAME;
-			ctx["version"] = OSU_TRACKER_VERSION;
 			ctx["hostname"] = OSU_TRACKER_WEBSERVER_IP;
 			ctx["port"] = OSU_TRACKER_WEBSERVER_PORT;
+
+			std::vector<crow::json::wvalue> elements;
+			for (size_t i = 1; i < vec_tracker.size(); ++i) {
+				if (vec_tracker[i][5] == "true") {
+					crow::json::wvalue el;
+					el["id"] = vec_tracker[i][0];
+					el["label"] = vec_tracker[i][1];
+					elements.push_back(std::move(el));
+				}
+			}
+			ctx["trackerElements"] = std::move(elements);
 
 			auto page = crow::mustache::load("tracker.html").render(ctx);
 			return page;
@@ -382,9 +398,8 @@ bool webserver_start(bool skipInit = false)
 			return page;
 		});
 		app.add_static_dir();
-	}
-	app.bindaddr(OSU_TRACKER_WEBSERVER_IP)
-		.port(OSU_TRACKER_WEBSERVER_PORT);
+
+	} // end of skip
 
 	writeLog("Starting Web Server...", true);
 	writeLog("Web Server should be accessible under:", true);
@@ -392,8 +407,7 @@ bool webserver_start(bool skipInit = false)
 	std::string url = "http://" + (std::string)OSU_TRACKER_WEBSERVER_IP + ":" + std::to_string(OSU_TRACKER_WEBSERVER_PORT);
 	writeLog(url, true, 0, 140, 255);
 	writeLog("#####################", true, 255, 255, 0);
-	app.run(); // blocking
+	app.bindaddr(OSU_TRACKER_WEBSERVER_IP).port(OSU_TRACKER_WEBSERVER_PORT).signal_clear().run(); // blocking
 	writeLog("Web Server Terminated", true , 255, 0, 0);		
-	
 	return shutdown_webServer;
 }

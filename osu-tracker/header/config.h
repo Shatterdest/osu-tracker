@@ -3,6 +3,9 @@
 #include <string>
 #include "console.h"
 
+// static data
+static std::string username;
+
 std::vector<std::vector<std::string>> vec_application {
 	{"key",					"name",					"value",	"desc",											   "secret"},
 	{"osu_id",				"osu! User ID",			"",			"Your osu! user id.",								"false"},
@@ -35,67 +38,64 @@ std::vector<std::vector<std::string>> vec_api {
 
 std::vector<std::vector<std::string>> vec_tracker {
 
-	{"key",			"name",				"output",	"group",			"path",				"display"},
-	{"scoreRank",	"Score Rank",		"int",		"respektive_user",	"/0/rank",			"true"},
-	{"scoreScore",	"res_RankedScore",	"int",		"respektive_user",	"/0/score",			"false"},
-	{"rankedScore",	"Ranked Score",		"int",		"osu",				"",					"true"},
-	{"totalScore",	"Total Score",		"int",		"osu",				"",					"true"},
-	{"level",		"Lvl",				"float",	"osu",				"",					"true"},
-	{"pp",			"PP",				"int",		"osu",				"",					"true"},
-	{"silverSS",	"Silver SS",		"int",		"osu",				"",					"true"},
-	{"goldSS",		"Gold SS",			"int",		"osu",				"",					"true"},
-	{"silverS",		"Silver S",			"int",		"osu",				"",					"true"},
-	{"goldS",		"Gold S",			"int",		"osu",				"",					"true"},
-	{"a",			"A",				"int",		"osu",				"",					"true"},
-	{"playcount",	"Playcount",		"int",		"osu",				"",					"true"},
-	{"b",			"B",				"int",		"inspector",		"/stats/b",			"true"},
-	{"c",			"C",				"int",		"inspector",		"/stats/c",			"true"},
-	{"d",			"D",				"int",		"inspector",		"/stats/d",			"true"},
-	{"completionP",	"Completion%",		"float",	"inspector",		"/stats/completion","true"},
-	{"targetRank",	"Target Rank",		"string",	"respektive_rank",	"/0/rank",			"true"},
-	{"targetUser",	"Target User",		"string",	"respektive_rank",	"/0/username",		"true"},
-	{"targetScore",	"Target Score",		"string",	"respektive_rank",	"/0/score",			"true"}
+	{"key",			"name",				"group",			"path",				"display"},
+	{"scoreRank",	"Score Rank",		"respektive_user",	"/0/rank",			"true"},
+	{"scoreScore",	"res_RankedScore",	"respektive_user",	"/0/score",			"false"},
+	{"level",		"Level",			"osu",				"",					"true"},
+	{"rankedScore",	"Ranked Score",		"osu",				"",					"true"},
+	{"totalScore",	"Total Score",		"osu",				"",					"true"},
+	{"ppRank",		"Performance Rank",	"osu",				"",					"true"},
+	{"pp",			"PP",				"osu",				"",					"true"},
+	{"acc",			"Accuracy",			"osu",				"",					"true"},
+	{"playtime",	"Play Time",		"osu",				"",					"true"},
+	{"playcount",	"Play Count",		"osu",				"",					"true"},
+	{"silverSS",	"Rank SSH",			"osu",				"",					"true"},
+	{"goldSS",		"Rank SS",			"osu",				"",					"true"},
+	{"silverS",		"Rank SH",			"osu",				"",					"true"},
+	{"goldS",		"Rank S",			"osu",				"",					"true"},
+	{"a",			"Rank A",			"osu",				"",					"true"},
+	{"b",			"Rank B",			"inspector",		"/stats/b",			"true"},
+	{"c",			"Rank C",			"inspector",		"/stats/c",			"true"},
+	{"d",			"Rank D",			"inspector",		"/stats/d",			"true"},
+	{"totalSS",		"Total SS",			"",					"",					"true"},
+	{"totalS",		"Total S",			"",					"",					"true"},
+	{"clears",		"Profile Clears",	"osu",				"",					"true"},
+	{"clears",		"Total Clears",		"inspector",		"",					"true"},
+	{"completionP",	"Completion%",		"inspector",		"/stats/completion","true"},
+	{"targetRank",	"Target Rank",		"respektive_rank",	"/0/rank",			"true"},
+	{"targetUser",	"Target User",		"respektive_rank",	"/0/username",		"true"},
+	{"targetScore",	"Target Score",		"respektive_rank",	"/0/score",			"true"}
 };
 
+/*
+0: key
+1: init
+2: current
+3: change/diff
+*/
 std::vector<std::vector<std::string>> vec_data {
-	{"init_scoreRank",	""},
-	{"scoreRank",		""},
-	{"init_scoreScore",	""},
-	{"scoreScore",		""},
-	{"init_rankedScore",""},
-	{"rankedScore",		""},
-	{"init_totalScore",	""},
-	{"totalScore",		""},
-	{"init_level",		""},
-	{"level",			""},
-	{"init_pp",			""},
-	{"pp",				""},
-	{"init_silverSS",	""},
-	{"silverSS",		""},
-	{"init_goldSS",		""},
-	{"goldSS",			""},
-	{"init_silverS",	""},
-	{"silverS",			""},
-	{"init_goldS",		""},
-	{"goldS",			""},
-	{"init_a",			""},
-	{"a",				""},
-	{"init_playcount",	""},
-	{"playcount",		""},
-	{"init_b",			""},
-	{"b",				""},
-	{"init_c",			""},
-	{"c",				""},
-	{"init_d",			""},
-	{"d",				""},
-	{"init_completionP",""},
-	{"completionP",		""},
-	{"init_targetRank",	""},
-	{"targetRank",		""},
-	{"init_targetUser",	""},
-	{"targetUser",		""},
-	{"init_targetScore",""},
-	{"targetScore",		""}
+	{"scoreRank",		"",		"",		""},
+	{"scoreScore",		"",		"",		""},
+	{"rankedScore",		"",		"",		""},
+	{"totalScore",		"",		"",		""},
+	{"level",			"",		"",		""},
+	{"pp",				"",		"",		""},
+	{"playcount",		"",		"",		""},
+	{"playtime",		"",		"",		""},
+	{"silverSS",		"",		"",		""},
+	{"goldSS",			"",		"",		""},
+	{"silverS",			"",		"",		""},
+	{"goldS",			"",		"",		""},
+	{"a",				"",		"",		""},
+	{"b",				"",		"",		""},
+	{"c",				"",		"",		""},
+	{"d",				"",		"",		""},
+	{"totalSS",			"",		"",		""},
+	{"totalS",			"",		"",		""},
+	{"completionP",		"",		"",		""},
+	{"targetRank",		"",		"",		""},
+	{"targetUser",		"",		"",		""},
+	{"targetScore",		"",		"",		""}
 };
 
 // STATS READ/WRITE
@@ -192,8 +192,8 @@ void writeConfig() {
 	input += "[TrackerConfig]\n";
 	for (int i = 1; i < vec_tracker.size(); i++) {
 		// 0 = key : 0
-		// 5 = display : 1
-		input += vec_tracker[i][0] + ";" + vec_tracker[i][5] + "\n";
+		// 4 = display : 1
+		input += vec_tracker[i][0] + ";" + vec_tracker[i][4] + "\n";
 	}
 	
 	std::ofstream file;
