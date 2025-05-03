@@ -14,7 +14,7 @@ A web server based osu! stats/session tracker
 - Linux
   - Make sure u have these installed:
     - cmake
-    - libcurl4-openssl-dev (provides lib files for linking)
+    - libcurl4-openssl-dev (provides lib files for linking) | (curl is enough, if u are using arch)
     - ninja (generator)
   - Use bash scripts
     - "release.sh" , "debug.sh"
