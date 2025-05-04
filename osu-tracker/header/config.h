@@ -79,11 +79,14 @@ std::vector<std::vector<std::string>> vec_data_inspector {
 	{"completionP",	"",	"",	"", "2"}  // 5
 };
 
-std::vector<std::vector<std::string>> vec_data_respektive {
-	{"scoreRank",	"",	"",	"", "1"}, // 0
-	{"targetRank",	"1"}, // 1
-	{"targetUser",	"0"}, // 2
-	{"targetScore",	"1"}  // 3
+std::vector<std::vector<std::string>> vec_data_respektive{
+	{"scoreRank",	"",	"",	"", "1"} // 0
+};
+
+std::vector<std::vector<std::string>> vec_data_respektive_target {
+	{"targetRank",	"1"}, // 0
+	{"targetUser",	"0"}, // 1
+	{"targetScore",	"1"}  // 2
 };
 
 /*
