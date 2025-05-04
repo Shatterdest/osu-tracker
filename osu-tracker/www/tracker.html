@@ -36,6 +36,7 @@
 				socket.onopen = () => {
 					const el = document.getElementById(`ws-conn-lost`);
 					el.hidden = true;
+					sendMessage("getData");
 				}
 				socket.onclose = () => {
 					const el = document.getElementById(`ws-conn-lost`);
@@ -79,8 +80,8 @@
 	{{#trackerElements}}
 	<div id="{{id}}-display" class="m-1 tracker-element row align-items-center">
 		<span class="me-1 text-start col-12 col-sm">{{label}}</span>
-		<span class="border border-1 border-white me-1 text-end col tracker-value {{id}}-current"></span>
-		<span class="border border-1 border-white text-start col tracker-value {{id}}-change"></span>
+		<span class="pe-1 border border-1 border-white me-1 text-end col tracker-value">&nbsp;<span class="{{id}}-current">{{val_current}}</span></span>
+		<span class="ps-1 border border-1 border-white text-start col tracker-value">&nbsp;<span class="{{id}}-change">{{val_change}}</span></span>
 	</div>
 	{{/trackerElements}}
 	<!-- END OF BODY-->

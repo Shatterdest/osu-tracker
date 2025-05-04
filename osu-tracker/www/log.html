@@ -69,7 +69,7 @@
 			}
 
 			function tracker() {
-				window.open("/tracker", "osu! Tracker", "popup").resizeBy(400, 800);
+                window.open("/tracker", "osu! Tracker", `width=576,height=600,resizable=yes,scrollbars=yes`);
 			}
 
 			window.onload = connectWebSocket;

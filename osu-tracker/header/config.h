@@ -7,64 +7,42 @@
 static std::string username;
 
 std::vector<std::vector<std::string>> vec_application {
-	{"key",					"name",					"value",	"desc",											   "secret"},
-	{"osu_id",				"osu! User ID",			"",			"Your osu! user id.",								"false"},
-	{"client_id",			"Client ID",			"",			"osu! API V2 Client ID.",							"false"},
-	{"client_secret",		"Client Secret",		"",			"osu! API V2 Client Secret ( DO NOT SHARE )!",		 "true"},
-	{"api_refreshInterval",	"API Refresh Interval",	"8",		"Time in (ms) till api fetches again in the loop.",	"false"}
-};
-
-std::vector<std::vector<std::string>> vec_api {
-	{"name","url"},
-	{
-		// If people want to change to a private server and track their stats there
-		// (if private server supports api)
-		"osu",
-		"https://osu.ppy.sh/api/v2/users/"
-	},
-	{
-		"inspector",
-		"https://api.kirino.sh/inspector/users/stats/{{osu_id}}?skipDailyData=true&skipOsuData=true&skipExtras=true"
-	},
-	{
-		"respektive_user",
-		"https://score.respektive.pw/u/{{osu_id}}"
-	},
-	{
-		"respektive_rank",
-		"https://score.respektive.pw/rank/{{scoreRank}}"
-	}
+	{"key","value"},
+	{"osu_id",""},
+	{"client_id",""},
+	{"client_secret",""},
+	{"api_refreshInterval","7000"},
+	{"gameMode","0"} // std, taiko, catch, mania
 };
 
 std::vector<std::vector<std::string>> vec_tracker {
 
-	{"key",			"name",				"group",			"path",				"display"},
-	{"scoreRank",	"Score Rank",		"respektive_user",	"/0/rank",			"true"},
-	{"scoreScore",	"res_RankedScore",	"respektive_user",	"/0/score",			"false"},
-	{"level",		"Level",			"osu",				"",					"true"},
-	{"rankedScore",	"Ranked Score",		"osu",				"",					"true"},
-	{"totalScore",	"Total Score",		"osu",				"",					"true"},
-	{"ppRank",		"Performance Rank",	"osu",				"",					"true"},
-	{"pp",			"PP",				"osu",				"",					"true"},
-	{"acc",			"Accuracy",			"osu",				"",					"true"},
-	{"playtime",	"Play Time",		"osu",				"",					"true"},
-	{"playcount",	"Play Count",		"osu",				"",					"true"},
-	{"silverSS",	"Rank SSH",			"osu",				"",					"true"},
-	{"goldSS",		"Rank SS",			"osu",				"",					"true"},
-	{"silverS",		"Rank SH",			"osu",				"",					"true"},
-	{"goldS",		"Rank S",			"osu",				"",					"true"},
-	{"a",			"Rank A",			"osu",				"",					"true"},
-	{"b",			"Rank B",			"inspector",		"/stats/b",			"true"},
-	{"c",			"Rank C",			"inspector",		"/stats/c",			"true"},
-	{"d",			"Rank D",			"inspector",		"/stats/d",			"true"},
-	{"totalSS",		"Total SS",			"",					"",					"true"},
-	{"totalS",		"Total S",			"",					"",					"true"},
-	{"clears",		"Profile Clears",	"osu",				"",					"true"},
-	{"clears",		"Total Clears",		"inspector",		"",					"true"},
-	{"completionP",	"Completion%",		"inspector",		"/stats/completion","true"},
-	{"targetRank",	"Target Rank",		"respektive_rank",	"/0/rank",			"true"},
-	{"targetUser",	"Target User",		"respektive_rank",	"/0/username",		"true"},
-	{"targetScore",	"Target Score",		"respektive_rank",	"/0/score",			"true"}
+	{"key",			"name",				"display"}, // 0
+	{"scoreRank",	"Score Rank",		"true"}, 	// 1
+	{"level",		"Level",			"true"},	// 2
+	{"rankedScore",	"Ranked Score",		"true"},	// 3
+	{"totalScore",	"Total Score",		"true"},	// 4
+	{"ppRank",		"Performance Rank",	"true"},	// 5
+	{"pp",			"PP",				"true"},	// 6
+	{"acc",			"Accuracy",			"true"},	// 7
+	{"playtime",	"Play Time",		"true"},	// 8
+	{"playcount",	"Play Count",		"true"},	// 9
+	{"silverSS",	"Rank SSH",			"true"},	// 10
+	{"goldSS",		"Rank SS",			"true"},	// 11
+	{"silverS",		"Rank SH",			"true"},	// 12
+	{"goldS",		"Rank S",			"true"},	// 13
+	{"a",			"Rank A",			"true"},	// 14
+	{"b",			"Rank B",			"true"},	// 15
+	{"c",			"Rank C",			"true"},	// 16
+	{"d",			"Rank D",			"true"},	// 17
+	{"totalSS",		"Total SS",			"true"},	// 18
+	{"totalS",		"Total S",			"true"},	// 19
+	{"clears",		"Profile Clears",	"true"},	// 20
+	{"totalClears",	"Total Clears",		"true"},	// 21
+	{"completionP",	"Completion%",		"true"},	// 22
+	{"targetRank",	"Target Rank",		"true"},	// 23
+	{"targetUser",	"Target User",		"true"},	// 24
+	{"targetScore",	"Target Score",		"true"}		// 25
 };
 
 /*
@@ -72,51 +50,41 @@ std::vector<std::vector<std::string>> vec_tracker {
 1: init
 2: current
 3: change/diff
+4: type -> string, int, float
 */
-std::vector<std::vector<std::string>> vec_data {
-	{"scoreRank",		"",		"",		""},
-	{"scoreScore",		"",		"",		""},
-	{"rankedScore",		"",		"",		""},
-	{"totalScore",		"",		"",		""},
-	{"level",			"",		"",		""},
-	{"pp",				"",		"",		""},
-	{"playcount",		"",		"",		""},
-	{"playtime",		"",		"",		""},
-	{"silverSS",		"",		"",		""},
-	{"goldSS",			"",		"",		""},
-	{"silverS",			"",		"",		""},
-	{"goldS",			"",		"",		""},
-	{"a",				"",		"",		""},
-	{"b",				"",		"",		""},
-	{"c",				"",		"",		""},
-	{"d",				"",		"",		""},
-	{"totalSS",			"",		"",		""},
-	{"totalS",			"",		"",		""},
-	{"completionP",		"",		"",		""},
-	{"targetRank",		"",		"",		""},
-	{"targetUser",		"",		"",		""},
-	{"targetScore",		"",		"",		""}
+std::vector<std::vector<std::string>> vec_data_osu {
+	{"level",		"",	"",	"", "2"}, // 0
+	{"rankedScore",	"",	"",	"", "1"}, // 1
+	{"totalScore",	"",	"",	"", "1"}, // 2
+	{"ppRank",		"",	"",	"", "1"}, // 3
+	{"pp",			"",	"",	"", "1"}, // 4
+	{"acc",			"",	"",	"", "2"}, // 5
+	{"playtime",	"",	"",	"", "1"}, // 6
+	{"playcount",	"",	"",	"", "1"}, // 7
+	{"silverSS",	"",	"",	"", "1"}, // 8
+	{"goldSS",		"",	"",	"", "1"}, // 9
+	{"silverS",		"",	"",	"", "1"}, // 10
+	{"goldS",		"",	"",	"", "1"}, // 11
+	{"a",			"",	"",	"", "1"}, // 12
+	{"totalSS",		"",	"",	"", "1"}, // 13
+	{"totalS",		"",	"",	"", "1"}, // 14
+	{"clears",		"",	"",	"", "1"}, // 15
 };
 
-// STATS READ/WRITE
-int setStats(std::string key, std::string value) {
-	for (size_t i = 1; i < vec_data.size(); i++) {
-		if (vec_data[i][0] == key) {
-			vec_data[i][1] = value;
-			return 0;
-		}
-	}
-	return -1;
-}
+std::vector<std::vector<std::string>> vec_data_inspector {
+	{"b",			"",	"",	"", "1"}, // 1
+	{"c",			"",	"",	"", "1"}, // 2
+	{"d",			"",	"",	"", "1"}, // 3
+	{"totalClears",	"",	"",	"", "1"}, // 4
+	{"completionP",	"",	"",	"", "2"}  // 5
+};
 
-std::string getStats(std::string key) {
-	for (size_t i = 1; i < vec_data.size(); i++) {
-		if (vec_data[i][0] == key) {
-			return vec_data[i][1];
-		}
-	}
-	return "";
-}
+std::vector<std::vector<std::string>> vec_data_respektive {
+	{"scoreRank",	"",	"",	"", "1"}, // 0
+	{"targetRank",	"1"}, // 1
+	{"targetUser",	"0"}, // 2
+	{"targetScore",	"1"}  // 3
+};
 
 /*
 *	1: vector that has string vectors
@@ -168,7 +136,7 @@ std::string getConfig(std::vector<std::vector<std::string>>& vec, std::string ke
 	return "";
 }
 
-// config file handling
+// write config
 void writeConfig() {
 	writeLog("Writing config file...");
 	std::string input;
@@ -178,22 +146,15 @@ void writeConfig() {
 	input += "[ApplicationConfig]\n";
 	for (int i = 1; i < vec_application.size(); i++) {
 		// 0 = key : 0
-		// 2 = value : 1
-		input += vec_application[i][0] + ";" + vec_application[i][2] + "\n";
-	}
-	input += "\n";
-	input += "[ApiConfig]\n";
-	for (int i = 1; i < vec_api.size(); i++) {
-		// 0 = key : 0
-		// 1 = url : 1
-		input += vec_api[i][0] + ";" + vec_api[i][1] + "\n";
+		// 1 = value : 1
+		input += vec_application[i][0] + ";" + vec_application[i][1] + "\n";
 	}
 	input += "\n";
 	input += "[TrackerConfig]\n";
 	for (int i = 1; i < vec_tracker.size(); i++) {
 		// 0 = key : 0
-		// 4 = display : 1
-		input += vec_tracker[i][0] + ";" + vec_tracker[i][4] + "\n";
+		// 2 = display : 1
+		input += vec_tracker[i][0] + ";" + vec_tracker[i][2] + "\n";
 	}
 	
 	std::ofstream file;
@@ -216,11 +177,8 @@ void readConfig() {
 				if (line == "[ApplicationConfig]") {
 					configHeader = 0;
 				}
-				if (line == "[ApiConfig]") {
-					configHeader = 1;
-				}
 				if (line == "[TrackerConfig]") {
-					configHeader = 2;
+					configHeader = 1;
 				}
 			}
 			if (!line.starts_with("//") && !line.empty() && !line.starts_with("[")) {
@@ -231,9 +189,6 @@ void readConfig() {
 					setConfig(vec_application, configLine[0],"value", configLine[1]);
 					break;
 				case 1:
-					setConfig(vec_api, configLine[0], "url", configLine[1]);
-					break;
-				case 2:
 					setConfig(vec_tracker, configLine[0], "display", configLine[1]);
 					break;
 				}
@@ -248,11 +203,6 @@ void readConfig() {
 
 void rmConfig() {
 	std::filesystem::remove("config.txt");
-	setConfig(vec_application, "osu_id", "value", "");
-	setConfig(vec_application, "client_id", "value", "");
-	setConfig(vec_application, "client_secret", "value", "");
-	setConfig(vec_application, "api_refreshInterval", "value", "8000");
-	writeConfig();
 }
 
 // FEATURE: for custom api settings

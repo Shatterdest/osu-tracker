@@ -114,22 +114,19 @@ std::mutex ws_mutex;
 std::unordered_set<crow::websocket::connection*> clients;
 std::unordered_set<crow::websocket::connection*> clients_settings;
 
-json settingsJson() {
-	json _j;
-	_j["cmd"] = "update";
-	_j["osu_id"] = vec_application[1][2];
-	_j["client_id"] = vec_application[2][2];
-	_j["client_secret"] = vec_application[3][2];
-	_j["api_refreshInterval"] = vec_application[4][2];
-	return _j;
-}
-
 // send Toast to client
 json sendToast(std::string msg) {
 	json _j;
 	_j["cmd"] = "toast";
 	_j["msg"] = msg;
 	return _j;
+}
+
+void sendCmd(crow::websocket::connection* client, std::string cmd, std::string msg = "") {
+	json _j;
+	_j["cmd"] = cmd;
+	_j["msg"] = ""; // optional message
+	client->send_text(_j.dump());
 }
 
 void shutdownWebServer(bool shutdown = false) {
@@ -139,14 +136,6 @@ void shutdownWebServer(bool shutdown = false) {
 }
 
 int counter = 0;
-
-// Signal handler for SIGINT
-void handleSigint(int signal) {
-	if (signal == SIGINT) {
-		writeLog("SIGINT received. Shutting down the server...", 255, 255, 0);
-		shutdownWebServer(true);
-	}
-}
 
 /*
 * blocking function
@@ -173,7 +162,6 @@ bool webserver_start(bool skipInit = false)
 			std::lock_guard<std::mutex> _(ws_mutex);
 			clients.insert(&conn);
 		})
-
 		.onclose([&](crow::websocket::connection& conn, const std::string& reason, uint16_t) {
 			// Close Websocket Connection
 			std::lock_guard<std::mutex> _(ws_mutex);
@@ -199,23 +187,19 @@ bool webserver_start(bool skipInit = false)
 		});
 
 		CROW_WEBSOCKET_ROUTE(app, "/ws/settings/")
-		.onopen([&](crow::websocket::connection& conn) {
+			.onopen([&](crow::websocket::connection& conn) {
 			// Add & Open WS Connection
 			std::lock_guard<std::mutex> _(ws_mutex);
 			clients_settings.insert(&conn);
+				})
 
-			// Send initial state
-			json j = settingsJson();
-			conn.send_text(j.dump());
-		})
-
-		.onclose([&](crow::websocket::connection& conn, const std::string& reason, uint16_t) {
+			.onclose([&](crow::websocket::connection& conn, const std::string& reason, uint16_t) {
 			// Close Websocket Connection
 			std::lock_guard<std::mutex> _(ws_mutex);
 			clients_settings.erase(&conn);
-		})
+				})
 
-		.onmessage([&](crow::websocket::connection& conn, const std::string& data, bool is_binary) {
+			.onmessage([&](crow::websocket::connection& conn, const std::string& data, bool is_binary) {
 			std::lock_guard<std::mutex> _(ws_mutex);
 			nlohmann::json j = json::parse(data);
 			std::string cmd = j["cmd"];
@@ -223,14 +207,22 @@ bool webserver_start(bool skipInit = false)
 
 			if (cmd[0] == '#') {
 				if (cmd == "#saveSettings") {
-				
+					if (j["msg"]["applicationConfig"][0]["value"] != vec_application[1][1] || j["msg"]["applicationConfig"][1]["value"] != vec_application[2][1] || j["msg"]["applicationConfig"][2]["value"] != vec_application[3][1] || j["msg"]["applicationConfig"][4]["value"] != vec_application[5][1]) {
+						// user id changed, reset tracker data
+					}
+					for (const auto& item : j["msg"]["applicationConfig"]) {
+						setConfig(vec_application, item["key"], "value", item["value"]);
+					}
+					for (const auto& item : j["msg"]["trackerConfig"]) {
+						setConfig(vec_tracker, item["key"], "display", boolToString(item["value"]));
+						
+					}
+					writeConfig();
 				}
 				
 				if (cmd == "#resetSettings") {
 					rmConfig();
-					nlohmann::json _j;
-					_j["cmd"] = "resetSettings";
-					conn.send_text(_j);
+					shutdownWebServer(false); //restart web server
 				}
 			}
 		});
@@ -244,12 +236,8 @@ bool webserver_start(bool skipInit = false)
 			for (size_t t = 0; t < vec_log.size(); t++) {
 				_j[t] = vec_log[t];
 			}
-
-			// Send initial state
-			json j = settingsJson();
 			conn.send_text(_j.dump());
 		})
-
 		.onclose([&](crow::websocket::connection& conn, const std::string& reason, uint16_t) {
 			// Close Websocket Connection
 			std::lock_guard<std::mutex> _(ws_mutex);
@@ -273,10 +261,11 @@ bool webserver_start(bool skipInit = false)
 			crow::mustache::context ctx;
 			ctx["hostname"] = OSU_TRACKER_WEBSERVER_IP;
 			ctx["port"] = OSU_TRACKER_WEBSERVER_PORT;
+			ctx["username"] = username;
 
 			std::vector<crow::json::wvalue> elements;
-			for (size_t i = 1; i < vec_tracker.size(); ++i) {
-				if (vec_tracker[i][5] == "true") {
+			for (size_t i = 1; i < vec_tracker.size(); i++) {
+				if (vec_tracker[i][2] == "true") {
 					crow::json::wvalue el;
 					el["id"] = vec_tracker[i][0];
 					el["label"] = vec_tracker[i][1];
@@ -288,6 +277,7 @@ bool webserver_start(bool skipInit = false)
 			auto page = crow::mustache::load("tracker.html").render(ctx);
 			return page;
 		});
+
 		CROW_ROUTE(app, "/settings")([]() {
 			crow::mustache::context ctx;
 
@@ -298,21 +288,37 @@ bool webserver_start(bool skipInit = false)
 			ctx["port"] = OSU_TRACKER_WEBSERVER_PORT;
 
 			// config
-			ctx["osu_id_name"] = vec_application[1][1];
-			ctx["osu_id_val"] = vec_application[1][2];
-			ctx["osu_id_desc"] = vec_application[1][3];
+			ctx["osu_id_name"] = "osu! User ID";
+			ctx["osu_id_val"] = vec_application[1][1];
+			ctx["osu_id_desc"] = "Your osu! user id.";
 
-			ctx["client_id_name"] = vec_application[2][1];
-			ctx["client_id_val"] = vec_application[2][2];
-			ctx["client_id_desc"] = vec_application[2][3];
+			ctx["client_id_name"] = "Client ID";
+			ctx["client_id_val"] = vec_application[2][1];
+			ctx["client_id_desc"] = "osu! API V2 Client ID.";
 
-			ctx["client_secret_name"] = vec_application[3][1];
-			ctx["client_secret_val"] = vec_application[3][2];
-			ctx["client_secret_desc"] = vec_application[3][3];
+			ctx["client_secret_name"] = "Client Secret";
+			ctx["client_secret_val"] = vec_application[3][1];
+			ctx["client_secret_desc"] = "osu! API V2 Client Secret ( DO NOT SHARE )!";
 
-			ctx["api_refreshInterval_name"] = vec_application[4][1];
-			ctx["api_refreshInterval_val"] = vec_application[4][2];
-			ctx["api_refreshInterval_desc"] = vec_application[4][3];
+			ctx["api_refreshInterval_name"] = "API Refresh Interval";
+			ctx["api_refreshInterval_val"] = vec_application[4][1];
+			ctx["api_refreshInterval_desc"] = "Time in (ms) till api fetches again in the loop.";
+
+			ctx["gameMode_name"] = "Game Mode";
+			ctx["gameMode_val_" + vec_application[5][1]] = "selected";
+			ctx["gameMode_desc"] = "Game Mode to track.";
+
+			std::vector<crow::json::wvalue> elements;
+			for (size_t i = 1; i < vec_tracker.size(); ++i) {
+				crow::json::wvalue el;
+				el["id"] = vec_tracker[i][0];
+				el["label"] = vec_tracker[i][1];
+				if (vec_tracker[i][2] == "true") {
+					el["checked"] = " checked";
+				}
+				elements.push_back(std::move(el));
+			}
+			ctx["trackerConfig"] = std::move(elements);
 
 			auto page = crow::mustache::load("settings.html").render(ctx);
 			return page;
@@ -329,7 +335,6 @@ bool webserver_start(bool skipInit = false)
 
 		});
 
-		// Info Page
 		CROW_ROUTE(app, "/info")([]() {
 			crow::mustache::context ctx;
 			ctx["title"] = OSU_TRACKER_NAME;
@@ -397,6 +402,7 @@ bool webserver_start(bool skipInit = false)
 			auto page = crow::mustache::load("info.html").render(ctx);
 			return page;
 		});
+
 		app.add_static_dir();
 
 	} // end of skip

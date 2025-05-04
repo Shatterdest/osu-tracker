@@ -21,9 +21,18 @@
                 const el = document.getElementById(`ws-conn-lost`);
                 el.hidden = true;
                 const data = JSON.parse(event.data);
+                if (data["cmd"]) {
+                    if (data["cmd"] == "toast") {
+                        sendNotif(data["msg"]);
+                    }
+                    if (data["cmd"] == "reload") {
+                        reload();
+                    }
+                } else { 
                 for (const key in data) {
                     const el = document.getElementById(`${key}-display`);
                     if (el) el.textContent = data[key];
+                    }
                 }
             };
        
@@ -40,17 +49,71 @@
             };
         }
 
-        function sendMessage(cmd) {
+        function sendMessage(cmd, msg) {
             // Object created
             let array = {};
             array["cmd"] = cmd;
+            array["msg"] = msg;
 
             socket.send(JSON.stringify(array));
         }
 
-        function tracker() {
-            window.open("/tracker", "osu! Tracker", "popup").resizeBy(400, 800);
+        function sendNotif(msg) {
+            const toastElement = document.getElementById('objectToast');
+            const toastSpan = document.getElementById('toast-msg');
+            toastSpan.textContent = msg;
+            const toastInstance = bootstrap.Toast.getOrCreateInstance(toastElement);
+            toastInstance.show();
         }
+
+        function resetSettings() {
+            sendMessage('#resetSettings');
+            window.location.reload();
+        }
+
+        function tracker() {
+            window.open("/tracker", "osu! Tracker", `width=576,height=600,resizable=yes,scrollbars=yes`);
+        }
+
+        function saveSettings() {
+            const config = {
+                cmd: "#saveSettings",
+                applicationConfig: [],
+                trackerConfig: []
+            };
+            // Get values from Application Config inputs
+            const osuId = document.getElementById('osu_id_key').value;
+            const clientId = document.getElementById('client_id_key').value;
+            const clientSecret = document.getElementById('client_secret_key').value;
+            const apiRefreshInterval = document.getElementById('api_refreshInterval_key').value;
+            const gameMode = document.getElementById('gameMode_key').value;
+
+            if (osuId == "" || clientId == "" || clientSecret == "" || apiRefreshInterval == "" || apiRefreshInterval < 5000) {
+                sendNotif("Please fill out all required fields properly.");
+                return;
+            }
+
+            // Add Application Config values to the array
+            config.applicationConfig.push({ key: 'osu_id', value: osuId });
+            config.applicationConfig.push({ key: 'client_id', value: clientId });
+            config.applicationConfig.push({ key: 'client_secret', value: clientSecret });
+            config.applicationConfig.push({ key: 'api_refreshInterval', value: apiRefreshInterval });
+            config.applicationConfig.push({ key: 'gameMode', value: gameMode });
+
+            // Get values from Tracker Config checkboxes
+            const trackerConfigContainer = document.getElementById('tracker-config-container');
+            const checkboxes = trackerConfigContainer.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach((checkbox) => {
+                config.trackerConfig.push({
+                    key: checkbox.id,
+                    value: checkbox.checked
+                });
+            });
+
+            sendMessage("#saveSettings", config);
+            sendNotif("Saved Settings.")
+            
+        };
 
         window.onload = connectWebSocket;
     </script>
@@ -59,7 +122,7 @@
 
     <nav class="navbar navbar-expand-lg bg-body-tertiary">
         <div class="container-fluid">
-            <a class="navbar-brand" href="#">
+            <a class="navbar-brand" href="/">
                 <span id="title-display">{{title}}</span>
                 <span class="badge text-bg-primary" id="version-display">{{version}}</span>
             </a>
@@ -83,6 +146,7 @@
     <div class="container" style="margin-top:50px">
         <h1 class="mb-2">Settings</h1>
 
+        <button type="button" class="btn btn-primary mb-5" onclick="saveSettings()">Save All Settings</button>
         <button type="button" class="btn btn-danger mb-5" data-bs-toggle="modal" data-bs-target="#warningSettingsReset">Reset all Settings</button>
 
         <!-- Modal -->
@@ -94,49 +158,89 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <span>Are you sure, you want to reset all settings ?</span>
-                        <span>- You will lose all current tracker stats.</span>
+                        <span>Are you sure, you want to reset all settings ?</span><br />
+                        <span>- You will lose all current tracker stats.</span><br />
                         <span>- Web Server will restart.</span>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal" onclick="sendMessage('#resetSettings')">Yes</button>
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal" onclick="resetSettings()">Yes</button>
                     </div>
                 </div>
             </div>
         </div>
 
+        <!-- Application Config -->
         <h5>Application Config</h5>
-        <div class="mb-5">
+        <div class="mb-5 was-validated">
             <div class="mb-2">
                 <div class="input-group input-group-sm">
                     <span class="input-group-text" id="inputGroup-sizing-sm">{{osu_id_name}}</span>
-                    <input type="number" class="form-control" aria-describedby="inputGroup-sizing-sm" value="{{osu_id_val}}">
+                    <input id="osu_id_key" type="number" class="form-control" aria-describedby="inputGroup-sizing-sm" value="{{osu_id_val}}" required>
+                    <div class="invalid-feedback">Please enter your osu! ID</div>
                 </div>
                 <div class="form-text">{{osu_id_desc}}</div>
             </div>
             <div class="mb-2">
                 <div class="input-group input-group-sm">
                     <span class="input-group-text" id="inputGroup-sizing-sm">{{client_id_name}}</span>
-                    <input type="number" class="form-control" aria-describedby="inputGroup-sizing-sm" value="{{client_id_val}}">
+                    <input id="client_id_key" type="number" class="form-control" aria-describedby="inputGroup-sizing-sm" value="{{client_id_val}}" required>
+                    <div class="invalid-feedback">Please enter a Client ID.</div>
                 </div>
                 <div class="form-text">{{client_id_desc}}</div>
             </div>
             <div class="mb-2">
                 <div class="input-group input-group-sm">
                     <span class="input-group-text" id="inputGroup-sizing-sm">{{client_secret_name}}</span>
-                    <input type="password" class="form-control" aria-describedby="inputGroup-sizing-sm" value="{{client_secret_val}}">
+                    <input id="client_secret_key" type="password" class="form-control" aria-describedby="inputGroup-sizing-sm" value="{{client_secret_val}}" required>
+                    <div class="invalid-feedback">Please enter a Client Secret.</div>
                 </div>
                 <div class="form-text">{{client_secret_desc}}</div>
             </div>
             <div class="mb-2">
                 <div class="input-group input-group-sm">
                     <span class="input-group-text" id="inputGroup-sizing-sm">{{api_refreshInterval_name}}</span>
-                    <input type="number" class="form-control" aria-describedby="inputGroup-sizing-sm" value="{{api_refreshInterval_val}}">
+                    <input id="api_refreshInterval_key" type="number" class="form-control" aria-describedby="inputGroup-sizing-sm" min="5000" value="{{api_refreshInterval_val}}" required>
+                    <div class="invalid-feedback">Please enter a Refresh Interval in (ms).</div>
                 </div>
                 <div class="form-text">{{api_refreshInterval_desc}}</div>
             </div>
-            <button type="button" class="btn btn-primary" onclick="">Save</button>
+            <div class="mb-2">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text" id="inputGroup-sizing-sm">{{gameMode_name}}</span>
+                    <select id="gameMode_key" class="form-select form-select-sm">
+                        <option value="0" {{gameMode_val_0}}>Standard</option>
+                        <option value="1" {{gameMode_val_1}}>Taiko</option>
+                        <option value="2" {{gameMode_val_2}}>Catch</option>
+                        <option value="3" {{gameMode_val_3}}>Mania</option>
+                    </select>
+                </div>
+                <div class="form-text">{{gameMode_desc}}</div>
+            </div>
+        </div>
+
+        <!-- Tracker Config-->
+        <h5>Tracker Config</h5>
+        <div id="tracker-config-container" class="mb-5">
+            {{#trackerConfig}}
+            <div class="form-check form-switch">
+                <input id="{{id}}" class="form-check-input" type="checkbox" {{checked}}>
+                <label class="form-check-label" for="{{id}}">{{label}}</label>
+            </div>
+            {{/trackerConfig}}
+        </div>
+
+        <!-- end of body-->
+    </div>
+
+    <div class="toast-container bottom-0 end-0 p-3">
+        <div id="objectToast" class="toast text-bg-secondary fade hide" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <span id="toast-msg"></span>
+                </div>
+                <button type="button" data-bs-theme="dark" class="btn-close btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
         </div>
     </div>
 </body>
