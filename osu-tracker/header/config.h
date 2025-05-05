@@ -7,16 +7,80 @@
 static std::string username;
 
 std::vector<std::vector<std::string>> vec_application {
-	{"key","value"},
-	{"osu_id",""},
-	{"client_id",""},
-	{"client_secret",""},
-	{"api_refreshInterval","7000"},
-	{"gameMode","0"} // std, taiko, catch, mania
+	{"key","value"}, // 0
+	{"osu_id",""},// 1
+	{"client_id",""},// 2
+	{"client_secret",""},// 3
+	{"api_refreshInterval","7000"},// 4
+	{"gameMode","0"} // 5: osu, taiko, fruits, mania
 };
 
-std::vector<std::vector<std::string>> vec_tracker {
+/*
+0: key
+1: init
+2: current
+3: change/diff
+4: type -> string, int, float
+*/
+std::vector<std::vector<std::string>> vec_data_osu {
+	{"level",		"",	"",	"", "2"}, // 0
+	{"rankedScore",	"",	"",	"", "1"}, // 1
+	{"totalScore",	"",	"",	"", "1"}, // 2
+	{"ppRank",		"",	"",	"", "1"}, // 3
+	{"pp",			"",	"",	"", "2"}, // 4
+	{"acc",			"",	"",	"", "2"}, // 5
+	{"playtime",	"",	"",	"", "1"}, // 6
+	{"playcount",	"",	"",	"", "1"}, // 7
+	
+	{"silverSS",	"",	"",	"", "1"}, // 8
+	{"goldSS",		"",	"",	"", "1"}, // 9
+	{"silverS",		"",	"",	"", "1"}, // 10
+	{"goldS",		"",	"",	"", "1"}, // 11
+	{"a",			"",	"",	"", "1"}, // 12
 
+	{"totalSS",		"",	"",	"", "1"}, // 13
+	{"totalS",		"",	"",	"", "1"}, // 14
+	{"clears",		"",	"",	"", "1"}, // 15
+};
+
+/*
+0: key
+1: init
+2: current
+3: change/diff
+4: type -> string, int, float
+*/
+std::vector<std::vector<std::string>> vec_data_inspector {
+	{"b",			"",	"",	"", "1"}, // 0
+	{"c",			"",	"",	"", "1"}, // 1
+	{"d",			"",	"",	"", "1"}, // 2
+	{"totalClears",	"",	"",	"", "1"}, // 3
+	{"completion",	"",	"",	"", "2"}  // 4
+};
+
+/*
+0: key
+1: init
+2: current
+3: change/diff
+4: type -> string, int, float
+*/
+std::vector<std::vector<std::string>> vec_data_respektive{
+	{"scoreRank","","","","1"} // 0
+};
+
+/*
+0: key
+1: current
+2: type -> string, int, float
+*/
+std::vector<std::vector<std::string>> vec_data_respektive_target {
+	{"targetRank",	"","1"}, // 0
+	{"targetUser",	"","0"}, // 1
+	{"targetScore",	"","1"}  // 2
+};
+
+std::vector<std::vector<std::string>> vec_tracker{
 	{"key",			"name",				"display"}, // 0
 	{"scoreRank",	"Score Rank",		"true"}, 	// 1
 	{"level",		"Level",			"true"},	// 2
@@ -39,54 +103,8 @@ std::vector<std::vector<std::string>> vec_tracker {
 	{"totalS",		"Total S",			"true"},	// 19
 	{"clears",		"Profile Clears",	"true"},	// 20
 	{"totalClears",	"Total Clears",		"true"},	// 21
-	{"completionP",	"Completion%",		"true"},	// 22
-	{"targetRank",	"Target Rank",		"true"},	// 23
-	{"targetUser",	"Target User",		"true"},	// 24
-	{"targetScore",	"Target Score",		"true"}		// 25
-};
-
-/*
-0: key
-1: init
-2: current
-3: change/diff
-4: type -> string, int, float
-*/
-std::vector<std::vector<std::string>> vec_data_osu {
-	{"level",		"",	"",	"", "2"}, // 0
-	{"rankedScore",	"",	"",	"", "1"}, // 1
-	{"totalScore",	"",	"",	"", "1"}, // 2
-	{"ppRank",		"",	"",	"", "1"}, // 3
-	{"pp",			"",	"",	"", "1"}, // 4
-	{"acc",			"",	"",	"", "2"}, // 5
-	{"playtime",	"",	"",	"", "1"}, // 6
-	{"playcount",	"",	"",	"", "1"}, // 7
-	{"silverSS",	"",	"",	"", "1"}, // 8
-	{"goldSS",		"",	"",	"", "1"}, // 9
-	{"silverS",		"",	"",	"", "1"}, // 10
-	{"goldS",		"",	"",	"", "1"}, // 11
-	{"a",			"",	"",	"", "1"}, // 12
-	{"totalSS",		"",	"",	"", "1"}, // 13
-	{"totalS",		"",	"",	"", "1"}, // 14
-	{"clears",		"",	"",	"", "1"}, // 15
-};
-
-std::vector<std::vector<std::string>> vec_data_inspector {
-	{"b",			"",	"",	"", "1"}, // 1
-	{"c",			"",	"",	"", "1"}, // 2
-	{"d",			"",	"",	"", "1"}, // 3
-	{"totalClears",	"",	"",	"", "1"}, // 4
-	{"completionP",	"",	"",	"", "2"}  // 5
-};
-
-std::vector<std::vector<std::string>> vec_data_respektive{
-	{"scoreRank",	"",	"",	"", "1"} // 0
-};
-
-std::vector<std::vector<std::string>> vec_data_respektive_target {
-	{"targetRank",	"1"}, // 0
-	{"targetUser",	"0"}, // 1
-	{"targetScore",	"1"}  // 2
+	{"completion",	"Completion%",		"true"},	// 22
+	{"targetRank",	"NextScoreRank ",	"true"},	// 23
 };
 
 /*
@@ -200,7 +218,7 @@ void readConfig() {
 		file.close();
 	}
 	else {
-		writeLog("Error reading config file", 255,0,0);
+		writeLog("Error reading config file",true, 255,0,0);
 	}
 }
 

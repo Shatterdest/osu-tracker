@@ -35,6 +35,7 @@ file(GLOB_RECURSE ZLIB_HEADERS CONFIGURE_DEPENDS lib/zlib/*.h)
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 	add_compile_definitions(_WIN32)
 	add_compile_definitions(OSU_TRACKER_CMAKE_CXX_COMPILER_ARCHITECTURE_ID="${CMAKE_CXX_COMPILER_ARCHITECTURE_ID}")
+
 	# Static libcurl, libcrypto and libssl (windows only)
 	# Using system curl and zlib on linux
 	set(LIBCURL_LIBRARY "${CMAKE_SOURCE_DIR}/lib/static/libcurl.lib")
@@ -47,6 +48,7 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 		${ZLIB_SOURCES}
 		${ZLIB_HEADERS}
 	)
+	target_sources(osu-tracker PRIVATE "${CMAKE_SOURCE_DIR}/res/resources.rc")
 	if(BUILD_TEST)
 		add_executable(test-tracker test.cpp
 			${CPR_SOURCES}
@@ -142,8 +144,8 @@ add_compile_definitions(OSU_TRACKER_CMAKE_SYSTEM_NAME="${CMAKE_SYSTEM_NAME}")
 
 # OSU_TRACKER PROJECT STATIC STRINGS
 add_compile_definitions(OSU_TRACKER_NAME="osu! Tracker")
-add_compile_definitions(OSU_TRACKER_VERSION="v0.1")
-add_compile_definitions(OSU_TRACKER_RELEASE_TYPE="Alpha")
+add_compile_definitions(OSU_TRACKER_VERSION="v0.2")
+add_compile_definitions(OSU_TRACKER_RELEASE_TYPE="Beta")
 add_compile_definitions(OSU_TRACKER_CREATOR="Railgun")
 add_compile_definitions(OSU_TRACKER_PROFILE="https://osu.ppy.sh/users/13817114")
 add_compile_definitions(OSU_TRACKER_GITHUB="https://github.com/nyaruku/osu-tracker")

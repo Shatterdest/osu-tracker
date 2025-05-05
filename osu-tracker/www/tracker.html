@@ -2,6 +2,8 @@
 <html data-bs-theme="dark">
 <head>
     <title>osu! Tracker</title>
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- Bootstrap Includes -->
     <link rel="stylesheet" href="static/bootstrap/bootstrap.min.css">
@@ -13,87 +15,273 @@
     <script type="text/javascript" src="static/index.js"></script>
 
     <script>
-			let socket;
+		let socket;
 
-			function connectWebSocket() {
-				socket = new WebSocket("ws://{{hostname}}:{{port}}/ws/main/");
+		function connectWebSocket() {
+			socket = new WebSocket("ws://{{hostname}}:{{port}}/ws/tracker/");
 
-				socket.onmessage = (event) => {
-					const el = document.getElementById(`ws-conn-lost`);
-					el.hidden = true;
-					const data = JSON.parse(event.data);
-					if (data["cmd"]) {
-						if (data["cmd"] == "toast"){
-							sendNotif(data["msg"]);
-						}
-					}else{
-						for (const key in data) {
-							const el = document.getElementById(`${key}-display`);
-							if (el) el.textContent = data[key];
-						}
+			socket.onmessage = (event) => {
+				const el = document.getElementById(`ws-conn-lost`);
+				el.hidden = true;
+				const data = JSON.parse(event.data);
+				if (data["cmd"]) {
+					if (data["cmd"] == "toast"){
+						sendNotif(data["msg"]);
 					}
-				};
-				socket.onopen = () => {
-					const el = document.getElementById(`ws-conn-lost`);
-					el.hidden = true;
-					sendMessage("getData");
+                    if (data["cmd"] == "data") {
+                        const bar = document.getElementById(`progress-bar`);
+                        bar.hidden = false;
+
+						const json_data = JSON.parse(data["msg"]);
+                        readArray(json_data["osu"]);
+                        readArray(json_data["respektive"]);
+                        readArray(json_data["inspector"]);
+
+
+                        if (json_data["respektive_target"]) {
+                            const targetRank = document.getElementById(`targetRank-extra`);
+                            const targetName = document.getElementById(`targetRank-current`);
+                            const targetScore = document.getElementById(`targetRank-change`);
+                            if (document.getElementById(`targetRank-display`)) {
+                                targetRank.innerText = "#" + json_data["respektive_target"][0][1];
+                                targetName.innerText = json_data["respektive_target"][1][1];
+                                targetScore.innerText = formatNumber(json_data["respektive_target"][2][1]);
+                            }
+                        }
+                        bar.hidden = true;
+                    }
+				}else{
+					for (const key in data) {
+						const el = document.getElementById(`${key}-display`);
+						if (el) el.textContent = data[key];
+					}
 				}
-				socket.onclose = () => {
-					const el = document.getElementById(`ws-conn-lost`);
-					el.hidden = false;
-					console.log("WebSocket disconnected. Retrying...");
-					setTimeout(connectWebSocket, 1000);
-				};
+			};
+			socket.onopen = () => {
+				const el = document.getElementById(`ws-conn-lost`);
+                el.hidden = true;
+                const bar = document.getElementById(`progress-bar`);
+                bar.hidden = false;
+                sendMessage("#data");
+                // Start executing the function every 10,000ms
+                setInterval(() => {
+                    bar.hidden = false;
+                    sendMessage("#data");
+                }, {{refreshInterval}});
 			}
+			socket.onclose = () => {
+				const el = document.getElementById(`ws-conn-lost`);
+				el.hidden = false;
+				console.log("WebSocket disconnected. Retrying...");
+				setTimeout(connectWebSocket, 1000);
+			};
+		}
 
-			function sendMessage(cmd) {
-				// Object created
-				let array = {};
-				array["cmd"] = cmd;
+		function sendMessage(cmd) {
+			// Object created
+			let array = {};
+			array["cmd"] = cmd;
 
-				socket.send(JSON.stringify(array));
+			socket.send(JSON.stringify(array));
+		}
+
+		function sendNotif(msg) {
+			const toastElement = document.getElementById('objectToast');
+			const toastSpan = document.getElementById('toast-msg');
+			toastSpan.textContent = msg;
+			const toastInstance = bootstrap.Toast.getOrCreateInstance(toastElement);
+			toastInstance.show();
+		}
+
+		function formatNumber(num) {
+			let str = num.toString();
+			let n = str.length;
+			for (let i = n - 3; i > 0; i -= 3) {
+				str = str.slice(0, i) + "," + str.slice(i);
 			}
+			return str;
+		}
 
-			function sendNotif(msg) {
-				const toastElement = document.getElementById('objectToast');
-				const toastSpan = document.getElementById('toast-msg');
-				toastSpan.textContent = msg;
-				const toastInstance = bootstrap.Toast.getOrCreateInstance(toastElement);
-				toastInstance.show();
-			}
+        function formatFloat(num) {
+            let str = parseFloat(num).toFixed(2); // Round to 2 decimal places
+            let [integerPart, decimalPart] = str.split("."); // Split the number into integer and decimal parts
 
-			window.onload = connectWebSocket;
+            // Format the integer part with thousand separators
+            let formattedInteger = "";
+            let n = integerPart.length;
+            for (let i = n - 3; i > 0; i -= 3) {
+                formattedInteger = "," + integerPart.slice(i, n) + formattedInteger;
+                n = i;
+            }
+            formattedInteger = integerPart.slice(0, n) + formattedInteger;
+
+            // Combine the formatted integer part with the decimal part
+            return formattedInteger + "." + decimalPart;
+        }
+
+        function formatPlaytime(seconds) {
+            const hours = Math.floor(seconds / 3600); // Calculate total hours
+            const minutes = Math.floor((seconds % 3600) / 60); // Calculate remaining minutes
+            const secs = seconds % 60; // Calculate remaining seconds
+
+            return `${hours}h ${minutes}m ${secs}s`;
+        }
+
+        function readArray(subArrays) {
+            // Iterate through each sub-array
+            subArrays.forEach((subArray, index) => {
+                if (subArrays[index][4] == "0") {
+                    // string
+                }
+                if (subArrays[index][4] == "1") {
+                    // int
+                    const current_el = document.getElementById(`${subArrays[index][0]}-current`)
+                    let current = +subArrays[index][2];
+                    if (subArrays[index][0] == "playtime") {
+                        current = formatPlaytime(current);
+                    } else {
+                        if (subArrays[index][0] == "scoreRank" || subArrays[index][0] == "ppRank") {
+                            current = "#" + formatNumber(current);
+                        } else {
+                            current = formatNumber(current);
+                        }
+                    }
+                    if (current_el) {
+                        current_el.textContent = current;
+                    }
+
+                    const change_el = document.getElementById(`${subArrays[index][0]}-change`)
+                    let change = +subArrays[index][3];
+                    let condition;
+
+                    if (change > 0) {
+                        if (subArrays[index][0] == "scoreRank" || subArrays[index][0] == "ppRank") {
+                            condition = 1;
+                        } else {
+                            condition = 0;
+                        }
+                    }
+                    if (change < 0) {
+                        if (subArrays[index][0] == "scoreRank" || subArrays[index][0] == "ppRank") {
+                            condition = 0;
+                        } else {
+                            condition = 1;
+                        }
+                    }
+                    if (change == 0) {
+                        condition = 2;
+                    }
+
+                    if (subArrays[index][0] == "playtime") {
+                        change = formatPlaytime(change);
+                    } else {
+                        change = formatNumber(change);
+                    }
+
+
+                if (condition == 0) {
+                    change = "+" + change;
+                    if (change_el) {
+                        change_el.textContent = change;
+                        change_el.style.color = "#009600";
+                    }
+                }
+                if (condition == 1) {
+                    if (change_el) {
+                        if (!change.toString().startsWith("-")) {
+                            change = "-" + change;
+                        }
+                        change_el.textContent = change;
+                        change_el.style.color = "#FF0000";
+                    }
+                }
+                if (condition == 2) {
+                    if (change_el) {
+                        change_el.textContent = change;
+                        change_el.style.color = "#787878";
+                    }
+                }
+                }
+                if (subArrays[index][4] == "2") {
+                    // float
+                    const current_el = document.getElementById(`${subArrays[index][0]}-current`)
+
+                    let current = formatFloat(subArrays[index][2]);
+                    let change = formatFloat(subArrays[index][3]);
+
+                    if (subArrays[index][0] == "acc" || subArrays[index][0] == "completion") {
+                        current = current + "%";
+                    }
+                    if (current_el) {
+                        current_el.textContent = current;
+                    }
+
+                    const change_el = document.getElementById(`${subArrays[index][0]}-change`)
+
+                    if (change > 0) {
+                        change = "+" + change;
+                        if (change_el) {
+                            change_el.textContent = change;
+                            change_el.style.color = "#009600";
+                        }
+                    }
+                    if (change < 0) {
+                        if (change_el) {
+                            if (!change.toString().startsWith("-")) {
+                                change = "-" + change;
+                            }
+                            change_el.textContent = change;
+                            change_el.style.color = "#FF0000";
+                        }
+                    }
+                    if (change == 0) {
+                        if (change_el) {
+                            change_el.textContent = change;
+                            change_el.style.color = "#787878";
+                        }
+                    }
+
+
+                }
+            });
+
+		}
+
+        window.onload = connectWebSocket;
     </script>
 </head>
 <body>
-	<nav class="navbar navbar-expand-lg bg-body-tertiary">
-		<div class="container-fluid">
-			<a class="navbar-brand user-select-none">
-				<span id="username-display">{{username}}</span>
-			</a>
-		</div>
-	</nav>
-	<div id="ws-conn-lost" class="alert alert-warning rounded-0" role="alert" hidden>
-		<span>Websocket connection got closed, reconnecting...</span>
-	</div>
-	<!-- END OF HEADER-->
-	{{#trackerElements}}
-	<div id="{{id}}-display" class="m-1 tracker-element row align-items-center">
-		<span class="me-1 text-start col-12 col-sm">{{label}}</span>
-		<span class="pe-1 border border-1 border-white me-1 text-end col tracker-value">&nbsp;<span class="{{id}}-current">{{val_current}}</span></span>
-		<span class="ps-1 border border-1 border-white text-start col tracker-value">&nbsp;<span class="{{id}}-change">{{val_change}}</span></span>
-	</div>
-	{{/trackerElements}}
-	<!-- END OF BODY-->
-	<div class="toast-container bottom-0 end-0 p-3">
-		<div id="objectToast" class="toast text-bg-secondary fade hide" role="alert" aria-live="assertive" aria-atomic="true">
-			<div class="d-flex">
-				<div class="toast-body">
-					<span id="toast-msg"></span>
-				</div>
-				<button type="button" data-bs-theme="dark" class="btn-close btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-			</div>
-		</div>
-	</div>
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+        <div class="container-fluid">
+            <a class="navbar-brand user-select-none">
+                <span id="username-display">{{username}}</span>
+            </a>
+        </div>
+    </nav>
+    <div id="ws-conn-lost" class="alert alert-warning rounded-0" role="alert" hidden>
+        <span>Websocket connection got closed, reconnecting...</span>
+    </div>
+    <div id="progress-bar" class="progress rounded-0" style=" height: 4px" hidden>
+        <div id="loading-bar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%;" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+    </div>
+    <!-- END OF HEADER-->
+    {{#trackerElements}}
+    <div id="{{id}}-display" class="m-1 tracker-element row align-items-center">
+        <span class="me-1 text-start col-12 col-sm"><span>{{label}}</span><span id="{{id}}-extra"></span></span>
+        <span class="pe-1 border border-1 border-white me-1 text-end col tracker-value">&nbsp;<span id="{{id}}-current"></span></span>
+        <span class="ps-1 border border-1 border-white text-start col tracker-value">&nbsp;<span id="{{id}}-change"></span></span>
+    </div>
+    {{/trackerElements}}
+    <!-- END OF BODY-->
+    <div class="toast-container bottom-0 end-0 p-3">
+        <div id="objectToast" class="toast text-bg-secondary fade hide" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <span id="toast-msg"></span>
+                </div>
+                <button type="button" data-bs-theme="dark" class="btn-close btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

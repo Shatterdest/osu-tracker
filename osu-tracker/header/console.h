@@ -65,7 +65,7 @@ void writeLog(std::string msg, bool alwaysPrint = false, int r = 255, int g = 25
 	resetColor();
 	std::cout << "[";
 	setColorRGB_f(100, 100, 100);
-	std::cout << "Internal";
+	std::cout << "osu-tracker";
 	resetColor();
 	std::cout << "] ";
 	setColorRGB_f(r, g, b);

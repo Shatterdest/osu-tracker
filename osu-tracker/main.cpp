@@ -24,16 +24,22 @@ void enableVirtualTerminalProcessing() {
 #endif
 
 void printHeader() {
-	setColor(conCol::b_defaultColor, conCol::f_cyan);
-	std::cout << OSU_TRACKER_NAME << " ";
-	setColor(conCol::b_defaultColor, conCol::f_white);
-	std::cout << OSU_TRACKER_VERSION << " " << OSU_TRACKER_RELEASE_TYPE;
+	writeLog("-------------------------------------------------------------", true,255,255,255);
+	writeLog("                    __   ______                __            ",		true, 103, 143, 245);
+	writeLog("  ____  _______  __/ /  /_  __/________ ______/ /_____  _____",		true, 103, 143, 245);
+	writeLog(" / __ \\/ ___/ / / / /    / / / ___/ __ `/ ___/ //_/ _ \\/ ___/",		true, 122, 103, 245);
+	writeLog("/ /_/ (__  ) /_/ /_/    / / / /  / /_/ / /__/ ,< /  __/ /    ",		true, 246, 12, 250);
+	writeLog("\\____/____/\\__,_(_)    /_/ /_/   \\__,_/\\___/_/|_|\\___/_/     ",	true, 246, 12, 250);
+	writeLog("                                                             ",		true, 246, 12, 250);
+	writeLog("-------------------------------------------------------------", true, 255, 255, 255);
+	writeLog((std::string)"Version Number: " + (OSU_TRACKER_VERSION), true, 111, 163, 247);
+	writeLog((std::string)"Release Type: " + (OSU_TRACKER_RELEASE_TYPE), true, 111, 163, 247);
 #ifdef DEBUG_BUILD
-	setColor(conCol::b_defaultColor, conCol::f_red);
-	std::cout << " DEBUG";
+	writeLog((std::string)"Build: DEBUG", true, 111, 163, 247);
+#else
+	writeLog((std::string)"Build: RELEASE", true, 111, 163, 247);
 #endif
-	resetColor();
-	std::cout << " by " << OSU_TRACKER_CREATOR << "\n-------------------------\n";
+	writeLog("-------------------------------------------------------------", true, 255, 255, 255);
 }
 
 int main()
@@ -62,7 +68,7 @@ int main()
 			writeConfig();
 		}
 		#if OSU_TRACKER_ENABLE_WEBSERVER == 1
-			api_init();
+			fetch_api_data(true);
 			run = !webserver_start(skipInit); // blocking
 			skipInit = true;
 		#endif
