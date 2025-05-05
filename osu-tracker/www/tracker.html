@@ -93,14 +93,19 @@
 			toastInstance.show();
 		}
 
-		function formatNumber(num) {
-			let str = num.toString();
-			let n = str.length;
-			for (let i = n - 3; i > 0; i -= 3) {
-				str = str.slice(0, i) + "," + str.slice(i);
-			}
-			return str;
-		}
+        function formatNumber(num) {
+            let isNegative = num < 0; // Check if the number is negative
+            let str = Math.abs(num).toString(); // Convert the absolute value of the number to a string
+            let n = str.length;
+
+            // Add commas for numbers with 4 or more digits
+            for (let i = n - 3; i > 0; i -= 3) {
+                str = str.slice(0, i) + "," + str.slice(i);
+            }
+
+            // Add the negative sign back if the number was negative
+            return isNegative ? "-" + str : str;
+        }
 
         function formatFloat(num) {
             let str = parseFloat(num).toFixed(2); // Round to 2 decimal places
@@ -164,6 +169,7 @@
                     if (change < 0) {
                         if (subArrays[index][0] == "scoreRank" || subArrays[index][0] == "ppRank") {
                             condition = 0;
+                            change = change.toString().replace("-", "");
                         } else {
                             condition = 1;
                         }
@@ -180,7 +186,9 @@
 
 
                 if (condition == 0) {
-                    change = "+" + change;
+                    if (subArrays[index][0] != "scoreRank" || subArrays[index][0] != "ppRank") {
+                        change = "+" + change;
+                    }
                     if (change_el) {
                         change_el.textContent = change;
                         change_el.style.color = "#009600";

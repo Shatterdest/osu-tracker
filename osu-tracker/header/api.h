@@ -259,7 +259,7 @@ void fetch_api_data(bool init) {
 	}
 	else {
 		if (init_api_failed && !init) {
-			// retry to init api data, since it failed before
+			// retry to init api data, since it failed to init
 			init_api_failed = false;
 			init = true;
 		}
