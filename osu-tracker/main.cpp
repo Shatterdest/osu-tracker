@@ -55,6 +55,7 @@ int main()
 		if (!std::filesystem::exists("config.txt")) {
 			writeLog("Config file not found");
 
+			// fix: direct index access
 			setConfig(vec_application, "osu_id", "value", "");
 			setConfig(vec_application, "client_id", "value", "");
 			setConfig(vec_application, "client_secret", "value", "");

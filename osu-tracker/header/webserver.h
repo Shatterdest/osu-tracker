@@ -200,9 +200,10 @@ bool webserver_start(bool skipInit = false)
 
 			if (cmd[0] == '#') {
 				if (cmd == "#saveSettings") {
+					bool resetSession = false;
 					if (j["msg"]["applicationConfig"][0]["value"] != vec_application[1][1] || j["msg"]["applicationConfig"][1]["value"] != vec_application[2][1] || j["msg"]["applicationConfig"][2]["value"] != vec_application[3][1] || j["msg"]["applicationConfig"][4]["value"] != vec_application[5][1]) {
 						// user id, api credentials or gamemode changed, reset tracker data
-						fetch_api_data(true);
+						resetSession = true;
 					}
 					for (const auto& item : j["msg"]["applicationConfig"]) {
 						setConfig(vec_application, item["key"], "value", item["value"]);
@@ -211,6 +212,8 @@ bool webserver_start(bool skipInit = false)
 						setConfig(vec_tracker, item["key"], "display", boolToString(item["value"]));
 						
 					}
+					if(resetSession)
+						fetch_api_data(true);
 					writeConfig();
 				}
 				if (cmd == "#resetSettings") {
