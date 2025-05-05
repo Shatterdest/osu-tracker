@@ -3,14 +3,19 @@
 # osu-tracker
 A web server based osu! stats/session tracker
 
+## How to use
+1. run executable
+2. visit http://127.0.0.1:10727
+
+## Bug Reporting / Questions
+- Join my Discord Server and just ask me:
+- https://discord.gg/FN6vauFTGA
+
 ## Credits
 - osu! API by osu!
 - Score Inspector API by Amayakase
 - Score Rank API by Respektive
 
-## Bug Reporting / Questions
-- Join my Discord Server and just ask me:
-- https://discord.gg/FN6vauFTGA
 
 ## How to build from source:
 - Windows
