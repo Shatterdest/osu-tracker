@@ -8,6 +8,7 @@ A web server based osu! stats/session tracker
 2. visit http://127.0.0.1:10727
 
 ## Bug Reporting / Questions
+- Open Issue or submit PR
 - Join my Discord Server and just ask me:
 - https://discord.gg/FN6vauFTGA
 
