@@ -8,6 +8,10 @@ A web server based osu! stats/session tracker
 - Score Inspector API by Amayakase
 - Score Rank API by Respektive
 
+## Bug Reporting / Questions
+- Join my Discord Server and just ask me:
+- https://discord.gg/FN6vauFTGA
+
 ## How to build from source:
 - Windows
   - Visual Studio (Recommended)
