@@ -5,6 +5,7 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
+  workflow_dispatch: 
 jobs:
   build:
     runs-on: ${{ matrix.os }}
@@ -117,3 +118,53 @@ jobs:
           buildPreset: '${{ matrix.preset }}'
         env:
           VCPKG_ROOT:
+
+      - name: Upload Windows Debug artifact
+        if: runner.os == 'Windows' && matrix.build_type == 'debug'
+        uses: actions/upload-artifact@v4
+        with:
+          name: osu-tracker-windows-debug
+          path: |
+            ${{ github.workspace }}/osu-tracker/out/build/x86-debug-windows/osu-tracker/osu-tracker.exe
+
+      - name: Upload Windows Release artifact
+        if: runner.os == 'Windows' && matrix.build_type == 'release'
+        uses: actions/upload-artifact@v4
+        with:
+          name: osu-tracker-windows-release
+          path: |
+            ${{ github.workspace }}/osu-tracker/out/build/x86-release-windows/osu-tracker/osu-tracker.exe
+
+      - name: Upload Linux Debug artifact
+        if: runner.os == 'Linux' && matrix.build_type == 'debug'
+        uses: actions/upload-artifact@v4
+        with:
+          name: osu-tracker-linux-debug
+          path: |
+            ${{ github.workspace }}/osu-tracker/out/build/x86-debug-linux/osu-tracker/osu-tracker
+
+      - name: Upload Linux Release artifact
+        if: runner.os == 'Linux' && matrix.build_type == 'release'
+        uses: actions/upload-artifact@v4
+        with:
+          name: osu-tracker-linux-release
+          path: |
+            ${{ github.workspace }}/osu-tracker/out/build/x86-release-linux/osu-tracker/osu-tracker
+
+      # Only run this on manual trigger
+      - name: Download all artifacts
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/download-artifact@v4
+        with:
+          path: ./release-artifacts
+
+      - name: Create GitHub Release
+        if: github.event_name == 'workflow_dispatch'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: manual-release-${{ github.run_number }}
+          name: Manual Release ${{ github.run_number }}
+          files: ./release-artifacts/**/*
+
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
