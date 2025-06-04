@@ -125,7 +125,7 @@ jobs:
         with:
           name: osu-tracker-windows-debug
           path: |
-            ${{ github.workspace }}/osu-tracker/out/build/x86-debug-windows/osu-tracker/osu-tracker.exe
+            ${{ github.workspace }}/osu-tracker/out/build/x86-debug-windows/osu-tracker/**
 
       - name: Upload Windows Release artifact
         if: runner.os == 'Windows' && matrix.build_type == 'release'
@@ -133,7 +133,7 @@ jobs:
         with:
           name: osu-tracker-windows-release
           path: |
-            ${{ github.workspace }}/osu-tracker/out/build/x86-release-windows/osu-tracker/osu-tracker.exe
+            ${{ github.workspace }}/osu-tracker/out/build/x86-release-windows/osu-tracker/**
 
       - name: Upload Linux Debug artifact
         if: runner.os == 'Linux' && matrix.build_type == 'debug'
@@ -141,7 +141,7 @@ jobs:
         with:
           name: osu-tracker-linux-debug
           path: |
-            ${{ github.workspace }}/osu-tracker/out/build/x86-debug-linux/osu-tracker/osu-tracker
+            ${{ github.workspace }}/osu-tracker/out/build/x86-debug-linux/osu-tracker/**
 
       - name: Upload Linux Release artifact
         if: runner.os == 'Linux' && matrix.build_type == 'release'
@@ -149,7 +149,7 @@ jobs:
         with:
           name: osu-tracker-linux-release
           path: |
-            ${{ github.workspace }}/osu-tracker/out/build/x86-release-linux/osu-tracker/osu-tracker
+            ${{ github.workspace }}/osu-tracker/out/build/x86-release-linux/osu-tracker/**
 
       # Only run this on manual trigger
       - name: Download all artifacts
