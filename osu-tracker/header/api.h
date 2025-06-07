@@ -177,7 +177,7 @@ int titanic_api(bool init) {
 			// calculate for titanic
 			vec_data_inspector[3][1] = std::to_string(std::stoi(vec_data_titanic[17][1]) + std::stoi(vec_data_inspector[0][1]) + std::stoi(vec_data_inspector[1][1]) + std::stoi(vec_data_inspector[2][1]));
 			// completion%
-			vec_data_inspector[4][1] = std::to_string(static_cast<float>(std::stoi(vec_data_inspector[3][1])) / static_cast<float>(count_ranked + count_approved + count_loved + count_qualified));
+			vec_data_inspector[4][1] = std::to_string((static_cast<float>(std::stoi(vec_data_inspector[3][1])) / static_cast<float>(count_ranked + count_approved + count_loved + count_qualified))*100);
 
 		}
 
@@ -206,7 +206,7 @@ int titanic_api(bool init) {
 		vec_data_inspector[2][2] = std::to_string(_j["stats"][mode]["d_count"].get<int>());
 		// calc for titanic
 		vec_data_inspector[3][2] = std::to_string(std::stoi(vec_data_titanic[17][2]) + std::stoi(vec_data_inspector[0][2]) + std::stoi(vec_data_inspector[1][2]) + std::stoi(vec_data_inspector[2][2]));
-		vec_data_inspector[4][2] = std::to_string(static_cast<float>(std::stoi(vec_data_inspector[3][2])) / static_cast<float>(count_ranked + count_approved + count_loved + count_qualified));
+		vec_data_inspector[4][2] = std::to_string((static_cast<float>(std::stoi(vec_data_inspector[3][2])) / static_cast<float>(count_ranked + count_approved + count_loved + count_qualified)) * 100);
 		// score rank, not supported by titanic (yet)
 		vec_data_respektive[0][2] = "";
 

@@ -108,7 +108,7 @@
         }
 
         function formatFloat(num) {
-            let str = parseFloat(num).toFixed(2); // Round to 2 decimal places
+            let str = parseFloat(num).toFixed(3); // Round to 3 decimal places
             let [integerPart, decimalPart] = str.split("."); // Split the number into integer and decimal parts
 
             // Format the integer part with thousand separators
