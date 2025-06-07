@@ -44,6 +44,30 @@ std::vector<std::vector<std::string>> vec_data_osu {
 	{"clears",		"",	"",	"", "1"}, // 15
 };
 
+std::vector<std::vector<std::string>> vec_data_titanic{
+	{"level",		"",	"",	"", "2"}, // 0
+	{"rankedScore",	"",	"",	"", "1"}, // 1
+	{"totalScore",	"",	"",	"", "1"}, // 2
+	{"ppRank",		"",	"",	"", "1"}, // 3
+	{"pp",			"",	"",	"", "2"}, // 4
+	{"ppv1",		"",	"",	"", "2"}, // 5
+	{"acc",			"",	"",	"", "2"}, // 6
+	{"playtime",	"",	"",	"", "1"}, // 7
+	{"playcount",	"",	"",	"", "1"}, // 8
+	{"totalHits",	"",	"",	"", "1"}, // 9
+
+	{"silverSS",	"",	"",	"", "1"}, // 10
+	{"goldSS",		"",	"",	"", "1"}, // 11
+	{"silverS",		"",	"",	"", "1"}, // 12
+	{"goldS",		"",	"",	"", "1"}, // 13
+	{"a",			"",	"",	"", "1"}, // 14
+
+	{"totalSS",		"",	"",	"", "1"}, // 15
+	{"totalS",		"",	"",	"", "1"}, // 16
+	{"clears",		"",	"",	"", "1"}, // 17
+};
+
+
 /*
 0: key
 1: init
@@ -105,37 +129,39 @@ std::vector<std::vector<std::string>> vec_tracker{
 	{"clears",		"Profile Clears",	"true"},	// 20
 	{"totalClears",	"Total Clears",		"true"},	// 21
 	{"completion",	"Completion%",		"true"},	// 22
-	{"targetRank",	"NextScoreRank ",	"true"},	// 23
+	{"targetRank",	"NextScoreRank ",	"true"}		// 23
 };
 
 // private server specific data
-std::vector<std::vector<std::string>> vec_tracker_ps{
+std::vector<std::vector<std::string>> vec_tracker_titanic{
+	// default false = not supported
 	{"key",			"name",				"display"}, // 0
-	{"scoreRank",	"Score Rank",		"true"}, 	// 1
+	{"scoreRank",	"Score Rank (Not supported)",		"false"}, 	// 1
 	{"level",		"Level",			"true"},	// 2
 	{"rankedScore",	"Ranked Score",		"true"},	// 3
 	{"totalScore",	"Total Score",		"true"},	// 4
 	{"ppRank",		"Performance Rank",	"true"},	// 5
 	{"pp",			"PP",				"true"},	// 6
-	{"acc",			"Accuracy",			"true"},	// 7
-	{"playtime",	"Play Time",		"true"},	// 8
-	{"playcount",	"Play Count",		"true"},	// 9
-	{"silverSS",	"Rank SSH",			"true"},	// 10
-	{"goldSS",		"Rank SS",			"true"},	// 11
-	{"silverS",		"Rank SH",			"true"},	// 12
-	{"goldS",		"Rank S",			"true"},	// 13
-	{"a",			"Rank A",			"true"},	// 14
-	{"b",			"Rank B",			"true"},	// 15
-	{"c",			"Rank C",			"true"},	// 16
-	{"d",			"Rank D",			"true"},	// 17
-	{"totalSS",		"Total SS",			"true"},	// 18
-	{"totalS",		"Total S",			"true"},	// 19
-	{"clears",		"Profile Clears",	"true"},	// 20
-	{"totalClears",	"Total Clears",		"true"},	// 21
-	{"completion",	"Completion%",		"true"},	// 22
-	{"targetRank",	"NextScoreRank ",	"true"},	// 23
+	{"ppv1",		"PPv1",				"true"},	// 7
+	{"acc",			"Accuracy",			"true"},	// 8
+	{"playtime",	"Play Time",		"true"},	// 9
+	{"playcount",	"Play Count",		"true"},	// 10
+	{"totalHits",	"Total Hits",		"true"},	// 11
+	{"silverSS",	"Rank SSH",			"true"},	// 12
+	{"goldSS",		"Rank SS",			"true"},	// 13
+	{"silverS",		"Rank SH",			"true"},	// 14
+	{"goldS",		"Rank S",			"true"},	// 15
+	{"a",			"Rank A",			"true"},	// 16
+	{"b",			"Rank B",			"true"},	// 17
+	{"c",			"Rank C",			"true"},	// 18
+	{"d",			"Rank D",			"true"},	// 19
+	{"totalSS",		"Total SS",			"true"},	// 20
+	{"totalS",		"Total S",			"true"},	// 21
+	{"clears",		"Profile Clears",	"true"},	// 22
+	{"totalClears",	"Total Clears",		"true"},	// 23
+	{"completion",	"Completion%",		"true"},	// 24
+	{"targetRank",	"NextScoreRank (Not supported)",	"false"}	// 25
 };
-
 
 /*
 *	1: vector that has string vectors
@@ -207,6 +233,13 @@ void writeConfig() {
 		// 2 = display : 1
 		input += vec_tracker[i][0] + ";" + vec_tracker[i][2] + "\n";
 	}
+	input += "\n";
+	input += "[TrackerConfigTitanic]\n";
+	for (int i = 1; i < vec_tracker_titanic.size(); i++) {
+		// 0 = key : 0
+		// 2 = display : 1
+		input += vec_tracker_titanic[i][0] + ";" + vec_tracker_titanic[i][2] + "\n";
+	}
 	
 	std::ofstream file;
 	file.open("config.txt");
@@ -231,6 +264,9 @@ void readConfig() {
 				if (line == "[TrackerConfig]") {
 					configHeader = 1;
 				}
+				if (line == "[TrackerConfigTitanic]") {
+					configHeader = 2;
+				}
 			}
 			if (!line.starts_with("//") && !line.empty() && !line.starts_with("[")) {
 				configLine = split(line, ';');
@@ -241,6 +277,9 @@ void readConfig() {
 						break;
 					case 1:
 						setConfig(vec_tracker, configLine[0], "display", configLine[1]);
+						break;
+					case 2:
+						setConfig(vec_tracker_titanic, configLine[0], "display", configLine[1]);
 						break;
 				}
 			}
@@ -254,14 +293,4 @@ void readConfig() {
 
 void rmConfig() {
 	std::filesystem::remove("config.txt");
-}
-
-// FEATURE: for custom api settings
-void removeConfig(std::vector<std::vector<std::any>>& vec, std::string key) {
-
-}
-
-// FEATURE: for custom api settings
-void addConfig() {
-
 }

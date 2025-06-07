@@ -216,9 +216,17 @@ bool webserver_start(bool skipInit = false)
 					for (const auto& item : j["msg"]["applicationConfig"]) {
 						setConfig(vec_application, item["key"], "value", item["value"]);
 					}
-					for (const auto& item : j["msg"]["trackerConfig"]) {
-						setConfig(vec_tracker, item["key"], "display", boolToString(item["value"]));
-						
+					switch (std::stoi(vec_application[6][1])) {
+					case 0:
+						for (const auto& item : j["msg"]["trackerConfig"]) {
+							setConfig(vec_tracker, item["key"], "display", boolToString(item["value"]));
+						}
+						break;
+					case 1:
+						for (const auto& item : j["msg"]["trackerConfig"]) {
+							setConfig(vec_tracker_titanic, item["key"], "display", boolToString(item["value"]));
+						}
+						break;
 					}
 					if(resetSession)
 						fetch_api_data(true);
@@ -301,13 +309,27 @@ bool webserver_start(bool skipInit = false)
 			ctx["refreshInterval"] = vec_application[4][1];
 
 			std::vector<crow::json::wvalue> elements;
-			for (size_t i = 1; i < vec_tracker.size(); i++) {
-				if (vec_tracker[i][2] == "true") {
-					crow::json::wvalue el;
-					el["id"] = vec_tracker[i][0];
-					el["label"] = vec_tracker[i][1];
-					elements.push_back(std::move(el));
+			switch (std::stoi(vec_application[6][1])) {
+			case 0:
+				for (size_t i = 1; i < vec_tracker.size(); i++) {
+					if (vec_tracker[i][2] == "true") {
+						crow::json::wvalue el;
+						el["id"] = vec_tracker[i][0];
+						el["label"] = vec_tracker[i][1];
+						elements.push_back(std::move(el));
+					}
 				}
+				break;
+			case 1:
+				for (size_t i = 1; i < vec_tracker_titanic.size(); i++) {
+					if (vec_tracker_titanic[i][2] == "true") {
+						crow::json::wvalue el;
+						el["id"] = vec_tracker_titanic[i][0];
+						el["label"] = vec_tracker_titanic[i][1];
+						elements.push_back(std::move(el));
+					}
+				}
+				break;
 			}
 			ctx["trackerElements"] = std::move(elements);
 
@@ -349,15 +371,38 @@ bool webserver_start(bool skipInit = false)
 			ctx["server_val_" + vec_application[6][1]] = "selected";
 			ctx["server_desc"] = "Which Server you want to track, bancho or a private server.";
 
+			if (std::stoi(vec_application[6][1]) > 0) {
+				// bootstrap: "display: none" class
+				// hide settings not related to private server
+				ctx["hide_on_privateServer"] = "d-none";
+			}
+
 			std::vector<crow::json::wvalue> elements;
-			for (size_t i = 1; i < vec_tracker.size(); ++i) {
-				crow::json::wvalue el;
-				el["id"] = vec_tracker[i][0];
-				el["label"] = vec_tracker[i][1];
-				if (vec_tracker[i][2] == "true") {
-					el["checked"] = " checked";
+			switch (std::stoi(vec_application[6][1])) {
+			case 0: // bancho
+				ctx["tracker_config_name"] = "Bancho Tracker Config";
+				for (size_t i = 1; i < vec_tracker.size(); ++i) {
+					crow::json::wvalue el;
+					el["id"] = vec_tracker[i][0];
+					el["label"] = vec_tracker[i][1];
+					if (vec_tracker[i][2] == "true") {
+						el["checked"] = " checked";
+					}
+					elements.push_back(std::move(el));
 				}
-				elements.push_back(std::move(el));
+				break;
+			case 1: // titanic
+				ctx["tracker_config_name"] = "Titanic Tracker Config";
+				for (size_t i = 1; i < vec_tracker_titanic.size(); ++i) {
+					crow::json::wvalue el;
+					el["id"] = vec_tracker_titanic[i][0];
+					el["label"] = vec_tracker_titanic[i][1];
+					if (vec_tracker_titanic[i][2] == "true") {
+						el["checked"] = " checked";
+					}
+					elements.push_back(std::move(el));
+				}
+				break;
 			}
 			ctx["trackerConfig"] = std::move(elements);
 

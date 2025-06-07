@@ -146,7 +146,7 @@ add_compile_definitions(OSU_TRACKER_CMAKE_SYSTEM_NAME="${CMAKE_SYSTEM_NAME}")
 
 # OSU_TRACKER PROJECT STATIC STRINGS
 add_compile_definitions(OSU_TRACKER_NAME="osu! Tracker")
-add_compile_definitions(OSU_TRACKER_VERSION="v0.2.1")
+add_compile_definitions(OSU_TRACKER_VERSION="v0.3.0")
 add_compile_definitions(OSU_TRACKER_RELEASE_TYPE="Beta")
 add_compile_definitions(OSU_TRACKER_CREATOR="Railgun")
 add_compile_definitions(OSU_TRACKER_PROFILE="https://osu.ppy.sh/users/13817114")

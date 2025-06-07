@@ -90,12 +90,11 @@
             const apiRefreshInterval = document.getElementById('api_refreshInterval_key').value;
             const gameMode = document.getElementById('gameMode_key').value;
             const server = document.getElementById('server_key').value;
-
-            if (osuId == "" || clientId == "" || clientSecret == "" || apiRefreshInterval == "" || apiRefreshInterval < 5000) {
-                //sendNotif("Please fill out all required fields properly.");
-                //return;
+            if (apiRefreshInterval == "" || apiRefreshInterval < 5000) {
+                sendNotif("Invalid API Refresh Interval has been set.");
+                return;
             }
-
+            
             // Add Application Config values to the array
             config.applicationConfig.push({ key: 'osu_id', value: osuId });
             config.applicationConfig.push({ key: 'client_id', value: clientId });
@@ -115,7 +114,7 @@
             });
 
             sendMessage("#saveSettings", config);
-            sendNotif("Saved Settings.")
+            sendNotif("Saved Settings., please reload this page, to update settings.")
 
         };
 
@@ -189,7 +188,7 @@
                 </div>
                 <div class="form-text">{{osu_id_desc}}</div>
             </div>
-            <div class="mb-2">
+            <div class="mb-2 {{hide_on_privateServer}}">
                 <div class="input-group input-group-sm">
                     <span class="input-group-text" id="inputGroup-sizing-sm">{{client_id_name}}</span>
                     <input id="client_id_key" type="number" class="form-control" aria-describedby="inputGroup-sizing-sm" value="{{client_id_val}}" required>
@@ -197,7 +196,7 @@
                 </div>
                 <div class="form-text">{{client_id_desc}}</div>
             </div>
-            <div class="mb-2">
+            <div class="mb-2 {{hide_on_privateServer}}">
                 <div class="input-group input-group-sm">
                     <span class="input-group-text" id="inputGroup-sizing-sm">{{client_secret_name}}</span>
                     <input id="client_secret_key" type="password" class="form-control" aria-describedby="inputGroup-sizing-sm" value="{{client_secret_val}}" required>
@@ -236,13 +235,13 @@
                 <div class="form-text">{{server_desc}}</div>
             </div>
         </div>
-        <div class="alert alert-info mb-5 " role="alert">
+        <div class="alert alert-info {{hide_on_privateServer}}" role="alert">
             You can get a "Client ID" and "Client Secret" by creating an OAuth Application in your: <a href="https://osu.ppy.sh/home/account/edit" target="_blank">osu! Account Settings</a>
         </div>
 
-
         <!-- Tracker Config-->
-        <h5>Tracker Config</h5>
+        <h5 class="mt-5">{{tracker_config_name}}</h5>
+        <h6>Refresh the page if you don't see config for your server.</h6>
         <div id="tracker-config-container" class="mb-5">
             {{#trackerConfig}}
             <div class="form-check form-switch">
