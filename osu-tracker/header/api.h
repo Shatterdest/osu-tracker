@@ -55,19 +55,29 @@ int api_auth() {
 	catch (const nlohmann::json::exception& e) {
 		// Catch JSON-specific exceptions
 		writeLog(std::string("api_auth() -> JSON exception: ") + e.what(), true, 255, 0, 0);
+		// segmentation fault -> linux fix
+		return -1;
 	}
 	catch (const cpr::Error& e) {
 		// Catch cpr-specific exceptions
 		writeLog(std::string("api_auth() -> CPR exception: ") + e.message, true, 255, 0, 0);
+		// segmentation fault -> linux fix
+		return -1;
 	}
 	catch (const std::exception& e) {
 		// Catch other standard exceptions
 		writeLog(std::string("api_auth() -> Standard exception: ") + e.what(), true, 255, 0, 0);
+		// segmentation fault -> linux fix
+		return -1;
 	}
 	catch (...) {
 		// Catch any other unknown exceptions
 		writeLog("api_auth() -> Unknown exception occurred", true, 255, 0, 0);
+		// segmentation fault -> linux fix
+		return -1;
 	}
+	// segmentation fault -> linux fix
+	return -1;
 }
 
 //
@@ -112,7 +122,6 @@ int titanic_api(bool init) {
 		// Launch threads
 		std::thread t1(fetch_users);
 		std::thread t2(fetch_stats);
-
 		// Wait for both to finish
 		t1.join();
 		t2.join();
@@ -354,20 +363,25 @@ static void osu_api(bool init) {
 	}
 	catch (const nlohmann::json::exception& e) {
 		// Catch JSON-specific exceptions
+		return;
 		writeLog(std::string("osu_api() -> JSON exception: ") + e.what(), true, 255, 0, 0);
 	}
 	catch (const cpr::Error& e) {
 		// Catch cpr-specific exceptions
+		return;
 		writeLog(std::string("osu_api() -> CPR exception: ") + e.message, true, 255, 0, 0);
 	}
 	catch (const std::exception& e) {
 		// Catch other standard exceptions
 		writeLog(std::string("osu_api() -> Standard exception: ") + e.what(), true, 255, 0, 0);
+		return;
 	}
 	catch (...) {
 		// Catch any other unknown exceptions
 		writeLog("osu_api() -> Unknown exception occurred", true, 255, 0, 0);
+		return;
 	}
+	return;
 }
 
 static void respektive_api(bool init) {
@@ -491,6 +505,7 @@ void fetch_api_data(bool init) {
 				}
 			}
 			// Launch threads for each API function
+			
 			std::thread t_osu_api(osu_api, init);
 			std::thread t_respektive_api(respektive_api, init);
 			std::thread t_inspector_api(inspector_api, init);
@@ -499,6 +514,11 @@ void fetch_api_data(bool init) {
 			t_osu_api.join();
 			t_respektive_api.join();
 			t_inspector_api.join();
+			
+			//osu_api(init);
+			//respektive_api(init);
+			//inspector_api(init);
+			return;
 			break;
 		}
 		case 1: {
@@ -516,6 +536,7 @@ void fetch_api_data(bool init) {
 				init_api_failed = false;
 				titanic_api(true); // intentionally re-pull with full init
 			}
+			return;
 			break;
 		}
 	}
