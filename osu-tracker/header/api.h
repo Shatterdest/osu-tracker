@@ -34,6 +34,149 @@ int api_auth() {
 	}
 }
 
+/*
+ PRIVATE SERVER IMPLEMENTATIONS
+*/
+// #############
+//	TITANIC
+// #############
+int titanic_api(bool init) {
+	try {
+		int mode = 0;
+		cpr::Response r = cpr::Get(
+			cpr::Url{ "https://api.titanic.sh/users/" + vec_application[1][1] },
+			cpr::Header{
+				{ "Content-Type", "apaplication/json" },
+				{ "Accept", "application/json" }
+			}
+		);
+		writeLog((std::string)"titanic_api() -> Status Code: " + std::to_string(r.status_code), false, 0, 255, 0);
+		nlohmann::json _j = nlohmann::json::parse(r.text);
+		for (size_t i = 0; i < 4; i++) {
+			if (vec_application[5][1] == std::to_string(_j["stats"][i]["mode"].get<int>())) {
+				mode = i; 
+				break;
+			}
+		}
+
+		username = _j["name"].get<std::string>();
+
+		if (init) {
+			 
+			vec_data_osu[0][1] = ""; // level, not supported by titanic
+			vec_data_osu[1][1] = std::to_string(_j["stats"][mode]["rscore"].get<long long>());
+			vec_data_osu[2][1] = std::to_string(_j["stats"][mode]["tscore"].get<long long>());
+			vec_data_osu[3][1] = std::to_string(_j["stats"][mode]["rank"].get<int>());
+			vec_data_osu[4][1] = std::to_string(_j["stats"][mode]["pp"].get<float>());
+			vec_data_osu[5][1] = std::to_string(_j["stats"][mode]["acc"].get<float>()*100);
+			vec_data_osu[6][1] = std::to_string(_j["stats"][mode]["playtime"].get<long long>());
+			vec_data_osu[7][1] = std::to_string(_j["stats"][mode]["playcount"].get<int>());
+			vec_data_osu[8][1] = std::to_string(_j["stats"][mode]["xh_count"].get<int>());
+			vec_data_osu[9][1] = std::to_string(_j["stats"][mode]["x_count"].get<int>());
+			vec_data_osu[10][1] = std::to_string(_j["stats"][mode]["sh_count"].get<int>());
+			vec_data_osu[11][1] = std::to_string(_j["stats"][mode]["s_count"].get<int>());
+			vec_data_osu[12][1] = std::to_string(_j["stats"][mode]["a_count"].get<int>());
+			vec_data_osu[13][1] = std::to_string(std::stoi(vec_data_osu[8][1]) + std::stoi(vec_data_osu[9][1])); // total ss
+			vec_data_osu[14][1] = std::to_string(std::stoi(vec_data_osu[10][1]) + std::stoi(vec_data_osu[11][1])); // total s
+			vec_data_osu[15][1] = std::to_string(std::stoi(vec_data_osu[12][1]) + std::stoi(vec_data_osu[13][1]) + std::stoi(vec_data_osu[14][1])); // profile clears
+
+			// score rank, not supported by titanic (yet)
+			vec_data_respektive[0][1] = "";
+
+			// b,c,d
+			vec_data_inspector[0][1] = std::to_string(_j["stats"][mode]["b_count"].get<int>());
+			vec_data_inspector[1][1] = std::to_string(_j["stats"][mode]["c_count"].get<int>());
+			vec_data_inspector[2][1] = std::to_string(_j["stats"][mode]["d_count"].get<int>());
+			// calculate for titanic
+			vec_data_inspector[3][1] = std::to_string(std::stoi(vec_data_osu[15][1]) + std::stoi(vec_data_inspector[0][1]) + std::stoi(vec_data_inspector[1][1]) + std::stoi(vec_data_inspector[2][1]));
+			vec_data_inspector[4][1] = ""; // completion, not supported by titanic
+		}
+
+		// current
+		vec_data_osu[0][2] = ""; // level, not supported by titanic
+		vec_data_osu[1][2] = std::to_string(_j["stats"][mode]["rscore"].get<long long>());
+		vec_data_osu[2][2] = std::to_string(_j["stats"][mode]["tscore"].get<long long>());
+		vec_data_osu[3][2] = std::to_string(_j["stats"][mode]["rank"].get<int>());
+		vec_data_osu[4][2] = std::to_string(_j["stats"][mode]["pp"].get<float>());
+		vec_data_osu[5][2] = std::to_string(_j["stats"][mode]["acc"].get<float>() * 100);
+		vec_data_osu[6][2] = std::to_string(_j["stats"][mode]["playtime"].get<long long>());
+		vec_data_osu[7][2] = std::to_string(_j["stats"][mode]["playcount"].get<int>());
+		vec_data_osu[8][2] = std::to_string(_j["stats"][mode]["xh_count"].get<int>());
+		vec_data_osu[9][2] = std::to_string(_j["stats"][mode]["x_count"].get<int>());
+		vec_data_osu[10][2] = std::to_string(_j["stats"][mode]["sh_count"].get<int>());
+		vec_data_osu[11][2] = std::to_string(_j["stats"][mode]["s_count"].get<int>());
+		vec_data_osu[12][2] = std::to_string(_j["stats"][mode]["a_count"].get<int>());
+		vec_data_osu[13][2] = std::to_string(std::stoi(vec_data_osu[8][1]) + std::stoi(vec_data_osu[9][1])); // total ss
+		vec_data_osu[14][2] = std::to_string(std::stoi(vec_data_osu[10][1]) + std::stoi(vec_data_osu[11][1])); // total s
+		vec_data_osu[15][2] = std::to_string(std::stoi(vec_data_osu[12][1]) + std::stoi(vec_data_osu[13][1]) + std::stoi(vec_data_osu[14][1])); // profile clears
+
+		vec_data_inspector[0][2] = std::to_string(_j["stats"][mode]["b_count"].get<int>());
+		vec_data_inspector[1][2] = std::to_string(_j["stats"][mode]["c_count"].get<int>());
+		vec_data_inspector[2][2] = std::to_string(_j["stats"][mode]["d_count"].get<int>());
+		// calc for titanic
+		vec_data_inspector[3][2] = std::to_string(std::stoi(vec_data_osu[15][1]) + std::stoi(vec_data_inspector[0][1]) + std::stoi(vec_data_inspector[1][1]) + std::stoi(vec_data_inspector[2][1]));
+		vec_data_inspector[4][2] = ""; //  not supported by titanic (yet)
+
+		// score rank, not supported by titanic (yet)
+		vec_data_respektive[0][2] = "";
+
+		// change
+		//vec_data_osu[0][3] = std::to_string(std::stof(vec_data_osu[0][2]) - std::stof(vec_data_osu[0][1])); // lvl
+		vec_data_osu[0][3] = ""; // lvl
+		vec_data_osu[1][3] = std::to_string(std::stoll(vec_data_osu[1][2]) - std::stoll(vec_data_osu[1][1])); // ranked score
+		vec_data_osu[2][3] = std::to_string(std::stoll(vec_data_osu[2][2]) - std::stoll(vec_data_osu[2][1])); // total score
+		vec_data_osu[3][3] = std::to_string(std::stoi(vec_data_osu[3][2]) - std::stoi(vec_data_osu[3][1])); // global rank
+		vec_data_osu[4][3] = std::to_string(std::stof(vec_data_osu[4][2]) - std::stof(vec_data_osu[4][1])); // pp
+		vec_data_osu[5][3] = std::to_string(std::stof(vec_data_osu[5][2]) - std::stof(vec_data_osu[5][1])); // acc
+		vec_data_osu[6][3] = std::to_string(std::stoll(vec_data_osu[6][2]) - std::stoll(vec_data_osu[6][1])); // play time
+		vec_data_osu[7][3] = std::to_string(std::stoi(vec_data_osu[7][2]) - std::stoi(vec_data_osu[7][1])); // play count
+		vec_data_osu[8][3] = std::to_string(std::stoi(vec_data_osu[8][2]) - std::stoi(vec_data_osu[8][1])); // ssh
+		vec_data_osu[9][3] = std::to_string(std::stoi(vec_data_osu[9][2]) - std::stoi(vec_data_osu[9][1])); // ss
+		vec_data_osu[10][3] = std::to_string(std::stoi(vec_data_osu[10][2]) - std::stoi(vec_data_osu[10][1])); // sh
+		vec_data_osu[11][3] = std::to_string(std::stoi(vec_data_osu[11][2]) - std::stoi(vec_data_osu[11][1])); // s
+		vec_data_osu[12][3] = std::to_string(std::stoi(vec_data_osu[12][2]) - std::stoi(vec_data_osu[12][1])); // a
+		vec_data_osu[13][3] = std::to_string(std::stoi(vec_data_osu[13][2]) - std::stoi(vec_data_osu[13][1])); // total ss
+		vec_data_osu[14][3] = std::to_string(std::stoi(vec_data_osu[14][2]) - std::stoi(vec_data_osu[14][1])); // total s
+		vec_data_osu[15][3] = std::to_string(std::stoi(vec_data_osu[15][2]) - std::stoi(vec_data_osu[15][1])); // cleares (without bcd)
+
+		vec_data_inspector[0][3] = std::to_string(std::stoi(vec_data_inspector[0][2]) - std::stoi(vec_data_inspector[0][1])); // b
+		vec_data_inspector[1][3] = std::to_string(std::stoi(vec_data_inspector[1][2]) - std::stoi(vec_data_inspector[1][1])); // c
+		vec_data_inspector[2][3] = std::to_string(std::stoi(vec_data_inspector[2][2]) - std::stoi(vec_data_inspector[2][1])); // d
+		vec_data_inspector[3][3] = std::to_string(std::stoi(vec_data_inspector[3][2]) - std::stoi(vec_data_inspector[3][1])); // total clears, calculated
+		vec_data_inspector[4][3] = ""; // completion, not supported by titanic (yet)
+
+		// score rank, not supported by titanic (yet)
+		vec_data_respektive[0][3] = "";
+
+		// extra, not supported by titanic
+		vec_data_respektive_target[0][1] = "";
+		vec_data_respektive_target[1][1] = "";
+		vec_data_respektive_target[2][1] = "";
+
+		// return
+		return r.status_code;
+	}
+	catch (const nlohmann::json::exception& e) {
+		// Catch JSON-specific exceptions
+		writeLog(std::string("titanic_api() -> JSON exception: ") + e.what(), true, 255, 0, 0);
+	}
+	catch (const cpr::Error& e) {
+		// Catch cpr-specific exceptions
+		writeLog(std::string("titanic_api() -> CPR exception: ") + e.message, true, 255, 0, 0);
+	}
+	catch (const std::exception& e) {
+		// Catch other standard exceptions
+		writeLog(std::string("titanic_api() -> Standard exception: ") + e.what(), true, 255, 0, 0);
+	}
+	catch (...) {
+		// Catch any other unknown exceptions
+		writeLog("titanic_api() -> Unknown exception occurred", true, 255, 0, 0);
+	}
+}
+
+// ##############
+//	bancho api
+// ##############
 void osu_api(bool init) {
 	try {
 		std::string mode;
@@ -111,21 +254,21 @@ void osu_api(bool init) {
 
 		// change
 		vec_data_osu[0][3] = std::to_string(std::stof(vec_data_osu[0][2]) - std::stof(vec_data_osu[0][1])); // lvl
-		vec_data_osu[1][3] = std::to_string(std::stoll(vec_data_osu[1][2]) - std::stoll(vec_data_osu[1][1]));
-		vec_data_osu[2][3] = std::to_string(std::stoll(vec_data_osu[2][2]) - std::stoll(vec_data_osu[2][1]));
-		vec_data_osu[3][3] = std::to_string(std::stoi(vec_data_osu[3][2]) - std::stoi(vec_data_osu[3][1]));
+		vec_data_osu[1][3] = std::to_string(std::stoll(vec_data_osu[1][2]) - std::stoll(vec_data_osu[1][1])); // ranked score
+		vec_data_osu[2][3] = std::to_string(std::stoll(vec_data_osu[2][2]) - std::stoll(vec_data_osu[2][1])); // total score
+		vec_data_osu[3][3] = std::to_string(std::stoi(vec_data_osu[3][2]) - std::stoi(vec_data_osu[3][1])); // global rank
 		vec_data_osu[4][3] = std::to_string(std::stof(vec_data_osu[4][2]) - std::stof(vec_data_osu[4][1])); // pp
 		vec_data_osu[5][3] = std::to_string(std::stof(vec_data_osu[5][2]) - std::stof(vec_data_osu[5][1])); // acc
-		vec_data_osu[6][3] = std::to_string(std::stoll(vec_data_osu[6][2]) - std::stoll(vec_data_osu[6][1]));
-		vec_data_osu[7][3] = std::to_string(std::stoi(vec_data_osu[7][2]) - std::stoi(vec_data_osu[7][1]));
-		vec_data_osu[8][3] = std::to_string(std::stoi(vec_data_osu[8][2]) - std::stoi(vec_data_osu[8][1]));
-		vec_data_osu[9][3] = std::to_string(std::stoi(vec_data_osu[9][2]) - std::stoi(vec_data_osu[9][1]));
-		vec_data_osu[10][3] = std::to_string(std::stoi(vec_data_osu[10][2]) - std::stoi(vec_data_osu[10][1]));
-		vec_data_osu[11][3] = std::to_string(std::stoi(vec_data_osu[11][2]) - std::stoi(vec_data_osu[11][1]));
-		vec_data_osu[12][3] = std::to_string(std::stoi(vec_data_osu[12][2]) - std::stoi(vec_data_osu[12][1]));
-		vec_data_osu[13][3] = std::to_string(std::stoi(vec_data_osu[13][2]) - std::stoi(vec_data_osu[13][1]));
-		vec_data_osu[14][3] = std::to_string(std::stoi(vec_data_osu[14][2]) - std::stoi(vec_data_osu[14][1]));
-		vec_data_osu[15][3] = std::to_string(std::stoi(vec_data_osu[15][2]) - std::stoi(vec_data_osu[15][1]));
+		vec_data_osu[6][3] = std::to_string(std::stoll(vec_data_osu[6][2]) - std::stoll(vec_data_osu[6][1])); // play time
+		vec_data_osu[7][3] = std::to_string(std::stoi(vec_data_osu[7][2]) - std::stoi(vec_data_osu[7][1])); // play count
+		vec_data_osu[8][3] = std::to_string(std::stoi(vec_data_osu[8][2]) - std::stoi(vec_data_osu[8][1])); // ssh
+		vec_data_osu[9][3] = std::to_string(std::stoi(vec_data_osu[9][2]) - std::stoi(vec_data_osu[9][1])); // ss
+		vec_data_osu[10][3] = std::to_string(std::stoi(vec_data_osu[10][2]) - std::stoi(vec_data_osu[10][1])); // sh
+		vec_data_osu[11][3] = std::to_string(std::stoi(vec_data_osu[11][2]) - std::stoi(vec_data_osu[11][1])); // s
+		vec_data_osu[12][3] = std::to_string(std::stoi(vec_data_osu[12][2]) - std::stoi(vec_data_osu[12][1])); // a
+		vec_data_osu[13][3] = std::to_string(std::stoi(vec_data_osu[13][2]) - std::stoi(vec_data_osu[13][1])); // total ss
+		vec_data_osu[14][3] = std::to_string(std::stoi(vec_data_osu[14][2]) - std::stoi(vec_data_osu[14][1])); // total s
+		vec_data_osu[15][3] = std::to_string(std::stoi(vec_data_osu[15][2]) - std::stoi(vec_data_osu[15][1])); // cleares (without bcd)
 	}
 	catch (const nlohmann::json::exception& e) {
 		// Catch JSON-specific exceptions
@@ -251,22 +394,44 @@ static void inspector_api(bool init) {
 }
 
 void fetch_api_data(bool init) {
-	if (api_auth() != 200) {
-		if (init) {
-			init_api_failed = true;
+	switch (std::stoi(vec_application[6][1])) {
+	case 0: // bancho
+		if (api_auth() != 200) {
+			if (init) {
+				init_api_failed = true;
+			}
+			return; // dont continue when auth fails
 		}
-		return; // dont continue when auth fails
-	}
-	else {
-		if (init_api_failed && !init) {
-			// retry to init api data, since it failed to init
-			init_api_failed = false;
-			init = true;
+		else {
+			if (init_api_failed && !init) {
+				// retry to init api data, since it failed to init
+				init_api_failed = false;
+				init = true;
+			}
 		}
+		osu_api(init);
+		respektive_api(init);
+		inspector_api(init);
+		break;
+	case 1: // titanic
+		// one extra request 
+		// need rewrite
+		if (titanic_api(init) != 200) {
+			if (init) {
+				init_api_failed = true;
+			}
+			return; // dont continue when auth fails
+		}
+		else {
+			if (init_api_failed && !init) {
+				// retry to init api data, since it failed to init
+				init_api_failed = false;
+				init = true;
+			}
+		}
+		titanic_api(init);
+		break;
 	}
-	osu_api(init);
-	respektive_api(init);
-	inspector_api(init);
 }
 
 // data that get send to client
@@ -274,10 +439,21 @@ nlohmann::json api_data() {
 	try {
 		// Create a JSON object
 		nlohmann::json _j;
-		_j["osu"] = vec_data_osu;
-		_j["respektive"] = vec_data_respektive;
-		_j["respektive_target"] = vec_data_respektive_target;
-		_j["inspector"] = vec_data_inspector;
+		switch (std::stoi(vec_application[6][1])) {
+			case 0: // bancho
+				_j["osu"] = vec_data_osu;
+				_j["respektive"] = vec_data_respektive;
+				_j["respektive_target"] = vec_data_respektive_target;
+				_j["inspector"] = vec_data_inspector;
+				break;
+			case 1: // titanic
+				// same general json structure, bc my ass has to rewrite frontend js code
+				_j["osu"] = vec_data_osu;
+				_j["respektive"] = vec_data_respektive;
+				_j["respektive_target"] = vec_data_respektive_target;
+				_j["inspector"] = vec_data_inspector;
+				break;
+		}
 		return _j;
 	}
 	catch (const std::exception& e) {

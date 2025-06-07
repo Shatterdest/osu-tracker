@@ -60,6 +60,7 @@ int main()
 			setConfig(vec_application, "client_id", "value", "");
 			setConfig(vec_application, "client_secret", "value", "");
 			setConfig(vec_application, "api_refreshInterval", "value", "7000");
+			setConfig(vec_application, "server", "value", "1");
 			writeConfig();
 			readConfig();
 		}

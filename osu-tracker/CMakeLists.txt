@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.15)
 project(osu-tracker LANGUAGES C CXX)
 
 # Threads to use
-set(CMAKE_BUILD_PARALLEL_LEVEL 4)
+set(CMAKE_BUILD_PARALLEL_LEVEL 16) # got a new cpu :3
 
 set(CMAKE_CXX_STANDARD 20) # Set the C++ standard to C++20
 set(CMAKE_C_STANDARD 23) # Set the C standard to C23
@@ -17,7 +17,8 @@ include_directories(${BASE_INCLUDE_PATH})
 
 # CMAKE
 option(USE_STATIC_LIB "Use static library" ON)
-option(BUILD_TEST "Build Test" ON) # You can disable compilation of test executable
+# disabled test, not needed really , but nice to have if needed
+option(BUILD_TEST "Build Test" OFF) # You can disable compilation of test executable
 
 file(COPY ${CMAKE_SOURCE_DIR}/www DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/osu-tracker/")
 file(COPY ${CMAKE_SOURCE_DIR}/tracker_txt DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/osu-tracker/")
@@ -58,13 +59,14 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 			${ZLIB_HEADERS}
 			includes/catch_amalgamated.cpp
 		)
-		# static libcurl
-		add_definitions(-DCURL_STATICLIB)
-		# static link for tracker
-		target_link_libraries(osu-tracker PRIVATE crypt32 advapi32 ${LIBCRYPTO_LIBRARY} ${LIBSSL_LIBRARY} ${LIBCURL_LIBRARY})
 		# static link for test, ws2_32 is required for catch2
 		target_link_libraries(test-tracker PRIVATE ws2_32 crypt32 advapi32 ${LIBCRYPTO_LIBRARY} ${LIBSSL_LIBRARY} ${LIBCURL_LIBRARY} )
 	endif()
+	# static libcurl
+	add_definitions(-DCURL_STATICLIB)
+	# static link for tracker
+	target_link_libraries(osu-tracker PRIVATE crypt32 advapi32 ${LIBCRYPTO_LIBRARY} ${LIBSSL_LIBRARY} ${LIBCURL_LIBRARY})
+
 	# Include bundled libraries
 	include_directories(
 		${CMAKE_SOURCE_DIR}/lib/cpr/cpr

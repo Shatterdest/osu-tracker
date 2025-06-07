@@ -12,7 +12,8 @@ std::vector<std::vector<std::string>> vec_application {
 	{"client_id",""},// 2
 	{"client_secret",""},// 3
 	{"api_refreshInterval","7000"},// 4
-	{"gameMode","0"} // 5: osu, taiko, fruits, mania
+	{"gameMode","0"}, // 5: osu, taiko, fruits, mania
+	{"server","1"} // 6: [0: bancho], [1: titanic]
 };
 
 /*
@@ -206,12 +207,12 @@ void readConfig() {
 				configLine = split(line, ';');
 				switch (configHeader)
 				{
-				case 0:
-					setConfig(vec_application, configLine[0],"value", configLine[1]);
-					break;
-				case 1:
-					setConfig(vec_tracker, configLine[0], "display", configLine[1]);
-					break;
+					case 0:
+						setConfig(vec_application, configLine[0],"value", configLine[1]);
+						break;
+					case 1:
+						setConfig(vec_tracker, configLine[0], "display", configLine[1]);
+						break;
 				}
 			}
 		}

@@ -250,6 +250,7 @@ bool webserver_start(bool skipInit = false)
 					json _j;
 					_j["cmd"] = "data";
 					_j["msg"] = api_data().dump();
+					// send to client
 					conn.send_text(_j.dump());
 				}
 			}
