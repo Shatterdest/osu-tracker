@@ -201,8 +201,16 @@ bool webserver_start(bool skipInit = false)
 			if (cmd[0] == '#') {
 				if (cmd == "#saveSettings") {
 					bool resetSession = false;
-					if (j["msg"]["applicationConfig"][0]["value"] != vec_application[1][1] || j["msg"]["applicationConfig"][1]["value"] != vec_application[2][1] || j["msg"]["applicationConfig"][2]["value"] != vec_application[3][1] || j["msg"]["applicationConfig"][4]["value"] != vec_application[5][1]) {
-						// user id, api credentials or gamemode changed, reset tracker data
+					if 
+						(
+						j["msg"]["applicationConfig"][0]["value"] != vec_application[1][1] // userid 
+						|| j["msg"]["applicationConfig"][1]["value"] != vec_application[2][1] // client id
+						|| j["msg"]["applicationConfig"][2]["value"] != vec_application[3][1] // client secret
+						|| j["msg"]["applicationConfig"][4]["value"] != vec_application[5][1] // game mode
+						|| j["msg"]["applicationConfig"][5]["value"] != vec_application[6][1] // server
+						) 
+					{
+						// reset tracker data
 						resetSession = true;
 					}
 					for (const auto& item : j["msg"]["applicationConfig"]) {
@@ -336,6 +344,10 @@ bool webserver_start(bool skipInit = false)
 			ctx["gameMode_name"] = "Game Mode";
 			ctx["gameMode_val_" + vec_application[5][1]] = "selected";
 			ctx["gameMode_desc"] = "Game Mode to track.";
+
+			ctx["server_name"] = "Server";
+			ctx["server_val_" + vec_application[6][1]] = "selected";
+			ctx["server_desc"] = "Which Server you want to track, bancho or a private server.";
 
 			std::vector<crow::json::wvalue> elements;
 			for (size_t i = 1; i < vec_tracker.size(); ++i) {

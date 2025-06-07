@@ -13,7 +13,7 @@ std::vector<std::vector<std::string>> vec_application {
 	{"client_secret",""},// 3
 	{"api_refreshInterval","7000"},// 4
 	{"gameMode","0"}, // 5: osu, taiko, fruits, mania
-	{"server","1"} // 6: [0: bancho], [1: titanic]
+	{"server","0"} // 6: [0: bancho], [1: titanic]
 };
 
 /*
@@ -107,6 +107,35 @@ std::vector<std::vector<std::string>> vec_tracker{
 	{"completion",	"Completion%",		"true"},	// 22
 	{"targetRank",	"NextScoreRank ",	"true"},	// 23
 };
+
+// private server specific data
+std::vector<std::vector<std::string>> vec_tracker_ps{
+	{"key",			"name",				"display"}, // 0
+	{"scoreRank",	"Score Rank",		"true"}, 	// 1
+	{"level",		"Level",			"true"},	// 2
+	{"rankedScore",	"Ranked Score",		"true"},	// 3
+	{"totalScore",	"Total Score",		"true"},	// 4
+	{"ppRank",		"Performance Rank",	"true"},	// 5
+	{"pp",			"PP",				"true"},	// 6
+	{"acc",			"Accuracy",			"true"},	// 7
+	{"playtime",	"Play Time",		"true"},	// 8
+	{"playcount",	"Play Count",		"true"},	// 9
+	{"silverSS",	"Rank SSH",			"true"},	// 10
+	{"goldSS",		"Rank SS",			"true"},	// 11
+	{"silverS",		"Rank SH",			"true"},	// 12
+	{"goldS",		"Rank S",			"true"},	// 13
+	{"a",			"Rank A",			"true"},	// 14
+	{"b",			"Rank B",			"true"},	// 15
+	{"c",			"Rank C",			"true"},	// 16
+	{"d",			"Rank D",			"true"},	// 17
+	{"totalSS",		"Total SS",			"true"},	// 18
+	{"totalS",		"Total S",			"true"},	// 19
+	{"clears",		"Profile Clears",	"true"},	// 20
+	{"totalClears",	"Total Clears",		"true"},	// 21
+	{"completion",	"Completion%",		"true"},	// 22
+	{"targetRank",	"NextScoreRank ",	"true"},	// 23
+};
+
 
 /*
 *	1: vector that has string vectors

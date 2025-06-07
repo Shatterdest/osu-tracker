@@ -89,6 +89,7 @@
             const clientSecret = document.getElementById('client_secret_key').value;
             const apiRefreshInterval = document.getElementById('api_refreshInterval_key').value;
             const gameMode = document.getElementById('gameMode_key').value;
+            const server = document.getElementById('server_key').value;
 
             if (osuId == "" || clientId == "" || clientSecret == "" || apiRefreshInterval == "" || apiRefreshInterval < 5000) {
                 //sendNotif("Please fill out all required fields properly.");
@@ -101,6 +102,7 @@
             config.applicationConfig.push({ key: 'client_secret', value: clientSecret });
             config.applicationConfig.push({ key: 'api_refreshInterval', value: apiRefreshInterval });
             config.applicationConfig.push({ key: 'gameMode', value: gameMode });
+            config.applicationConfig.push({ key: 'server', value: server });
 
             // Get values from Tracker Config checkboxes
             const trackerConfigContainer = document.getElementById('tracker-config-container');
@@ -222,6 +224,16 @@
                     </select>
                 </div>
                 <div class="form-text">{{gameMode_desc}}</div>
+            </div>
+            <div class="mb-2">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text" id="inputGroup-sizing-sm">{{server_name}}</span>
+                    <select id="server_key" class="form-select form-select-sm">
+                        <option value="0" {{server_val_0}}>Bancho</option>
+                        <option value="1" {{server_val_1}}>Titanic</option>
+                    </select>
+                </div>
+                <div class="form-text">{{server_desc}}</div>
             </div>
         </div>
         <div class="alert alert-info mb-5 " role="alert">
