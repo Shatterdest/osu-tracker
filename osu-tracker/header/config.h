@@ -32,7 +32,7 @@ std::vector<std::vector<std::string>> vec_data_osu {
 	{"acc",			"",	"",	"", "2"}, // 5
 	{"playtime",	"",	"",	"", "1"}, // 6
 	{"playcount",	"",	"",	"", "1"}, // 7
-	
+
 	{"silverSS",	"",	"",	"", "1"}, // 8
 	{"goldSS",		"",	"",	"", "1"}, // 9
 	{"silverS",		"",	"",	"", "1"}, // 10

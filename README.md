@@ -31,10 +31,14 @@ A web server based osu! stats/session tracker
     - Usage
       
       Configure
-      > ./release.sh configure
+      ```sh
+      ./release.sh configure
+      ```
       
       Build
-      > ./release.sh build
+      ```sh
+      ./release.sh build
+      ```
 
 ## TODO:
 - Overlay (Browser/Text based)
