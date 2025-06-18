@@ -16,151 +16,65 @@ std::vector<std::vector<std::string>> vec_application {
 	{"server","0"} // 6: [0: bancho], [1: titanic]
 };
 
-/*
-0: key
-1: init
-2: current
-3: change/diff
-4: type -> string, int, float
-*/
-std::vector<std::vector<std::string>> vec_data_osu {
-	{"level",		"",	"",	"", "2"}, // 0
-	{"rankedScore",	"",	"",	"", "1"}, // 1
-	{"totalScore",	"",	"",	"", "1"}, // 2
-	{"ppRank",		"",	"",	"", "1"}, // 3
-	{"pp",			"",	"",	"", "2"}, // 4
-	{"acc",			"",	"",	"", "2"}, // 5
-	{"playtime",	"",	"",	"", "1"}, // 6
-	{"playcount",	"",	"",	"", "1"}, // 7
-
-	{"silverSS",	"",	"",	"", "1"}, // 8
-	{"goldSS",		"",	"",	"", "1"}, // 9
-	{"silverS",		"",	"",	"", "1"}, // 10
-	{"goldS",		"",	"",	"", "1"}, // 11
-	{"a",			"",	"",	"", "1"}, // 12
-
-	{"totalSS",		"",	"",	"", "1"}, // 13
-	{"totalS",		"",	"",	"", "1"}, // 14
-	{"clears",		"",	"",	"", "1"}, // 15
+enum data_type {
+	t_string = 0,
+	t_int = 1,
+	t_decimal  = 2
 };
 
-std::vector<std::vector<std::string>> vec_data_titanic{
-	{"level",		"",	"",	"", "2"}, // 0
-	{"rankedScore",	"",	"",	"", "1"}, // 1
-	{"totalScore",	"",	"",	"", "1"}, // 2
-	{"ppRank",		"",	"",	"", "1"}, // 3
-	{"pp",			"",	"",	"", "2"}, // 4
-	{"ppv1",		"",	"",	"", "2"}, // 5
-	{"acc",			"",	"",	"", "2"}, // 6
-	{"playtime",	"",	"",	"", "1"}, // 7
-	{"playcount",	"",	"",	"", "1"}, // 8
-	{"totalHits",	"",	"",	"", "1"}, // 9
-
-	{"silverSS",	"",	"",	"", "1"}, // 10
-	{"goldSS",		"",	"",	"", "1"}, // 11
-	{"silverS",		"",	"",	"", "1"}, // 12
-	{"goldS",		"",	"",	"", "1"}, // 13
-	{"a",			"",	"",	"", "1"}, // 14
-
-	{"totalSS",		"",	"",	"", "1"}, // 15
-	{"totalS",		"",	"",	"", "1"}, // 16
-	{"clears",		"",	"",	"", "1"}, // 17
+enum format_type {
+	f_string = 0,
+	f_int = 1,
+	f_decimal = 2,
+	f_rank = 3,
+	f_time = 4,
 };
 
-
-/*
-0: key
-1: init
-2: current
-3: change/diff
-4: type -> string, int, float
-*/
-std::vector<std::vector<std::string>> vec_data_inspector {
-	{"b",			"",	"",	"", "1"}, // 0
-	{"c",			"",	"",	"", "1"}, // 1
-	{"d",			"",	"",	"", "1"}, // 2
-	{"totalClears",	"",	"",	"", "1"}, // 3
-	{"completion",	"",	"",	"", "2"}  // 4
+struct data_entry {
+	std::string key;
+	std::string name;
+	std::string init;
+	std::string current;
+	std::string change;
+	data_type	type;
+	format_type format;
+	bool display;
+	bool bancho;
+	bool titanic;
 };
 
-/*
-0: key
-1: init
-2: current
-3: change/diff
-4: type -> string, int, float
-*/
-std::vector<std::vector<std::string>> vec_data_respektive{
-	{"scoreRank","","","","1"} // 0
-};
+std::vector<data_entry> vec_data{
+	{"level",		"Level",			"", "",	"", data_type::t_decimal,	format_type::f_decimal, true,	true,	true},	// 0
+	{"rankedScore",	"Ranked Score",		"", "",	"", data_type::t_int,		format_type::f_int,		true,	true,	true},	// 1
+	{"totalScore",	"Total Score",		"", "",	"", data_type::t_int,		format_type::f_int,		true,	true,	true},	// 2
+	{"ppRank",		"PP Rank",			"", "",	"", data_type::t_int,		format_type::f_rank,	true,	true,	true},	// 3
+	{"pp",			"PP",				"", "",	"", data_type::t_decimal,	format_type::f_decimal, true,	true,	true},	// 4
+	{"ppv1",		"PPv1",				"", "",	"", data_type::t_decimal,	format_type::f_decimal, true,	false,	true},	// 5
+	{"acc",			"Accuracy",			"", "",	"", data_type::t_decimal,	format_type::f_decimal, true,	true,	true},	// 6
+	{"playtime",	"Play Time",		"", "",	"", data_type::t_int,		format_type::f_time,	true,	true,	true},	// 7
+	{"playcount",	"Play Count",		"", "",	"", data_type::t_int,		format_type::f_int,		true,	true,	true},	// 8
+	{"totalHits",	"Total Hits",		"", "",	"", data_type::t_int,		format_type::f_int,		true,	true,	true},	// 9
+					    
+	{"silverSS",	"Rank SSH",			"", "",	"", data_type::t_int,		format_type::f_int,		true,	true,	true},	// 10
+	{"goldSS",		"Rank SS",			"", "",	"", data_type::t_int,		format_type::f_int,		true,	true,	true},	// 11
+	{"silverS",		"Rank SH",			"", "",	"", data_type::t_int,		format_type::f_int,		true,	true,	true},	// 12
+	{"goldS",		"Rank S",			"", "",	"", data_type::t_int,		format_type::f_int,		true,	true,	true},	// 13
+	{"a",			"Rank A",			"", "",	"", data_type::t_int,		format_type::f_int,		true,	true,	true},	// 14
+	{"b",			"Rank B",			"", "",	"", data_type::t_int,		format_type::f_int,		true,	true,	true},	// 15
+	{"c",			"Rank C",			"", "",	"", data_type::t_int,		format_type::f_int,		true,	true,	true},	// 16
+	{"d",			"Rank D",			"", "",	"", data_type::t_int,		format_type::f_int,		true,	true,	true},	// 17
+	{"totalSS",		"Total SS",			"", "",	"", data_type::t_int,		format_type::f_int,		true,	true,	true},	// 18
+	{"totalS",		"Total S",			"", "",	"", data_type::t_int,		format_type::f_int,		true,	true,	true},	// 19
+					    
+	{"clears",		"Profile Clears",	"", "",	"", data_type::t_int,		format_type::f_int,		true,	true,	true},	// 20
+	{"totalClears",	"Total Clears",		"", "",	"", data_type::t_int,		format_type::f_int,		true,	true,	true},	// 21
+	{"completion",	"Completion%",		"", "",	"", data_type::t_decimal,	format_type::f_decimal, true,	true,	true},	// 22
+	{"scoreRank",	"Score Rank",		"", "",	"", data_type::t_int,		format_type::f_rank,	true,	true,	true},	// 23
+					    
+	{"targetRank",	"Target Rank",		"", "",	"", data_type::t_int,		format_type::f_rank,	true,	true,	true},	// 24
+	{"targetUser",	"Target Player",	"", "",	"", data_type::t_string,	format_type::f_string,	true,	true,	true},	// 25
+	{"targetScore",	"Target Score",		"", "",	"", data_type::t_int,		format_type::f_int,		true,	true,	true},	// 26
 
-/*
-0: key
-1: current
-2: type -> string, int, float
-*/
-std::vector<std::vector<std::string>> vec_data_respektive_target {
-	{"targetRank",	"","1"}, // 0
-	{"targetUser",	"","0"}, // 1
-	{"targetScore",	"","1"}  // 2
-};
-
-std::vector<std::vector<std::string>> vec_tracker{
-	{"key",			"name",				"display"}, // 0
-	{"scoreRank",	"Score Rank",		"true"}, 	// 1
-	{"level",		"Level",			"true"},	// 2
-	{"rankedScore",	"Ranked Score",		"true"},	// 3
-	{"totalScore",	"Total Score",		"true"},	// 4
-	{"ppRank",		"Performance Rank",	"true"},	// 5
-	{"pp",			"PP",				"true"},	// 6
-	{"acc",			"Accuracy",			"true"},	// 7
-	{"playtime",	"Play Time",		"true"},	// 8
-	{"playcount",	"Play Count",		"true"},	// 9
-	{"silverSS",	"Rank SSH",			"true"},	// 10
-	{"goldSS",		"Rank SS",			"true"},	// 11
-	{"silverS",		"Rank SH",			"true"},	// 12
-	{"goldS",		"Rank S",			"true"},	// 13
-	{"a",			"Rank A",			"true"},	// 14
-	{"b",			"Rank B",			"true"},	// 15
-	{"c",			"Rank C",			"true"},	// 16
-	{"d",			"Rank D",			"true"},	// 17
-	{"totalSS",		"Total SS",			"true"},	// 18
-	{"totalS",		"Total S",			"true"},	// 19
-	{"clears",		"Profile Clears",	"true"},	// 20
-	{"totalClears",	"Total Clears",		"true"},	// 21
-	{"completion",	"Completion%",		"true"},	// 22
-	{"targetRank",	"NextScoreRank ",	"true"}		// 23
-};
-
-// private server specific data
-std::vector<std::vector<std::string>> vec_tracker_titanic{
-	// default false = not supported
-	{"key",			"name",				"display"}, // 0
-	{"scoreRank",	"Score Rank (Not supported)",		"false"}, 	// 1
-	{"level",		"Level",			"true"},	// 2
-	{"rankedScore",	"Ranked Score",		"true"},	// 3
-	{"totalScore",	"Total Score",		"true"},	// 4
-	{"ppRank",		"Performance Rank",	"true"},	// 5
-	{"pp",			"PP",				"true"},	// 6
-	{"ppv1",		"PPv1",				"true"},	// 7
-	{"acc",			"Accuracy",			"true"},	// 8
-	{"playtime",	"Play Time",		"true"},	// 9
-	{"playcount",	"Play Count",		"true"},	// 10
-	{"totalHits",	"Total Hits",		"true"},	// 11
-	{"silverSS",	"Rank SSH",			"true"},	// 12
-	{"goldSS",		"Rank SS",			"true"},	// 13
-	{"silverS",		"Rank SH",			"true"},	// 14
-	{"goldS",		"Rank S",			"true"},	// 15
-	{"a",			"Rank A",			"true"},	// 16
-	{"b",			"Rank B",			"true"},	// 17
-	{"c",			"Rank C",			"true"},	// 18
-	{"d",			"Rank D",			"true"},	// 19
-	{"totalSS",		"Total SS",			"true"},	// 20
-	{"totalS",		"Total S",			"true"},	// 21
-	{"clears",		"Profile Clears",	"true"},	// 22
-	{"totalClears",	"Total Clears",		"true"},	// 23
-	{"completion",	"Completion%",		"true"},	// 24
-	{"targetRank",	"NextScoreRank (Not supported)",	"false"}	// 25
 };
 
 /*
