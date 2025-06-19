@@ -2,55 +2,122 @@
 #include <utility>
 #include <string>
 #include "console.h"
+#include <algorithm>
 
 class config {
 public:
 	enum class gameMode {
-		osu = 0,
-		taiko = 1,
-		fruits = 2,
-		mania = 3
+		osu = 0
+		,taiko = 1
+		,fruits = 2
+		,mania = 3
 	};
 
 	enum class server {
-		bancho = 0,
-		titanic = 1
+		bancho = 0
+		,titanic = 1
 	};
 
 	struct application {
+		// definition and initialization
+		#define applicationFields(_field) \
+			_field(int, osuId, 0) \
+			_field(int, clientId, 0) \
+			_field(std::string, clientSecret, "") \
+			_field(int, apiInterval, 7000) \
+			_field(config::gameMode, mode, config::gameMode::osu) \
+			_field(config::server, server, config::server::bancho)
+
+		static application& instance() {
+			static application ctx;
+			return ctx;
+		}
+
+		#define DECLARE(type, name, default_val) type name = default_val;
+			applicationFields(DECLARE)
+		#undef DECLARE
+
+		// Convert to array
+		std::vector<std::tuple<std::string, std::string>> toArray() const {
+			std::vector<std::tuple<std::string, std::string>> result;
+			#define TO_STRING(type, name, default_val) result.emplace_back(#name, to_string(name));
+				applicationFields(TO_STRING)
+			#undef TO_STRING
+				return result;
+		}
+		std::string get(const std::string& key) const {
+			#define GET_CASE(type, name, default_val) if (key == #name) return to_string(name);
+				applicationFields(GET_CASE)
+			#undef GET_CASE
+			throw std::invalid_argument("Invalid key: " + key);
+		}
+		static void set(const std::string& key, const std::string& value) {
+			application& ctx = instance();
+			#define SET_CASE(type, name, default_val) if (key == #name) { from_string(value, ctx.name); return; }
+				applicationFields(SET_CASE)
+			#undef SET_CASE
+			throw std::invalid_argument("Invalid key: " + key);
+		}
+	private:
+		// Generic string conversion
+		template<typename T>
+		static std::string to_string(const T& val) {
+			if constexpr (std::is_enum_v<T>) {
+				return std::to_string(static_cast<int>(val));
+			}
+			else {
+				return std::to_string(val);
+			}
+		}
+
+		static std::string to_string(const std::string& val) {
+			return val;
+		}
+
+		// Parsing from string
+		template<typename T>
+		static void from_string(const std::string& str, T& out) {
+			std::istringstream ss(str);
+			ss >> out;
+		}
+
+		static void from_string(const std::string& str, std::string& out) {
+			out = str;
+		}
+
+		static void from_string(const std::string& str, config::gameMode& out) {
+			out = static_cast<config::gameMode>(std::stoi(str));
+		}
+
+		static void from_string(const std::string& str, config::server& out) {
+			out = static_cast<config::server>(std::stoi(str));
+		}
+	};
+
+	struct user {
 		std::string username = "";
-		int osuId = 0;
-		int clientId = 0;
-		std::string clientSecret = "";
-		int apiInterval = 7000;
-		gameMode mode = gameMode::osu;
-		server server = server::bancho;
+		std::string avatar = "";
 
 		std::vector<std::tuple<std::string, std::string>> toArray() const {
 			return {
 				{"username", username}
-				,{"osuId", std::to_string(osuId)}
-				,{"clientId", std::to_string(clientId)}
-				,{"clientSecret", clientSecret}
-				,{"apiInterval", std::to_string(apiInterval)}
-				,{"mode", std::to_string(static_cast<int>(mode))}
-				,{"server", std::to_string(static_cast<int>(server))}
+				,{ "avatar", avatar}
 			};
 		}
 	};
 
 	enum class dataType {
-		t_string = 0,
-		t_int = 1,
-		t_decimal = 2
+		t_string = 0
+		,t_int = 1
+		,t_decimal = 2
 	};
 
 	enum class formatType {
-		f_string = 0,
-		f_int = 1,
-		f_decimal = 2,
-		f_rank = 3,
-		f_time = 4,
+		f_string = 0
+		,f_int = 1
+		,f_decimal = 2
+		,f_rank = 3
+		,f_time = 4
 	};
 
 	struct dataEntry {
@@ -74,14 +141,14 @@ public:
 				,{"change", change}
 				,{"dataType", std::to_string(static_cast<int>(dataType))}
 				,{"formatType", std::to_string(static_cast<int>(formatType))}
-				,{"display", boolToString(display)}
-				,{"banchoSupport", boolToString(banchoSupport)}
-				,{"titanicSupport", boolToString(titanicSupport)}
+				,{"display", ext::bool2str(display)}
+				,{"banchoSupport", ext::bool2str(banchoSupport)}
+				,{"titanicSupport", ext::bool2str(titanicSupport)}
 			};
 		}
 	};
 
-	std::vector<dataEntry> vecData {
+	static inline std::vector<dataEntry> vecData {
 		{"level",		"Level",			"", "",	"", dataType::t_decimal,	formatType::f_decimal,	true,	true,	true}
 		,{"rankedScore","Ranked Score",		"", "",	"", dataType::t_int,		formatType::f_int,		true,	true,	true}
 		,{"totalScore",	"Total Score",		"", "",	"", dataType::t_int,		formatType::f_int,		true,	true,	true}
@@ -113,83 +180,74 @@ public:
 		,{"targetUser",	"Target Player",	"", "",	"", dataType::t_string,		formatType::f_string,	true,	true,	true}
 		,{"targetScore","Target Score",		"", "",	"", dataType::t_int,		formatType::f_int,		true,	true,	true}
 	};
-};
 
-// write config
-void writeConfig() {
-	writeLog("Writing config file...");
-	std::string input;
-	input += "//PLEASE DONT MANUALLY EDIT THIS FILE\n"
-			 "//(you still can,but you might break it)\n"
-			 "//(If you want to reset all settings, just delete this file)\n\n";
-	input += "[ApplicationConfig]";
-	for (const auto& [key, value] : config::application{}.toArray()) {
-		input += "\n" + key + ";" + value;
+	enum fileHeader {
+		ApplicationConfig
+		,TrackerConfig
+	};
+	fileHeader resolve(std::string str) {
+		if (str == "[ApplicationConfig]") return ApplicationConfig;
+		if (str == "[TrackerConfig]") return TrackerConfig;
 	}
-	input += "\n\n[TrackerConfig]";
-	for (const auto& _vecData : config::vecData.size()) {
-		// 0 = key : 0
-		// 2 = display : 1
-		input += vec_tracker[i][0] + ";" + vec_tracker[i][2] + "\n";
-	}
-	input += "\n";
-	input += "[TrackerConfigTitanic]\n";
-	for (int i = 1; i < vec_tracker_titanic.size(); i++) {
-		// 0 = key : 0
-		// 2 = display : 1
-		input += vec_tracker_titanic[i][0] + ";" + vec_tracker_titanic[i][2] + "\n";
-	}
-	
-	std::ofstream file;
-	file.open("config.txt");
-	file << input;
-	file.close();
-	writeLog("Config written");
-}
 
-// read config
-void readConfig() {
-	std::ifstream file("config.txt");
-	if (file.is_open()) {
-		writeLog("Reading config file...");
-		std::string line;
-		int configHeader = -1;
-		std::vector<std::string> configLine;
-		while (std::getline(file, line)) {
-			if (line.starts_with("[")) {
-				if (line == "[ApplicationConfig]") {
-					configHeader = 0;
+	void writeConfig() {
+		writeLog("Writing config file...");
+		std::string input;
+		input += "//PLEASE DONT MANUALLY EDIT THIS FILE\n"
+			"//(you still can,but you might break it)\n"
+			"//(If you want to reset all settings, just delete this file)\n\n";
+		input += "[ApplicationConfig]";
+		for (const auto& [key, value] : config::application{}.toArray()) {
+			input += "\n" + key + ";" + value;
+		}
+		input += "\n\n[TrackerConfig]";
+		for (const config::dataEntry _vecData : config::vecData) {
+			input += _vecData.key + ";" + ext::bool2str(_vecData.display) + "\n";
+		}
+		std::ofstream file;
+		file.open("config.txt");
+		file << input;
+		file.close();
+		writeLog("Config written");
+	}
+
+	void readConfig() {
+		if (std::ifstream file{ "config.txt" }; file.is_open()) {
+			writeLog("Reading config file...");
+			int configHeader = -1;
+			for (std::string line; std::getline(file, line); ){
+				if (!line.starts_with("//") && !line.empty())
+					continue;
+				if (line.starts_with("[")) {
+					switch (resolve(line)) {
+						case ApplicationConfig:
+							configHeader = 0;
+							break;
+						case TrackerConfig:
+							configHeader = 1;
+							break;
+					}
+					continue;
 				}
-				if (line == "[TrackerConfig]") {
-					configHeader = 1;
-				}
-				if (line == "[TrackerConfigTitanic]") {
-					configHeader = 2;
-				}
-			}
-			if (!line.starts_with("//") && !line.empty() && !line.starts_with("[")) {
-				configLine = split(line, ';');
-				switch (configHeader)
-				{
+				std::string key, value;
+				std::tie(key,value) = ext::split2tuple(line, ';');
+				switch (configHeader) {
 					case 0:
-						setConfig(vec_application, configLine[0],"value", configLine[1]);
+						config::application::set(key, value);
 						break;
 					case 1:
-						setConfig(vec_tracker, configLine[0], "display", configLine[1]);
-						break;
-					case 2:
-						setConfig(vec_tracker_titanic, configLine[0], "display", configLine[1]);
+						config::vecData::set(key, value);
 						break;
 				}
 			}
+			file.close();
 		}
-		file.close();
+		else {
+			writeLog("Error reading config file", true, 255, 0, 0);
+		}
 	}
-	else {
-		writeLog("Error reading config file",true, 255,0,0);
-	}
-}
 
-void rmConfig() {
-	std::filesystem::remove("config.txt");
-}
+	void rmConfig() {
+		std::filesystem::remove("config.txt");
+	}
+};

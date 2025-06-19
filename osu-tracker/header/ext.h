@@ -1,55 +1,49 @@
 #pragma once
 // HELPER FUNCTIONS
-
-bool isNumeric(const std::string& str) {
-	return std::all_of(str.begin(), str.end(), ::isdigit);
-}
-
-static std::string formatNumber(long long num) {
-	std::string str = std::to_string(num);
-	int n = str.length();
-	for (int i = n - 3; i > 0; i -= 3) {
-		str.insert(i, ".");
+class ext {
+public:
+	bool isNumeric(const std::string& str) {
+		return std::all_of(str.begin(), str.end(), ::isdigit);
 	}
-	return str;
-}
 
-std::string boolToString(bool b) {
-	return b ? "true" : "false";
-}
-
-bool stringToBool(std::string s) {
-	if (s == "true") {
-		return true;
+	static std::string formatNumber(long long num) {
+		std::string str = std::to_string(num);
+		int n = str.length();
+		for (int i = n - 3; i > 0; i -= 3) {
+			str.insert(i, ".");
+		}
+		return str;
 	}
-	else {
+
+	static std::string bool2str(bool b) {
+		return b ? "true" : "false";
+	}
+
+	static bool str2bool(std::string s) {
+		if (s == "true")
+			return true;
 		return false;
 	}
-}	
 
-std::vector<std::string> split(std::string str, char delimiter) {
-	std::vector<std::string> result;
-	size_t start = 0;
-	size_t end = str.find(delimiter);
-
-	while (end != std::string::npos) {
-		result.push_back(str.substr(start, end - start));
-		start = end + 1;
-		end = str.find(delimiter, start);
+	// split a string by a char
+	static std::vector<std::string> split2vector(std::string str, char delimiter) {
+		std::vector<std::string> result;
+		size_t start = 0;
+		size_t end = str.find(delimiter);
+		while (end != std::string::npos) {
+			result.push_back(str.substr(start, end - start));
+			start = end + 1;
+			end = str.find(delimiter, start);
+		}
+		result.push_back(str.substr(start));
+		return result;
 	}
-	result.push_back(str.substr(start));
 
-	return result;
-}
-
-void getInput(std::string name, std::string& var) {
-	std::cin >> var;
-	if (!isNumeric(var)) {
-		std::cout << "Your " << name << " should only contain numbers!\n>";
-		getInput(name, var);
+	static std::tuple<std::string, std::string> split2tuple(std::string str, char delimiter) {
+		size_t pos = str.find(delimiter);
+		if (pos == std::string::npos) {
+			return { str, "" };
+		}
+		return { str.substr(0, pos), str.substr(pos + 1) };
 	}
-}
-
-void getInput(std::string var) {
-	std::cin >> var;
-}
+};
