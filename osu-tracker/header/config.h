@@ -240,7 +240,7 @@ public:
 		if (str == "[Display]") return Display;
 		if (str == "[Sort]") return Sort;
 	}
-
+	// this is basically a csv generator with headers and comments
 	void writeConfig() {
 		writeLog("Writing config file...");
 		std::string input;
@@ -255,9 +255,9 @@ public:
 		for (const config::dataEntry _vecData : config::data::arr) {
 			input += "\n" + _vecData.key + ";" + ext::bool2str(_vecData.display);
 		}
-		input += "\n\n[Sort]\n";
-		for (const config::dataEntry _vecData : config::data::arr) {
-			input += std::to_string(_vecData.sort);
+		input += "\n\n[Sort]\n" + std::to_string(config::data::arr[0].sort);
+		for (size_t _idx = 1; _idx < config::data::arr.size(); _idx++) {
+			input += ";" + std::to_string(config::data::arr[_idx].sort);
 		}
 		std::ofstream file;
 		file.open("config.txt");
@@ -298,7 +298,10 @@ public:
 						config::data::arr[config::data::getIndex(key.c_str())].display = ext::str2bool(value);
 						break;
 					case 2:
-						config::data::arr[config::data::getIndex(key.c_str())].display = ext::str2bool(value);
+						std::vector<std::string> _arr = ext::split2vector(line, ';');
+						for (size_t _idx = 0; _idx < _arr.size(); _idx++) {
+							config::data::arr[_idx].sort = std::stoi(_arr[_idx]);
+						}
 						break;
 				}
 			}
