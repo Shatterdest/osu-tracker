@@ -54,20 +54,13 @@ int main()
 	while (run) {
 		if (!std::filesystem::exists("config.txt")) {
 			writeLog("Config file not found");
-
-			// fix: direct index access
-			setConfig(vec_application, "osu_id", "value", "");
-			setConfig(vec_application, "client_id", "value", "");
-			setConfig(vec_application, "client_secret", "value", "");
-			setConfig(vec_application, "api_refreshInterval", "value", "7000");
-			setConfig(vec_application, "server", "value", "0");
-			writeConfig();
-			readConfig();
+			config::writeConfig();
+			config::readConfig();
 		}
 		else {
 			writeLog("Config file found");
-			readConfig();
-			writeConfig();
+			config::readConfig();
+			config::writeConfig();
 		}
 		#if OSU_TRACKER_ENABLE_WEBSERVER == 1
 			fetch_api_data(true);

@@ -235,13 +235,13 @@ public:
 		,Display
 		,Sort
 	};
-	fileHeader resolve(std::string str) {
+	static fileHeader resolve(std::string str) {
 		if (str == "[Main]") return Main;
 		if (str == "[Display]") return Display;
 		if (str == "[Sort]") return Sort;
 	}
 	// this is basically a csv generator with headers and comments
-	void writeConfig() {
+	static void writeConfig() {
 		writeLog("Writing config file...");
 		std::string input;
 		input += "//PLEASE DONT MANUALLY EDIT THIS FILE\n"
@@ -266,7 +266,7 @@ public:
 		writeLog("Config written");
 	}
 
-	void readConfig() {
+	static void readConfig() {
 		if (std::ifstream file{ "config.txt" }; file.is_open()) {
 			writeLog("Reading config file...");
 			int configHeader = -1;
