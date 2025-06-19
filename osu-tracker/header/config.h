@@ -4,6 +4,44 @@
 #include "console.h"
 #include <algorithm>
 
+#define FOREACH_DATA_KEY(F) \
+	F(level) \
+	F(rankedScore) \
+	F(totalScore) \
+	F(pp) \
+	F(ppv1) \
+	F(acc) \
+	F(playtime) \
+	F(playcount) \
+	F(totalHits) \
+	F(silverSS) \
+	F(goldSS) \
+	F(silverS) \
+	F(goldS) \
+	F(a) \
+	F(b) \
+	F(c) \
+	F(d) \
+	F(totalSS) \
+	F(totalS) \
+	F(clears) \
+	F(totalClears) \
+	F(completion) \
+	F(scoreRank) \
+	F(targetRank) \
+	F(targetUser) \
+	F(targetScore)
+
+constexpr bool str_eq(const char* a, const char* b) {
+	while (*a && *b) {
+		if (*a != *b) return false;
+		++a; ++b;
+	}
+	return *a == *b;
+}
+
+#define GEN_CASE(name, idx) if (str_eq(key, #name)) return idx;
+
 class config {
 public:
 	enum class gameMode {
@@ -123,6 +161,7 @@ public:
 	struct dataEntry {
 		std::string key;
 		std::string name;
+		int sort;
 		std::string init;
 		std::string current;
 		std::string change;
@@ -136,6 +175,7 @@ public:
 			return {
 				{"key", key}
 				,{"name", name}
+				,{"sort", std::to_string(sort)}
 				,{"init", init}
 				,{"current", current}
 				,{"change", change}
@@ -147,47 +187,58 @@ public:
 			};
 		}
 	};
+	
+	class data {
+	public:
+		static inline std::vector<dataEntry> arr {
+			{"level",		"Level",			1, "", "",	"", dataType::t_decimal,	formatType::f_decimal,	true,	true,	true}
+			,{"rankedScore","Ranked Score",		2, "", "",	"", dataType::t_int,		formatType::f_int,		true,	true,	true}
+			,{"totalScore",	"Total Score",		3, "", "",	"", dataType::t_int,		formatType::f_int,		true,	true,	true}
+			,{"ppRank",		"PP Rank",			4, "", "",	"", dataType::t_int,		formatType::f_rank,		true,	true,	true}
+			,{"pp",			"PP",				5, "", "",	"", dataType::t_decimal,	formatType::f_decimal,	true,	true,	true}
+			,{"ppv1",		"PPv1",				6, "", "",	"", dataType::t_decimal,	formatType::f_decimal,	true,	false,	true}
+			,{"acc",		"Accuracy",			7, "", "",	"", dataType::t_decimal,	formatType::f_decimal,	true,	true,	true}
+			,{"playtime",	"Play Time",		8, "", "",	"", dataType::t_int,		formatType::f_time,		true,	true,	true}
+			,{"playcount",	"Play Count",		9, "", "",	"", dataType::t_int,		formatType::f_int,		true,	true,	true}
+			,{"totalHits",	"Total Hits",		10, "", "",	"", dataType::t_int,		formatType::f_int,		true,	true,	true}
 
-	static inline std::vector<dataEntry> vecData {
-		{"level",		"Level",			"", "",	"", dataType::t_decimal,	formatType::f_decimal,	true,	true,	true}
-		,{"rankedScore","Ranked Score",		"", "",	"", dataType::t_int,		formatType::f_int,		true,	true,	true}
-		,{"totalScore",	"Total Score",		"", "",	"", dataType::t_int,		formatType::f_int,		true,	true,	true}
-		,{"ppRank",		"PP Rank",			"", "",	"", dataType::t_int,		formatType::f_rank,		true,	true,	true}
-		,{"pp",			"PP",				"", "",	"", dataType::t_decimal,	formatType::f_decimal,	true,	true,	true}
-		,{"ppv1",		"PPv1",				"", "",	"", dataType::t_decimal,	formatType::f_decimal,	true,	false,	true}
-		,{"acc",		"Accuracy",			"", "",	"", dataType::t_decimal,	formatType::f_decimal,	true,	true,	true}
-		,{"playtime",	"Play Time",		"", "",	"", dataType::t_int,		formatType::f_time,		true,	true,	true}
-		,{"playcount",	"Play Count",		"", "",	"", dataType::t_int,		formatType::f_int,		true,	true,	true}
-		,{"totalHits",	"Total Hits",		"", "",	"", dataType::t_int,		formatType::f_int,		true,	true,	true}
+			,{"silverSS",	"Rank SSH",			11, "", "",	"", dataType::t_int,		formatType::f_int,		true,	true,	true}
+			,{"goldSS",		"Rank SS",			12, "", "",	"", dataType::t_int,		formatType::f_int,		true,	true,	true}
+			,{"silverS",	"Rank SH",			13, "", "",	"", dataType::t_int,		formatType::f_int,		true,	true,	true}
+			,{"goldS",		"Rank S",			14, "", "",	"", dataType::t_int,		formatType::f_int,		true,	true,	true}
+			,{"a",			"Rank A",			15, "", "",	"", dataType::t_int,		formatType::f_int,		true,	true,	true}
+			,{"b",			"Rank B",			16, "", "",	"", dataType::t_int,		formatType::f_int,		true,	true,	true}
+			,{"c",			"Rank C",			17, "", "",	"", dataType::t_int,		formatType::f_int,		true,	true,	true}
+			,{"d",			"Rank D",			18, "", "",	"", dataType::t_int,		formatType::f_int,		true,	true,	true}
+			,{"totalSS",	"Total SS",			19, "", "",	"", dataType::t_int,		formatType::f_int,		true,	true,	true}
+			,{"totalS",		"Total S",			20, "", "",	"", dataType::t_int,		formatType::f_int,		true,	true,	true}
 
-		,{"silverSS",	"Rank SSH",			"", "",	"", dataType::t_int,		formatType::f_int,		true,	true,	true}
-		,{"goldSS",		"Rank SS",			"", "",	"", dataType::t_int,		formatType::f_int,		true,	true,	true}
-		,{"silverS",	"Rank SH",			"", "",	"", dataType::t_int,		formatType::f_int,		true,	true,	true}
-		,{"goldS",		"Rank S",			"", "",	"", dataType::t_int,		formatType::f_int,		true,	true,	true}
-		,{"a",			"Rank A",			"", "",	"", dataType::t_int,		formatType::f_int,		true,	true,	true}
-		,{"b",			"Rank B",			"", "",	"", dataType::t_int,		formatType::f_int,		true,	true,	true}
-		,{"c",			"Rank C",			"", "",	"", dataType::t_int,		formatType::f_int,		true,	true,	true}
-		,{"d",			"Rank D",			"", "",	"", dataType::t_int,		formatType::f_int,		true,	true,	true}
-		,{"totalSS",	"Total SS",			"", "",	"", dataType::t_int,		formatType::f_int,		true,	true,	true}
-		,{"totalS",		"Total S",			"", "",	"", dataType::t_int,		formatType::f_int,		true,	true,	true}
+			,{"clears",		"Profile Clears",	21, "", "",	"", dataType::t_int,		formatType::f_int,		true,	true,	true}
+			,{"totalClears","Total Clears",		22, "", "",	"", dataType::t_int,		formatType::f_int,		true,	true,	true}
+			,{"completion",	"Completion%",		23, "", "",	"", dataType::t_decimal,	formatType::f_decimal,	true,	true,	true}
+			,{"scoreRank",	"Score Rank",		24, "", "",	"", dataType::t_int,		formatType::f_rank,		true,	true,	true}
 
-		,{"clears",		"Profile Clears",	"", "",	"", dataType::t_int,		formatType::f_int,		true,	true,	true}
-		,{"totalClears","Total Clears",		"", "",	"", dataType::t_int,		formatType::f_int,		true,	true,	true}
-		,{"completion",	"Completion%",		"", "",	"", dataType::t_decimal,	formatType::f_decimal,	true,	true,	true}
-		,{"scoreRank",	"Score Rank",		"", "",	"", dataType::t_int,		formatType::f_rank,		true,	true,	true}
+			,{"targetRank",	"Target Rank",		25, "", "",	"", dataType::t_int,		formatType::f_rank,		true,	true,	true}
+			,{"targetUser",	"Target Player",	26, "", "",	"", dataType::t_string,		formatType::f_string,	true,	true,	true}
+			,{"targetScore","Target Score",		27, "", "",	"", dataType::t_int,		formatType::f_int,		true,	true,	true}
+		};
 
-		,{"targetRank",	"Target Rank",		"", "",	"", dataType::t_int,		formatType::f_rank,		true,	true,	true}
-		,{"targetUser",	"Target Player",	"", "",	"", dataType::t_string,		formatType::f_string,	true,	true,	true}
-		,{"targetScore","Target Score",		"", "",	"", dataType::t_int,		formatType::f_int,		true,	true,	true}
+		static constexpr int getIndex(const char* key) {
+		#define INDEX_CASE(name) GEN_CASE(name, __COUNTER__)
+			FOREACH_DATA_KEY(INDEX_CASE)
+				return -1;
+		}
 	};
 
 	enum fileHeader {
-		ApplicationConfig
-		,TrackerConfig
+		Main
+		,Display
+		,Sort
 	};
 	fileHeader resolve(std::string str) {
-		if (str == "[ApplicationConfig]") return ApplicationConfig;
-		if (str == "[TrackerConfig]") return TrackerConfig;
+		if (str == "[Main]") return Main;
+		if (str == "[Display]") return Display;
+		if (str == "[Sort]") return Sort;
 	}
 
 	void writeConfig() {
@@ -196,13 +247,17 @@ public:
 		input += "//PLEASE DONT MANUALLY EDIT THIS FILE\n"
 			"//(you still can,but you might break it)\n"
 			"//(If you want to reset all settings, just delete this file)\n\n";
-		input += "[ApplicationConfig]";
+		input += "[Main]";
 		for (const auto& [key, value] : config::application{}.toArray()) {
 			input += "\n" + key + ";" + value;
 		}
-		input += "\n\n[TrackerConfig]";
-		for (const config::dataEntry _vecData : config::vecData) {
-			input += _vecData.key + ";" + ext::bool2str(_vecData.display) + "\n";
+		input += "\n\n[Display]";
+		for (const config::dataEntry _vecData : config::data::arr) {
+			input += "\n" + _vecData.key + ";" + ext::bool2str(_vecData.display);
+		}
+		input += "\n\n[Sort]\n";
+		for (const config::dataEntry _vecData : config::data::arr) {
+			input += std::to_string(_vecData.sort);
 		}
 		std::ofstream file;
 		file.open("config.txt");
@@ -220,23 +275,30 @@ public:
 					continue;
 				if (line.starts_with("[")) {
 					switch (resolve(line)) {
-						case ApplicationConfig:
+						case Main:
 							configHeader = 0;
 							break;
-						case TrackerConfig:
+						case Display:
 							configHeader = 1;
+							break;
+						case Sort:
+							configHeader = 2;
 							break;
 					}
 					continue;
 				}
 				std::string key, value;
-				std::tie(key,value) = ext::split2tuple(line, ';');
 				switch (configHeader) {
 					case 0:
+						std::tie(key, value) = ext::split2tuple(line, ';');
 						config::application::set(key, value);
 						break;
 					case 1:
-						config::vecData::set(key, value);
+						std::tie(key, value) = ext::split2tuple(line, ';');
+						config::data::arr[config::data::getIndex(key.c_str())].display = ext::str2bool(value);
+						break;
+					case 2:
+						config::data::arr[config::data::getIndex(key.c_str())].display = ext::str2bool(value);
 						break;
 				}
 			}
