@@ -203,37 +203,30 @@ bool webserver_start(bool skipInit = false)
 					bool resetSession = false;
 					if 
 						(
-						j["msg"]["applicationConfig"][0]["value"] != vec_application[1][1] // userid 
-						|| j["msg"]["applicationConfig"][1]["value"] != vec_application[2][1] // client id
-						|| j["msg"]["applicationConfig"][2]["value"] != vec_application[3][1] // client secret
-						|| j["msg"]["applicationConfig"][4]["value"] != vec_application[5][1] // game mode
-						|| j["msg"]["applicationConfig"][5]["value"] != vec_application[6][1] // server
+						j["msg"]["applicationConfig"][0]["value"] != config::application::instance().get("userId")
+						|| j["msg"]["applicationConfig"][1]["value"] != config::application::instance().get("clientId")
+						|| j["msg"]["applicationConfig"][2]["value"] != config::application::instance().get("clientSecret")
+						|| j["msg"]["applicationConfig"][4]["value"] != config::application::instance().get("gameMode")
+						|| j["msg"]["applicationConfig"][5]["value"] != config::application::instance().get("server")
 						) 
 					{
 						// reset tracker data
 						resetSession = true;
 					}
 					for (const auto& item : j["msg"]["applicationConfig"]) {
-						setConfig(vec_application, item["key"], "value", item["value"]);
+						config::application::set(item["key"], item["value"]);
 					}
-					switch (std::stoi(vec_application[6][1])) {
-					case 0:
-						for (const auto& item : j["msg"]["trackerConfig"]) {
-							setConfig(vec_tracker, item["key"], "display", boolToString(item["value"]));
-						}
-						break;
-					case 1:
-						for (const auto& item : j["msg"]["trackerConfig"]) {
-							setConfig(vec_tracker_titanic, item["key"], "display", boolToString(item["value"]));
-						}
-						break;
+					// server independent
+					for (const auto& item : j["msg"]["trackerConfig"]) {
+						config::data::arr[config::data::getIndex(item["key"].get<std::string>().c_str())].display = ext::str2bool(item["value"]);
 					}
+
 					if(resetSession)
 						fetch_api_data(true);
-					writeConfig();
+					config::writeConfig();
 				}
 				if (cmd == "#resetSettings") {
-					rmConfig();
+					config::rmConfig();
 					shutdownWebServer(false); //restart web server
 				}
 				if (cmd == "#resetSession") {
@@ -305,31 +298,30 @@ bool webserver_start(bool skipInit = false)
 			crow::mustache::context ctx;
 			ctx["hostname"] = OSU_TRACKER_WEBSERVER_IP;
 			ctx["port"] = OSU_TRACKER_WEBSERVER_PORT;
-			ctx["username"] = username;
-			ctx["refreshInterval"] = vec_application[4][1];
+			ctx["username"] = config::user::instance().username;
+			ctx["refreshInterval"] = config::application::instance().apiInterval;
 
 			std::vector<crow::json::wvalue> elements;
-			switch (std::stoi(vec_application[6][1])) {
-			case 0:
-				for (size_t i = 1; i < vec_tracker.size(); i++) {
-					if (vec_tracker[i][2] == "true") {
-						crow::json::wvalue el;
-						el["id"] = vec_tracker[i][0];
-						el["label"] = vec_tracker[i][1];
-						elements.push_back(std::move(el));
+			for (const config::dataEntry _vecData : config::data::arr) {
+				if (_vecData.display) {
+					crow::json::wvalue el;
+					switch (config::application::instance().server){
+						case config::server::bancho:
+							if (!_vecData.banchoSupport)
+								continue;
+							el["id"] = _vecData.key;
+							el["label"] = _vecData.name;
+							elements.push_back(std::move(el));
+							break;
+						case config::server::titanic:
+							if (!_vecData.titanicSupport)
+								continue;
+							el["id"] = _vecData.key;
+							el["label"] = _vecData.name;
+							elements.push_back(std::move(el));
+							break;
 					}
 				}
-				break;
-			case 1:
-				for (size_t i = 1; i < vec_tracker_titanic.size(); i++) {
-					if (vec_tracker_titanic[i][2] == "true") {
-						crow::json::wvalue el;
-						el["id"] = vec_tracker_titanic[i][0];
-						el["label"] = vec_tracker_titanic[i][1];
-						elements.push_back(std::move(el));
-					}
-				}
-				break;
 			}
 			ctx["trackerElements"] = std::move(elements);
 
@@ -348,58 +340,63 @@ bool webserver_start(bool skipInit = false)
 
 			// config
 			ctx["osu_id_name"] = "osu! User ID";
-			ctx["osu_id_val"] = vec_application[1][1];
+			ctx["osu_id_val"] = config::application::instance().get("osuId");
 			ctx["osu_id_desc"] = "Your osu! user id.";
 
 			ctx["client_id_name"] = "Client ID";
-			ctx["client_id_val"] = vec_application[2][1];
+			ctx["client_id_val"] = config::application::instance().get("clientId");
 			ctx["client_id_desc"] = "osu! API V2 Client ID.";
 
 			ctx["client_secret_name"] = "Client Secret";
-			ctx["client_secret_val"] = vec_application[3][1];
+			ctx["client_secret_val"] = config::application::instance().get("clientSecret");
 			ctx["client_secret_desc"] = "osu! API V2 Client Secret ( DO NOT SHARE )!";
 
 			ctx["api_refreshInterval_name"] = "API Refresh Interval";
-			ctx["api_refreshInterval_val"] = vec_application[4][1];
+			ctx["api_refreshInterval_val"] = config::application::instance().get("apiInterval");
 			ctx["api_refreshInterval_desc"] = "Time in (ms) till api fetches again in the loop.";
 
 			ctx["gameMode_name"] = "Game Mode";
-			ctx["gameMode_val_" + vec_application[5][1]] = "selected";
+			ctx["gameMode_val_" + std::to_string(static_cast<int>(config::application::instance().mode))] = "selected";
 			ctx["gameMode_desc"] = "Game Mode to track.";
 
 			ctx["server_name"] = "Server";
-			ctx["server_val_" + vec_application[6][1]] = "selected";
+			ctx["server_val_" + std::to_string(static_cast<int>(config::application::instance().server))] = "selected";
 			ctx["server_desc"] = "Which Server you want to track, bancho or a private server.";
 
-			if (std::stoi(vec_application[6][1]) > 0) {
-				// bootstrap: "display: none" class
-				// hide settings not related to private server
-				ctx["hide_on_privateServer"] = "d-none";
+
+			// bootstrap: "display: none" class
+			// hide settings not related to private server
+			switch (config::application::instance().server) {
+				case config::server::titanic:
+					ctx["hide_on_privateServer"] = "d-none";
+					break;
 			}
 
 			std::vector<crow::json::wvalue> elements;
-			switch (std::stoi(vec_application[6][1])) {
-			case 0: // bancho
+			switch (config::application::instance().server) {
+			case config::server::bancho:
 				ctx["tracker_config_name"] = "Bancho Tracker Config";
-				for (size_t i = 1; i < vec_tracker.size(); ++i) {
+				for (const config::dataEntry _vecData : config::data::arr) {
+					if (!_vecData.banchoSupport)
+						continue;
 					crow::json::wvalue el;
-					el["id"] = vec_tracker[i][0];
-					el["label"] = vec_tracker[i][1];
-					if (vec_tracker[i][2] == "true") {
+					el["id"] = _vecData.key;
+					el["label"] = _vecData.name;
+					if(_vecData.display)
 						el["checked"] = " checked";
-					}
 					elements.push_back(std::move(el));
-				}
+				}				
 				break;
-			case 1: // titanic
+			case config::server::titanic:
 				ctx["tracker_config_name"] = "Titanic Tracker Config";
-				for (size_t i = 1; i < vec_tracker_titanic.size(); ++i) {
+				for (const config::dataEntry _vecData : config::data::arr) {
+					if (!_vecData.titanicSupport)
+						continue;
 					crow::json::wvalue el;
-					el["id"] = vec_tracker_titanic[i][0];
-					el["label"] = vec_tracker_titanic[i][1];
-					if (vec_tracker_titanic[i][2] == "true") {
+					el["id"] = _vecData.key;
+					el["label"] = _vecData.name;
+					if (_vecData.display)
 						el["checked"] = " checked";
-					}
 					elements.push_back(std::move(el));
 				}
 				break;

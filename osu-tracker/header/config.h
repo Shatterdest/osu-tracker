@@ -133,6 +133,12 @@ public:
 	};
 
 	struct user {
+
+		static user& instance() {
+			static user ctx;
+			return ctx;
+		}
+
 		std::string username = "";
 		std::string avatar = "";
 
@@ -312,7 +318,7 @@ public:
 		}
 	}
 
-	void rmConfig() {
+	static void rmConfig() {
 		std::filesystem::remove("config.txt");
 	}
 };
