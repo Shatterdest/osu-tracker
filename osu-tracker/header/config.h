@@ -222,7 +222,7 @@ public:
 			,{"clears",		"Profile Clears",	21, "", "",	"", dataType::t_int,		formatType::f_int,		true,	true,	true}
 			,{"totalClears","Total Clears",		22, "", "",	"", dataType::t_int,		formatType::f_int,		true,	true,	true}
 			,{"completion",	"Completion%",		23, "", "",	"", dataType::t_decimal,	formatType::f_decimal,	true,	true,	true}
-			,{"scoreRank",	"Score Rank",		24, "", "",	"", dataType::t_int,		formatType::f_rank,		true,	true,	true}
+			,{"scoreRank",	"Score Rank",		24, "", "",	"", dataType::t_int,		formatType::f_rank,		true,	true,	false}
 
 			,{"targetRank",	"Target Rank",		25, "", "",	"", dataType::t_int,		formatType::f_rank,		true,	true,	true}
 			,{"targetUser",	"Target Player",	26, "", "",	"", dataType::t_string,		formatType::f_string,	true,	true,	true}

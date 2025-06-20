@@ -42,7 +42,7 @@ long double getLevelFromScore(long double totalScore) {
 int api_auth() {
 	try {
 		nlohmann::json request;
-		std::string body = R"({"client_id":)" + vec_application[2][1] + R"(, "client_secret":")" + vec_application[3][1] + R"(", "grant_type":"client_credentials", "scope":"public"})";
+		std::string body = R"({"client_id":)" + std::to_string(config::application::instance().clientId) + R"(, "client_secret":")" + config::application::instance().clientSecret + R"(", "grant_type":"client_credentials", "scope":"public"})";
 		cpr::Response r = cpr::Post(cpr::Url{ "https://osu.ppy.sh/oauth/token" },
 			cpr::Body{body},
 			cpr::Header{ { "Content-Type", "application/json" } });
@@ -87,10 +87,11 @@ int api_auth() {
 //	TITANIC
 // #############
 int titanic_api(bool init) {
-	writeLog(std::string("titanic_api(init) -> ") + boolToString(init), false, 0, 0, 255);
+	writeLog(std::string("titanic_api(init) -> ") + ext::bool2str(init), false, 0, 0, 255);
 	try {
 		int mode = 0;
-		static const std::string _mode = vec_application[5][1];
+
+		static const std::string _mode = std::to_string(static_cast<int>(config::application::instance().mode));
 
 		cpr::Response r;
 		cpr::Response r2;
@@ -98,7 +99,7 @@ int titanic_api(bool init) {
 		// Thread function for the first request
 		auto fetch_users = [&r]() {
 			r = cpr::Get(
-				cpr::Url{ "https://api.titanic.sh/users/" + vec_application[1][1] },
+				cpr::Url{ "https://api.titanic.sh/users/" + std::to_string(config::application::instance().osuId) },
 				cpr::Header{
 					{ "Content-Type", "application/json" },
 					{ "Accept", "application/json" }
@@ -144,36 +145,35 @@ int titanic_api(bool init) {
 			}
 		}
 
-		username = _j["name"].get<std::string>();
+		config::user::instance().username = _j["name"].get<std::string>();
 
 		if (init) {
-			 
-			vec_data_titanic[0][1] = std::to_string(getLevelFromScore(_j["stats"][mode]["tscore"].get<long long>())); // level
-			vec_data_titanic[1][1] = std::to_string(_j["stats"][mode]["rscore"].get<long long>());
-			vec_data_titanic[2][1] = std::to_string(_j["stats"][mode]["tscore"].get<long long>());
-			vec_data_titanic[3][1] = std::to_string(_j["stats"][mode]["rank"].get<int>());
-			vec_data_titanic[4][1] = std::to_string(_j["stats"][mode]["pp"].get<float>());
-			vec_data_titanic[5][1] = std::to_string(_j["stats"][mode]["ppv1"].get<float>());
-			vec_data_titanic[6][1] = std::to_string(_j["stats"][mode]["acc"].get<float>()*100);
-			vec_data_titanic[7][1] = std::to_string(_j["stats"][mode]["playtime"].get<long long>());
-			vec_data_titanic[8][1] = std::to_string(_j["stats"][mode]["playcount"].get<int>());
-			vec_data_titanic[9][1] = std::to_string(_j["stats"][mode]["total_hits"].get<int>());
-			vec_data_titanic[10][1] = std::to_string(_j["stats"][mode]["xh_count"].get<int>());
-			vec_data_titanic[11][1] = std::to_string(_j["stats"][mode]["x_count"].get<int>());
-			vec_data_titanic[12][1] = std::to_string(_j["stats"][mode]["sh_count"].get<int>());
-			vec_data_titanic[13][1] = std::to_string(_j["stats"][mode]["s_count"].get<int>());
-			vec_data_titanic[14][1] = std::to_string(_j["stats"][mode]["a_count"].get<int>());
-			vec_data_titanic[15][1] = std::to_string(std::stoi(vec_data_titanic[10][1]) + std::stoi(vec_data_titanic[11][1])); // total ss
-			vec_data_titanic[16][1] = std::to_string(std::stoi(vec_data_titanic[12][1]) + std::stoi(vec_data_titanic[13][1])); // total s
-			vec_data_titanic[17][1] = std::to_string(std::stoi(vec_data_titanic[15][1]) + std::stoi(vec_data_titanic[16][1]) + std::stoi(vec_data_titanic[14][1])); // profile clears
+			config::data::arr[config::data::getIndex("level")].init = std::to_string(getLevelFromScore(_j["stats"][mode]["tscore"].get<long long>())); // level
+			config::data::arr[config::data::getIndex("rankedScore")].init = std::to_string(_j["stats"][mode]["rscore"].get<long long>());
+			config::data::arr[config::data::getIndex("totalScore")].init = std::to_string(_j["stats"][mode]["tscore"].get<long long>());
+			config::data::arr[config::data::getIndex("ppRank")].init = std::to_string(_j["stats"][mode]["rank"].get<int>());
+			config::data::arr[config::data::getIndex("pp")].init = std::to_string(_j["stats"][mode]["pp"].get<float>());
+			config::data::arr[config::data::getIndex("ppv1")].init = std::to_string(_j["stats"][mode]["ppv1"].get<float>());
+			config::data::arr[config::data::getIndex("acc")].init = std::to_string(_j["stats"][mode]["acc"].get<float>()*100);
+			config::data::arr[config::data::getIndex("playtime")].init = std::to_string(_j["stats"][mode]["playtime"].get<long long>());
+			config::data::arr[config::data::getIndex("playcount")].init = std::to_string(_j["stats"][mode]["playcount"].get<int>());
+			config::data::arr[config::data::getIndex("totalHits")].init = std::to_string(_j["stats"][mode]["total_hits"].get<int>());
+			config::data::arr[config::data::getIndex("silverSS")].init = std::to_string(_j["stats"][mode]["xh_count"].get<int>());
+			config::data::arr[config::data::getIndex("goldSS")].init = std::to_string(_j["stats"][mode]["x_count"].get<int>());
+			config::data::arr[config::data::getIndex("silverS")].init = std::to_string(_j["stats"][mode]["sh_count"].get<int>());
+			config::data::arr[config::data::getIndex("goldS")].init = std::to_string(_j["stats"][mode]["s_count"].get<int>());
+			config::data::arr[config::data::getIndex("a")].init = std::to_string(_j["stats"][mode]["a_count"].get<int>());
+			config::data::arr[config::data::getIndex("totalSS")].init = std::to_string(std::stoi(config::data::arr[config::data::getIndex("silverSS")].init) + std::stoi(config::data::arr[config::data::getIndex("goldSS")].init)); // total ss
+			config::data::arr[config::data::getIndex("totalS")].init = std::to_string(std::stoi(config::data::arr[config::data::getIndex("silverS")].init) + std::stoi(config::data::arr[config::data::getIndex("goldS")].init)); // total s
+			config::data::arr[config::data::getIndex("clears")].init = std::to_string(std::stoi(config::data::arr[config::data::getIndex("totalSS")].init) + std::stoi(config::data::arr[config::data::getIndex("totalS")].init) + std::stoi(config::data::arr[config::data::getIndex("a")].init)); // profile clears
 
 			// score rank, not supported by titanic (yet)
-			vec_data_respektive[0][1] = "";
+			//vec_data_respektive[0][1] = "";
 
 			// b,c,d
-			vec_data_inspector[0][1] = std::to_string(_j["stats"][mode]["b_count"].get<int>());
-			vec_data_inspector[1][1] = std::to_string(_j["stats"][mode]["c_count"].get<int>());
-			vec_data_inspector[2][1] = std::to_string(_j["stats"][mode]["d_count"].get<int>());
+			config::data::arr[config::data::getIndex("b")].init = std::to_string(_j["stats"][mode]["b_count"].get<int>());
+			config::data::arr[config::data::getIndex("c")].init = std::to_string(_j["stats"][mode]["c_count"].get<int>());
+			config::data::arr[config::data::getIndex("d")].init = std::to_string(_j["stats"][mode]["d_count"].get<int>());
 			// calculate for titanic
 			vec_data_inspector[3][1] = std::to_string(std::stoi(vec_data_titanic[17][1]) + std::stoi(vec_data_inspector[0][1]) + std::stoi(vec_data_inspector[1][1]) + std::stoi(vec_data_inspector[2][1]));
 			// completion%
@@ -271,7 +271,7 @@ int titanic_api(bool init) {
 static void osu_api(bool init) {
 	try {
 		std::string mode;
-		switch (std::stoi(vec_application[5][1])) {
+		switch (static_cast<int>(config::application::instance().mode)) {
 			case 0:
 				mode = "osu";
 				break;
