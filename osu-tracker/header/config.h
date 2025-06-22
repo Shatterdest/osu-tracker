@@ -151,9 +151,10 @@ public:
 	};
 
 	enum class dataType {
-		t_string = 0
-		,t_int = 1
-		,t_decimal = 2
+		_string = 0
+		,_int = 1
+		,_float = 2
+		,_longLong = 3
 	};
 
 	enum class formatType {
@@ -173,6 +174,7 @@ public:
 		std::string change;
 		dataType dataType;
 		formatType formatType;
+		bool noDiff;
 		bool display;
 		bool banchoSupport;
 		bool titanicSupport;
@@ -187,6 +189,7 @@ public:
 				,{"change", change}
 				,{"dataType", std::to_string(static_cast<int>(dataType))}
 				,{"formatType", std::to_string(static_cast<int>(formatType))}
+				,{"noDiff", ext::bool2str(display)}
 				,{"display", ext::bool2str(display)}
 				,{"banchoSupport", ext::bool2str(banchoSupport)}
 				,{"titanicSupport", ext::bool2str(titanicSupport)}
@@ -197,36 +200,36 @@ public:
 	class data {
 	public:
 		static inline std::vector<dataEntry> arr {
-			{"level",		"Level",			1, "", "",	"", dataType::t_decimal,	formatType::f_decimal,	true,	true,	true}
-			,{"rankedScore","Ranked Score",		2, "", "",	"", dataType::t_int,		formatType::f_int,		true,	true,	true}
-			,{"totalScore",	"Total Score",		3, "", "",	"", dataType::t_int,		formatType::f_int,		true,	true,	true}
-			,{"ppRank",		"PP Rank",			4, "", "",	"", dataType::t_int,		formatType::f_rank,		true,	true,	true}
-			,{"pp",			"PP",				5, "", "",	"", dataType::t_decimal,	formatType::f_decimal,	true,	true,	true}
-			,{"ppv1",		"PPv1",				6, "", "",	"", dataType::t_decimal,	formatType::f_decimal,	true,	false,	true}
-			,{"acc",		"Accuracy",			7, "", "",	"", dataType::t_decimal,	formatType::f_decimal,	true,	true,	true}
-			,{"playtime",	"Play Time",		8, "", "",	"", dataType::t_int,		formatType::f_time,		true,	true,	true}
-			,{"playcount",	"Play Count",		9, "", "",	"", dataType::t_int,		formatType::f_int,		true,	true,	true}
-			,{"totalHits",	"Total Hits",		10, "", "",	"", dataType::t_int,		formatType::f_int,		true,	true,	true}
-
-			,{"silverSS",	"Rank SSH",			11, "", "",	"", dataType::t_int,		formatType::f_int,		true,	true,	true}
-			,{"goldSS",		"Rank SS",			12, "", "",	"", dataType::t_int,		formatType::f_int,		true,	true,	true}
-			,{"silverS",	"Rank SH",			13, "", "",	"", dataType::t_int,		formatType::f_int,		true,	true,	true}
-			,{"goldS",		"Rank S",			14, "", "",	"", dataType::t_int,		formatType::f_int,		true,	true,	true}
-			,{"a",			"Rank A",			15, "", "",	"", dataType::t_int,		formatType::f_int,		true,	true,	true}
-			,{"b",			"Rank B",			16, "", "",	"", dataType::t_int,		formatType::f_int,		true,	true,	true}
-			,{"c",			"Rank C",			17, "", "",	"", dataType::t_int,		formatType::f_int,		true,	true,	true}
-			,{"d",			"Rank D",			18, "", "",	"", dataType::t_int,		formatType::f_int,		true,	true,	true}
-			,{"totalSS",	"Total SS",			19, "", "",	"", dataType::t_int,		formatType::f_int,		true,	true,	true}
-			,{"totalS",		"Total S",			20, "", "",	"", dataType::t_int,		formatType::f_int,		true,	true,	true}
-
-			,{"clears",		"Profile Clears",	21, "", "",	"", dataType::t_int,		formatType::f_int,		true,	true,	true}
-			,{"totalClears","Total Clears",		22, "", "",	"", dataType::t_int,		formatType::f_int,		true,	true,	true}
-			,{"completion",	"Completion%",		23, "", "",	"", dataType::t_decimal,	formatType::f_decimal,	true,	true,	true}
-			,{"scoreRank",	"Score Rank",		24, "", "",	"", dataType::t_int,		formatType::f_rank,		true,	true,	false}
-
-			,{"targetRank",	"Target Rank",		25, "", "",	"", dataType::t_int,		formatType::f_rank,		true,	true,	true}
-			,{"targetUser",	"Target Player",	26, "", "",	"", dataType::t_string,		formatType::f_string,	true,	true,	true}
-			,{"targetScore","Target Score",		27, "", "",	"", dataType::t_int,		formatType::f_int,		true,	true,	true}
+			{"level",		"Level",			1, "", "",	"", dataType::_float,	formatType::f_decimal,	true,	true,	true,	true}
+			,{"rankedScore","Ranked Score",		2, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	true,	true}
+			,{"totalScore",	"Total Score",		3, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	true,	true}
+			,{"ppRank",		"PP Rank",			4, "", "",	"", dataType::_int,		formatType::f_rank,		true,	true,	true,	true}
+			,{"pp",			"PP",				5, "", "",	"", dataType::_float,	formatType::f_decimal,	true,	true,	true,	true}
+			,{"ppv1",		"PPv1",				6, "", "",	"", dataType::_float,	formatType::f_decimal,	true,	true,	false,	true}
+			,{"acc",		"Accuracy",			7, "", "",	"", dataType::_float,	formatType::f_decimal,	true,	true,	true,	true}
+			,{"playtime",	"Play Time",		8, "", "",	"", dataType::_int,		formatType::f_time,		true,	true,	true,	true}
+			,{"playcount",	"Play Count",		9, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	true,	true}
+			,{"totalHits",	"Total Hits",		10, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	true,	true}
+																													  
+			,{"silverSS",	"Rank SSH",			11, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	true,	true}
+			,{"goldSS",		"Rank SS",			12, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	true,	true}
+			,{"silverS",	"Rank SH",			13, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	true,	true}
+			,{"goldS",		"Rank S",			14, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	true,	true}
+			,{"a",			"Rank A",			15, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	true,	true}
+			,{"b",			"Rank B",			16, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	true,	true}
+			,{"c",			"Rank C",			17, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	true,	true}
+			,{"d",			"Rank D",			18, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	true,	true}
+			,{"totalSS",	"Total SS",			19, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	true,	true}
+			,{"totalS",		"Total S",			20, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	true,	true}
+																													  
+			,{"clears",		"Profile Clears",	21, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	true,	true}
+			,{"totalClears","Total Clears",		22, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	true,	true}
+			,{"completion",	"Completion%",		23, "", "",	"", dataType::_float,	formatType::f_decimal,	true,	true,	true,	true}
+			,{"scoreRank",	"Score Rank",		24, "", "",	"", dataType::_int,		formatType::f_rank,		true,	true,	true,	false}
+																													  
+			,{"targetRank",	"Target Rank",		25, "", "",	"", dataType::_int,		formatType::f_rank,		false,	true,	true,	true}
+			,{"targetUser",	"Target Player",	26, "", "",	"", dataType::_string,	formatType::f_string,	false,	true,	true,	true}
+			,{"targetScore","Target Score",		27, "", "",	"", dataType::_int,		formatType::f_int,		false,	true,	true,	true}
 		};
 
 		static constexpr int getIndex(const char* key) {
@@ -248,7 +251,7 @@ public:
 	}
 	// this is basically a csv generator with headers and comments
 	static void writeConfig() {
-		writeLog("Writing config file...");
+		console::writeLog("Writing config file...");
 		std::string input;
 		input += "//PLEASE DONT MANUALLY EDIT THIS FILE\n"
 			"//(you still can,but you might break it)\n"
@@ -269,12 +272,12 @@ public:
 		file.open("config.txt");
 		file << input;
 		file.close();
-		writeLog("Config written");
+		console::writeLog("Config written");
 	}
 
 	static void readConfig() {
 		if (std::ifstream file{ "config.txt" }; file.is_open()) {
-			writeLog("Reading config file...");
+			console::writeLog("Reading config file...");
 			int configHeader = -1;
 			for (std::string line; std::getline(file, line); ){
 				if (!line.starts_with("//") && !line.empty())
@@ -314,7 +317,7 @@ public:
 			file.close();
 		}
 		else {
-			writeLog("Error reading config file", true, 255, 0, 0);
+			console::writeLog("Error reading config file", true, 255, 0, 0);
 		}
 	}
 
