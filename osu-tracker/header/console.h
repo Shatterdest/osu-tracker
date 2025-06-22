@@ -1,8 +1,11 @@
 #pragma once
-
 class console {	
 public:
-	static std::vector<std::string> vec_log;
+	static console& instance() {
+		static console ctx;
+		return ctx;
+	}
+	std::vector<std::string> vec_log;
 	// ansi console color codes
 	enum conCol {
 		f_black = 30,
@@ -52,7 +55,7 @@ public:
 		strftime(timeBuffer, sizeof(timeBuffer), "%H:%M:%S", timeInfo);
 		std::stringstream ss;
 		ss << (std::string)dateBuffer + " " + timeBuffer << " " << "[" << "Internal" << "] " << msg;
-		vec_log.push_back(ss.str());
+		console::instance().vec_log.push_back(ss.str());
 		#if RELEASE_BUILD
 			if(!alwaysPrint) // Dont print on release if not explicity
 				return;

@@ -5,13 +5,18 @@
 
 class api {
 private: 
+	static api& instance() {
+		static api ctx;
+		return ctx;
+	}
+
 	bool init_api_failed = false;
 
 	// Private Servers
 	class pServer {
-	private:
+	public:
 		// fetch titanic api data
-		int titanic(bool init) {
+		static int titanic(bool init) {
 			console::writeLog(std::string("titanic_api(init) -> ") + ext::bool2str(init), false, 0, 0, 255);
 			try {
 
@@ -174,10 +179,14 @@ private:
 	};
 
 	class osu {
-	private:
-		static std::string auth_token;
+	public:
+		static osu& instance() {
+			static osu ctx;
+			return ctx;
+		}
+		std::string auth_token;
 		// auth osu api
-		int api_auth() {
+		static int api_auth() {
 			try {
 				nlohmann::json request;
 				std::string body = R"({"client_id":)" + std::to_string(config::application::instance().clientId) + R"(, "client_secret":")" + config::application::instance().clientSecret + R"(", "grant_type":"client_credentials", "scope":"public"})";
@@ -185,7 +194,7 @@ private:
 					cpr::Body{ body },
 					cpr::Header{ { "Content-Type", "application/json" } });
 				request = nlohmann::json::parse(r.text);
-				auth_token = "Bearer " + request.value("access_token", "");
+				api::osu::instance().auth_token = "Bearer " + request.value("access_token", "");
 				request.clear();
 				console::writeLog((std::string)"api_auth() -> Status Code: " + std::to_string(r.status_code), false, 0, 255, 0);
 				return r.status_code;
@@ -240,7 +249,7 @@ private:
 					cpr::Header{
 						{ "Content-Type", "application/json" },
 						{ "Accept", "application/json" },
-						{ "Authorization", auth_token }
+						{ "Authorization", api::osu::instance().auth_token }
 					}
 				);
 				console::writeLog((std::string)"api() -> Status Code: " + std::to_string(r.status_code), false, 0, 255, 0);
@@ -310,7 +319,7 @@ private:
 			return -1;
 		}
 		class extended {
-		private:
+		public:
 			static void respektive_api(bool init) {
 				try {
 					nlohmann::json _user;
@@ -371,7 +380,7 @@ private:
 			static void inspector_api(bool init) {
 				try {
 					cpr::Response r = cpr::Get(
-						cpr::Url{ "https://api.kirino.sh/inspector/users/stats/" + vec_application[1][1] + "?skipDailyData=true&skipOsuData=true&skipExtras=true" },
+						cpr::Url{ "https://api.kirino.sh/inspector/users/stats/" + std::to_string(config::application::instance().osuId) + "?skipDailyData=true&skipOsuData=true&skipExtras=true"},
 						cpr::Header{
 							{ "Content-Type", "application/json" }
 						}
@@ -466,81 +475,62 @@ private:
 		}
 	
 public:
-		void fetch_api_data(bool init) {
-		switch (std::stoi(vec_application[6][1])) {
-			case 0: {
+		static void fetch_api_data(bool init) {
+		switch (config::application::instance().server) {
+			case config::server::bancho: {
 				// bancho
-				if (api_auth() != 200) {
+				if (api::osu::api_auth() != 200) {
 					if (init) {
-						init_api_failed = true;
+						api::instance().init_api_failed = true;
 					}
 					return; // dont continue when auth fails
 				}
 				else {
-					if (init_api_failed && !init) {
+					if (api::instance().init_api_failed && !init) {
 						// retry to init api data, since it failed to init
-						init_api_failed = false;
+						api::instance().init_api_failed = false;
 						init = true;
 					}
 				}
 				// Launch threads for each API function
-			
-				std::thread t_osu_api(osu_api, init);
-				std::thread t_respektive_api(respektive_api, init);
-				std::thread t_inspector_api(inspector_api, init);
+				std::thread t_osu_api(api::osu::api, init);
+				std::thread t_respektive_api(api::osu::extended::respektive_api, init);
+				std::thread t_inspector_api(api::osu::extended::inspector_api, init);
 
 				// Wait for all threads to complete
 				t_osu_api.join();
 				t_respektive_api.join();
 				t_inspector_api.join();
 			
-				//osu_api(init);
-				//respektive_api(init);
-				//inspector_api(init);
 				return;
-				break;
 			}
-			case 1: {
+			case config::server::titanic: {
 				// titanic
-				int result = titanic_api(init); // only one call to pull data
+				int result = api::pServer::titanic(init); // only one call to pull data
 				if (result != 200) {
 					if (init) {
-						init_api_failed = true;
+						api::instance().init_api_failed = true;
 					}
 					return;
 				}
 
-				if (init_api_failed && !init) {
+				if (api::instance().init_api_failed && !init) {
 					// The first init failed earlier, but now it worked — re-run with init = true
-					init_api_failed = false;
-					titanic_api(true); // intentionally re-pull with full init
+					api::instance().init_api_failed = false;
+					api::pServer::titanic(true); // intentionally re-pull with full init
 				}
 				return;
-				break;
 			}
 		}
 	}
 
 	// data that get send to client
-	nlohmann::json api_data() {
+	static nlohmann::json api_data() {
 		try {
+			// Json probably not needed at this point if 
 			// Create a JSON object
 			nlohmann::json _j;
-			switch (std::stoi(vec_application[6][1])) {
-				case 0: // bancho
-					_j["osu"] = vec_data_osu;
-					_j["respektive"] = vec_data_respektive;
-					_j["respektive_target"] = vec_data_respektive_target;
-					_j["inspector"] = vec_data_inspector;
-					break;
-				case 1: // titanic
-					// same general json structure, bc my ass has to rewrite frontend js code
-					_j["osu"] = vec_data_titanic;
-					_j["respektive"] = vec_data_respektive;
-					_j["respektive_target"] = vec_data_respektive_target;
-					_j["inspector"] = vec_data_inspector;
-					break;
-			}
+			//_j["data"] = config::data::arr;
 			return _j;
 		}
 		catch (const std::exception& e) {

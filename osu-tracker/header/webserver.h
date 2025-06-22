@@ -26,73 +26,73 @@ public:
 		switch (level) {
 			#ifdef DEBUG_BUILD
 				case crow::LogLevel::Debug:
-					setColorRGB_f(100, 100, 100);
+					console::setColorRGB_f(100, 100, 100);
 					std::cout << (std::string)dateBuffer + " " + timeBuffer << " ";
-					resetColor();
+					console::resetColor();
 
 					std::cout << "[";
-					setColor(conCol::b_defaultColor, conCol::f_white);
+					console::setColor(console::conCol::b_defaultColor, console::conCol::f_white);
 					std::cout << "Debug";
-					resetColor();
+					console::resetColor();
 					std::cout << "] ";
-					setColorRGB_f(255, 255, 255);
+					console::setColorRGB_f(255, 255, 255);
 					std::cout << message << "\n";
-					resetColor();
+					console::resetColor();
 					break;
 				case crow::LogLevel::Info:
-					setColorRGB_f(100, 100, 100);
+					console::setColorRGB_f(100, 100, 100);
 					std::cout << (std::string)dateBuffer + " " + timeBuffer << " ";
-					resetColor();
+					console::resetColor();
 
 					std::cout << "[";
-					setColor(conCol::b_defaultColor, conCol::f_cyan);
+					console::setColor(console::conCol::b_defaultColor, console::conCol::f_cyan);
 					std::cout << "Info";
-					resetColor();
+					console::resetColor();
 					std::cout << "] ";
-					setColorRGB_f(255, 255, 255);
+					console::setColorRGB_f(255, 255, 255);
 					std::cout << message << "\n";
-					resetColor();
+					console::resetColor();
 					break;
 			#endif
 			case crow::LogLevel::Warning: 
-				setColorRGB_f(100, 100, 100);
+				console::setColorRGB_f(100, 100, 100);
 				std::cout << (std::string)dateBuffer + " " + timeBuffer << " ";
-				resetColor();
+				console::resetColor();
 
 				std::cout << "[";
-				setColor(conCol::b_defaultColor, conCol::f_yellow);
+				console::setColor(console::conCol::b_defaultColor, console::conCol::f_yellow);
 				std::cout << "Warning";
-				resetColor();
+				console::resetColor();
 				std::cout << "] ";
-				setColorRGB_f(255, 255, 255);
+				console::setColorRGB_f(255, 255, 255);
 				std::cout << message << "\n";
-				resetColor();
+				console::resetColor();
 				break;
 			case crow::LogLevel::Error: 
-				setColorRGB_f(100, 100, 100);
+				console::setColorRGB_f(100, 100, 100);
 				std::cout << (std::string)dateBuffer + " " + timeBuffer << " ";
-				resetColor();
+				console::resetColor();
 
 				std::cout << "[";
-				setColor(conCol::b_defaultColor, conCol::f_red);
+				console::setColor(console::conCol::b_defaultColor, console::conCol::f_red);
 				std::cout << "Error";
-				resetColor();
+				console::resetColor();
 				std::cout << "] ";
-				setColorRGB_f(255, 255, 255);
+				console::setColorRGB_f(255, 255, 255);
 				std::cout << message << "\n";
-				resetColor();
+				console::resetColor();
 				break;
 			case crow::LogLevel::Critical: 
-				setColorRGB_f(100, 100, 100);
+				console::setColorRGB_f(100, 100, 100);
 				std::cout << (std::string)dateBuffer + " " + timeBuffer << " ";
-				resetColor();
+				console::resetColor();
 
-				setColor(conCol::b_red, conCol::f_white);
+				console::setColor(console::conCol::b_red, console::conCol::f_white);
 				std::cout << "[Critical]";
 				std::cout << "]";
-				setColorRGB_f(255, 255, 255);
+				console::setColorRGB_f(255, 255, 255);
 				std::cout << " " << message << "\n";
-				resetColor();
+				console::resetColor();
 				break;
 		}
 		std::string logLevel;
@@ -106,7 +106,7 @@ public:
 		}
 		std::stringstream ss;
 		ss << (std::string)dateBuffer + " " + timeBuffer << " [" << logLevel <<"] " << message;
-		vec_log.push_back(ss.str());
+		console::instance().vec_log.push_back(ss.str());
 	}
 };
 
@@ -123,7 +123,7 @@ json sendToast(std::string msg) {
 }
 
 void shutdownWebServer(bool shutdown = false) {
-	writeLog("Web Server termination initiated...",false, 255, 255, 0);
+	console::writeLog("Web Server termination initiated...",false, 255, 255, 0);
 	shutdown_webServer = shutdown;
 	app.stop();
 }
@@ -167,7 +167,7 @@ bool webserver_start(bool skipInit = false)
 			nlohmann::json j = json::parse(data);
 
 			std::string cmd = j["cmd"];
-			writeLog("Command received: " + cmd);
+			console::writeLog("Command received: " + cmd);
 		
 			if (cmd[0] == '#') {
 				if(cmd == "#restart")
@@ -196,7 +196,7 @@ bool webserver_start(bool skipInit = false)
 			std::lock_guard<std::mutex> _(ws_mutex);
 			nlohmann::json j = json::parse(data);
 			std::string cmd = j["cmd"];
-			writeLog("Command received: " + cmd);
+			console::writeLog("Command received: " + cmd);
 
 			if (cmd[0] == '#') {
 				if (cmd == "#saveSettings") {
@@ -222,7 +222,7 @@ bool webserver_start(bool skipInit = false)
 					}
 
 					if(resetSession)
-						fetch_api_data(true);
+						api::fetch_api_data(true);
 					config::writeConfig();
 				}
 				if (cmd == "#resetSettings") {
@@ -230,7 +230,7 @@ bool webserver_start(bool skipInit = false)
 					shutdownWebServer(false); //restart web server
 				}
 				if (cmd == "#resetSession") {
-					fetch_api_data(true);
+					api::fetch_api_data(true);
 				}
 			}
 		});
@@ -240,7 +240,7 @@ bool webserver_start(bool skipInit = false)
 			// Add & Open WS Connection
 			std::lock_guard<std::mutex> _(ws_mutex);
 			clients_settings.insert(&conn);
-			fetch_api_data(false);
+			api::fetch_api_data(false);
 		})
 		.onclose([&](crow::websocket::connection& conn, const std::string& reason, uint16_t) {
 			// Close Websocket Connection
@@ -251,14 +251,14 @@ bool webserver_start(bool skipInit = false)
 			std::lock_guard<std::mutex> _(ws_mutex);
 			nlohmann::json j = json::parse(data);
 			std::string cmd = j["cmd"];
-			writeLog("Command received: " + cmd);
+			console::writeLog("Command received: " + cmd);
 
 			if (cmd[0] == '#') {
 				if (cmd == "#data") {
-					fetch_api_data(false);
+					api::fetch_api_data(false);
 					json _j;
 					_j["cmd"] = "data";
-					_j["msg"] = api_data().dump();
+					_j["msg"] = api::api_data().dump();
 					// send to client
 					conn.send_text(_j.dump());
 				}
@@ -271,8 +271,8 @@ bool webserver_start(bool skipInit = false)
 			std::lock_guard<std::mutex> _(ws_mutex);
 			clients_settings.insert(&conn);
 			nlohmann::json _j;
-			for (size_t t = 0; t < vec_log.size(); t++) {
-				_j[t] = vec_log[t];
+			for (size_t t = 0; t < console::instance().vec_log.size(); t++) {
+				_j[t] = console::instance().vec_log[t];
 			}
 			conn.send_text(_j.dump());
 		})
@@ -490,13 +490,13 @@ bool webserver_start(bool skipInit = false)
 
 	} // end of skip
 
-	writeLog("Starting Web Server...", true);
-	writeLog("Web Server should be accessible under:", true);
-	writeLog("#####################", true, 255, 255, 0);
+	console::writeLog("Starting Web Server...", true);
+	console::writeLog("Web Server should be accessible under:", true);
+	console::writeLog("#####################", true, 255, 255, 0);
 	std::string url = "http://" + (std::string)OSU_TRACKER_WEBSERVER_IP + ":" + std::to_string(OSU_TRACKER_WEBSERVER_PORT);
-	writeLog(url, true, 0, 140, 255);
-	writeLog("#####################", true, 255, 255, 0);
+	console::writeLog(url, true, 0, 140, 255);
+	console::writeLog("#####################", true, 255, 255, 0);
 	app.bindaddr(OSU_TRACKER_WEBSERVER_IP).port(OSU_TRACKER_WEBSERVER_PORT).signal_clear().run(); // blocking
-	writeLog("Web Server Terminated", true , 255, 0, 0);		
+	console::writeLog("Web Server Terminated", true , 255, 0, 0);
 	return shutdown_webServer;
 }

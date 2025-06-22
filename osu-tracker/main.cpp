@@ -12,6 +12,7 @@
 #include "../header/console.h"
 #include "../header/config.h"
 #include "../header/webserver.h"
+#include "../header/ui.h"
 
 #ifdef _WIN32
 	void enableVirtualTerminalProcessing() {
@@ -44,6 +45,7 @@ void printHeader() {
 
 int main()
 {
+	ui::open();
 	#ifdef _WIN32 
 		enableVirtualTerminalProcessing(); //poopoo cmd.exe 
 	#endif
