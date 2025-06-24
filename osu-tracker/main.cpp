@@ -12,7 +12,7 @@
 #include "../header/console.h"
 #include "../header/config.h"
 #include "../header/webserver.h"
-#include "../header/ui.h"
+#include "../header/ui/ui.h"
 
 #ifdef _WIN32
 	void enableVirtualTerminalProcessing() {
@@ -66,7 +66,7 @@ int main()
 		}
 		#if OSU_TRACKER_ENABLE_WEBSERVER == 1
 			api::fetch_api_data(true);
-			run = !webserver_start(skipInit); // blocking
+			run = !webserver::start(skipInit); // blocking
 			skipInit = true;
 		#endif
 		}

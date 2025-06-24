@@ -31,6 +31,9 @@ file(GLOB_RECURSE ZLIB_SOURCES CONFIGURE_DEPENDS lib/zlib/*.c)
 file(GLOB_RECURSE CPR_HEADERS CONFIGURE_DEPENDS lib/cpr/*.h)
 file(GLOB_RECURSE CURL_HEADERS CONFIGURE_DEPENDS lib/curl/lib/*.h)
 file(GLOB_RECURSE ZLIB_HEADERS CONFIGURE_DEPENDS lib/zlib/*.h)
+file(GLOB_RECURSE NUKLEAR_HEADER CONFIGURE_DEPENDS lib/nuklear/nuklear.h)
+file(GLOB_RECURSE NUKLEAR_HEADER_WIN CONFIGURE_DEPENDS lib/nuklear/nuklear_gdip.h)
+file(GLOB_RECURSE NUKLEAR_HEADER_LINUX CONFIGURE_DEPENDS lib/nuklear/nuklear_xlib.h)
 
 # No MacOS support
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
@@ -48,6 +51,9 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 		${CURL_HEADERS}
 		${ZLIB_SOURCES}
 		${ZLIB_HEADERS}
+		${NUKLEAR_HEADER}
+		${NUKLEAR_HEADER_WIN}
+		header/ui/ui_windows.c
 	)
 	target_sources(osu-tracker PRIVATE "${CMAKE_SOURCE_DIR}/res/resources.rc")
 	if(BUILD_TEST)
@@ -65,7 +71,7 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 	# static libcurl
 	add_definitions(-DCURL_STATICLIB)
 	# static link for tracker
-	target_link_libraries(osu-tracker PRIVATE crypt32 advapi32 ${LIBCRYPTO_LIBRARY} ${LIBSSL_LIBRARY} ${LIBCURL_LIBRARY})
+	target_link_libraries(osu-tracker PRIVATE gdiplus.lib shlwapi.lib crypt32 advapi32 ${LIBCRYPTO_LIBRARY} ${LIBSSL_LIBRARY} ${LIBCURL_LIBRARY})
 
 	# Include bundled libraries
 	include_directories(
