@@ -89,6 +89,10 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 	add_executable(osu-tracker main.cpp
 		${CPR_SOURCES}
 		${CPR_HEADERS}
+		${NUKLEAR_HEADER}
+		${NUKLEAR_HEADER_LINUX}
+		header/ui/ui_linux.c
+
 	)
 	if(BUILD_TEST)
 		add_executable(test-tracker test.cpp

@@ -1,7 +1,7 @@
 #if defined(_WIN32)
-extern "C" int ui_main(void); // Declare the C function from ui_windows.h
+extern "C" int ui_main(void);
 #elif defined(__linux__)
-extern "C" int ui_main(void); // Declare the Linux version if applicable
+extern "C" int ui_main(void);
 #endif
 class ui {
     public:

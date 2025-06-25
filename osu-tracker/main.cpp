@@ -45,15 +45,15 @@ void printHeader() {
 
 int main()
 {
-	ui::open();
 	#ifdef _WIN32 
 		enableVirtualTerminalProcessing(); //poopoo cmd.exe 
 	#endif
 	printHeader();
-
+	;
 	bool run = true;
-	bool skipInit = false;
+	bool skipInit = false;	
 	while (run) {
+		std::thread uiThread(ui::open); //restart tracker ui when webserver restarts
 		if (!std::filesystem::exists("config.txt")) {
 			console::writeLog("Config file not found");
 			config::writeConfig();
@@ -69,6 +69,7 @@ int main()
 			run = !webserver::start(skipInit); // blocking
 			skipInit = true;
 		#endif
-		}
+		uiThread.join();
+	}
 	return 0;
 }
