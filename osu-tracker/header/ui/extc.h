@@ -81,3 +81,15 @@ const char* removeSubstring(const char* inputString, const char* substringToRemo
 bool lineStartsWith(const char* line, const char* prefix) {
     return strncmp(line, prefix, strlen(prefix)) == 0;
 }
+
+void ext_TextColor(struct nk_context* ctx, int r, int g, int b) {
+    ctx->style.text.color.r = r;
+    ctx->style.text.color.g = g;
+    ctx->style.text.color.b = b;
+}
+
+void ext_BG(struct nk_context* ctx, int r, int g, int b) {
+    ctx->style.window.fixed_background.data.color.r = r;
+    ctx->style.window.fixed_background.data.color.g = g;
+    ctx->style.window.fixed_background.data.color.b = b;
+}

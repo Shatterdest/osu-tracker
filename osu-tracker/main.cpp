@@ -48,12 +48,18 @@ int main()
 	#ifdef _WIN32 
 		enableVirtualTerminalProcessing(); //poopoo cmd.exe 
 	#endif
+	
 	printHeader();
-	;
+	
 	bool run = true;
 	bool skipInit = false;	
 	while (run) {
-		std::thread uiThread(ui::open); //restart tracker ui when webserver restarts
+		config::user* pUser = &config::user::instance();
+		std::vector<config::dataEntry>* pEntries = &config::data::arr;
+		std::thread uiThread([pUser, pEntries]() {
+			ui::open(*pUser, *pEntries);
+		});
+
 		if (!std::filesystem::exists("config.txt")) {
 			console::writeLog("Config file not found");
 			config::writeConfig();

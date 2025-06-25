@@ -2,6 +2,7 @@
 #include <iomanip>
 #include <thread>
 #include "../header/config.h"
+#include "../header/ui/ui.h"
 
 class api {
 private: 
@@ -476,6 +477,7 @@ private:
 	
 public:
 		static void fetch_api_data(bool init) {
+
 		switch (config::application::instance().server) {
 			case config::server::bancho: {
 				// bancho
@@ -501,7 +503,7 @@ public:
 				t_osu_api.join();
 				t_respektive_api.join();
 				t_inspector_api.join();
-			
+				ui::updateSharedData(config::user::instance(), config::data::arr);
 				return;
 			}
 			case config::server::titanic: {
@@ -519,6 +521,7 @@ public:
 					api::instance().init_api_failed = false;
 					api::pServer::titanic(true); // intentionally re-pull with full init
 				}
+				ui::updateSharedData(config::user::instance(), config::data::arr);
 				return;
 			}
 		}
