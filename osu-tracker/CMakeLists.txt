@@ -32,7 +32,7 @@ file(GLOB_RECURSE CPR_HEADERS CONFIGURE_DEPENDS lib/cpr/*.h)
 file(GLOB_RECURSE CURL_HEADERS CONFIGURE_DEPENDS lib/curl/lib/*.h)
 file(GLOB_RECURSE ZLIB_HEADERS CONFIGURE_DEPENDS lib/zlib/*.h)
 file(GLOB_RECURSE NUKLEAR_HEADER CONFIGURE_DEPENDS lib/nuklear/nuklear.h)
-file(GLOB_RECURSE NUKLEAR_HEADER_WIN CONFIGURE_DEPENDS lib/nuklear/nuklear_gdip.h)
+file(GLOB_RECURSE NUKLEAR_HEADER_WIN CONFIGURE_DEPENDS lib/nuklear/nuklear_gdi.h)
 file(GLOB_RECURSE NUKLEAR_HEADER_LINUX CONFIGURE_DEPENDS lib/nuklear/nuklear_xlib.h)
 
 # No MacOS support
@@ -71,7 +71,7 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 	# static libcurl
 	add_definitions(-DCURL_STATICLIB)
 	# static link for tracker
-	target_link_libraries(osu-tracker PRIVATE gdiplus.lib shlwapi.lib crypt32 advapi32 ${LIBCRYPTO_LIBRARY} ${LIBSSL_LIBRARY} ${LIBCURL_LIBRARY})
+	target_link_libraries(osu-tracker PRIVATE user32.lib gdi32.lib Msimg32.lib crypt32 advapi32 ${LIBCRYPTO_LIBRARY} ${LIBSSL_LIBRARY} ${LIBCURL_LIBRARY})
 
 	# Include bundled libraries
 	include_directories(
@@ -157,6 +157,7 @@ add_compile_definitions(OSU_TRACKER_CMAKE_SYSTEM_NAME="${CMAKE_SYSTEM_NAME}")
 # OSU_TRACKER PROJECT STATIC STRINGS
 add_compile_definitions(OSU_TRACKER_NAME="osu! Tracker")
 add_compile_definitions(OSU_TRACKER_VERSION="v0.3.0")
+add_compile_definitions(OSU_TRACKER_FULL="osu! Tracker v0.3.0")
 add_compile_definitions(OSU_TRACKER_RELEASE_TYPE="Beta")
 add_compile_definitions(OSU_TRACKER_CREATOR="Railgun")
 add_compile_definitions(OSU_TRACKER_PROFILE="https://osu.ppy.sh/users/13817114")
