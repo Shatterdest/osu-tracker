@@ -28,8 +28,8 @@ dataEntryC userToDataEntryC(const config::user& u) {
     entry.init = "";
     entry.current = "";
     entry.change = "";
-    entry.dataType = 0;    // e.g. _string
-    entry.formatType = 0;  // e.g. f_string
+    entry.dataType = 0;
+    entry.formatType = 0;
     entry.noDiff = false;
     entry.display = true;
     entry.banchoSupport = false;
@@ -96,7 +96,6 @@ class ui {
     }
 
     int close() {
-        // You would implement this depending on your platform logic
         return 0;
     }
 };

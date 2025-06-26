@@ -19,8 +19,7 @@ struct dataEntryC {
     bool titanicSupport;
 };
 
-// TODO: pass struct to draw content fn
-void drawContent(struct nk_context* ctx, GdiFont* font, GdiFont* fontHeader, RECT* rect) {
+void drawContent(struct nk_context* ctx, GdiFont* font, GdiFont* fontHeader, RECT* rect, struct userC* user, struct dataEntryC* entries, size_t count) {
     /* GUI */
     nk_draw_set_color_inline(ctx, NK_COLOR_INLINE_TAG);
     nk_gdi_set_font(fontHeader);

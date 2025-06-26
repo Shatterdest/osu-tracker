@@ -222,7 +222,7 @@ public:
 						}
 						// server independent
 						for (const auto& item : j["msg"]["trackerConfig"]) {
-							config::data::arr[config::data::getIndex(item["key"].get<std::string>().c_str())].display = ext::str2bool(item["value"]);
+							config::data::arr[config::data::getIndex(item["key"].get<std::string>().c_str())].display = item["value"];
 						}
 
 						if(resetSession)
@@ -360,7 +360,7 @@ public:
 				ctx["api_refreshInterval_desc"] = "Time in (ms) till api fetches again in the loop.";
 
 				ctx["gameMode_name"] = "Game Mode";
-				ctx["gameMode_val_" + std::to_string(static_cast<int>(config::application::instance().mode))] = "selected";
+				ctx["gameMode_val_" + std::to_string(static_cast<int>(config::application::instance().gameMode))] = "selected";
 				ctx["gameMode_desc"] = "Game Mode to track.";
 
 				ctx["server_name"] = "Server";

@@ -54,7 +54,7 @@ private:
 				t2.join();
 				nlohmann::json _j = nlohmann::json::parse(r_titanicUsers.text);
 				nlohmann::json _j2 = nlohmann::json::parse(r_titanicStats.text);
-				static const std::string _mode = std::to_string(static_cast<int>(config::application::instance().mode));
+				static const std::string _mode = std::to_string(static_cast<int>(config::application::instance().gameMode));
 				//static const int count_graveyard = _j2["beatmap_modes"][_mode]["count_graveyard"].get<int>();
 				//static const int count_wip = _j2["beatmap_modes"][_mode]["count_wip"].get<int>();
 				//static const int count_pending = _j2["beatmap_modes"][_mode]["count_pending"].get<int>();
@@ -231,7 +231,7 @@ private:
 		static int api(bool init) {
 			try {
 				std::string mode;
-				switch (static_cast<int>(config::application::instance().mode)) {
+				switch (static_cast<int>(config::application::instance().gameMode)) {
 					case 0:
 						mode = "osu";
 						break;
@@ -325,7 +325,7 @@ private:
 				try {
 					nlohmann::json _user;
 					cpr::Response r_user = cpr::Get(
-						cpr::Url{ "https://score.respektive.pw/u/" + std::to_string(config::application::instance().osuId) + "?m=" + std::to_string(static_cast<int>(config::application::instance().mode)) },
+						cpr::Url{ "https://score.respektive.pw/u/" + std::to_string(config::application::instance().osuId) + "?m=" + std::to_string(static_cast<int>(config::application::instance().gameMode)) },
 						cpr::Header{
 							{ "Content-Type", "application/json" }
 						}
@@ -341,7 +341,7 @@ private:
 
 					nlohmann::json _target;
 					cpr::Response r_target = cpr::Get(
-						cpr::Url{ "https://score.respektive.pw/rank/" + std::to_string(_user[0]["rank"].get<int>() - 1) + "?m=" + std::to_string(static_cast<int>(config::application::instance().mode)) },
+						cpr::Url{ "https://score.respektive.pw/rank/" + std::to_string(_user[0]["rank"].get<int>() - 1) + "?m=" + std::to_string(static_cast<int>(config::application::instance().gameMode)) },
 						cpr::Header{
 							{ "Content-Type", "application/json" }
 						}

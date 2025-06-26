@@ -8,6 +8,7 @@
 	F(level) \
 	F(rankedScore) \
 	F(totalScore) \
+	F(ppRank) \
 	F(pp) \
 	F(ppv1) \
 	F(acc) \
@@ -63,7 +64,7 @@ public:
 			_field(int, clientId, 0) \
 			_field(std::string, clientSecret, "") \
 			_field(int, apiInterval, 7000) \
-			_field(config::gameMode, mode, config::gameMode::osu) \
+			_field(config::gameMode, gameMode, config::gameMode::osu) \
 			_field(config::server, server, config::server::bancho)
 
 		static application& instance() {
@@ -201,15 +202,15 @@ public:
 	public:
 		static inline std::vector<dataEntry> arr {
 			{"level",		"Level",			1, "", "",	"", dataType::_float,	formatType::f_decimal,	true,	true,	true,	true}
-			,{"rankedScore","Ranked Score",		2, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	true,	true}
-			,{"totalScore",	"Total Score",		3, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	true,	true}
+			,{"rankedScore","Ranked Score",		2, "", "",	"", dataType::_longLong,formatType::f_int,		true,	true,	true,	true}
+			,{"totalScore",	"Total Score",		3, "", "",	"", dataType::_longLong,formatType::f_int,		true,	true,	true,	true}
 			,{"ppRank",		"PP Rank",			4, "", "",	"", dataType::_int,		formatType::f_rank,		true,	true,	true,	true}
 			,{"pp",			"PP",				5, "", "",	"", dataType::_float,	formatType::f_decimal,	true,	true,	true,	true}
 			,{"ppv1",		"PPv1",				6, "", "",	"", dataType::_float,	formatType::f_decimal,	true,	true,	false,	true}
 			,{"acc",		"Accuracy",			7, "", "",	"", dataType::_float,	formatType::f_decimal,	true,	true,	true,	true}
-			,{"playtime",	"Play Time",		8, "", "",	"", dataType::_int,		formatType::f_time,		true,	true,	true,	true}
+			,{"playtime",	"Play Time",		8, "", "",	"", dataType::_longLong,formatType::f_time,		true,	true,	true,	true} //long long just in case
 			,{"playcount",	"Play Count",		9, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	true,	true}
-			,{"totalHits",	"Total Hits",		10, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	true,	true}
+			,{"totalHits",	"Total Hits",		10, "", "",	"", dataType::_longLong,formatType::f_int,		true,	true,	true,	true} //long long just in case
 																													  
 			,{"silverSS",	"Rank SSH",			11, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	true,	true}
 			,{"goldSS",		"Rank SS",			12, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	true,	true}
@@ -229,7 +230,7 @@ public:
 																													  
 			,{"targetRank",	"Target Rank",		25, "", "",	"", dataType::_int,		formatType::f_rank,		false,	true,	true,	true}
 			,{"targetUser",	"Target Player",	26, "", "",	"", dataType::_string,	formatType::f_string,	false,	true,	true,	true}
-			,{"targetScore","Target Score",		27, "", "",	"", dataType::_int,		formatType::f_int,		false,	true,	true,	true}
+			,{"targetScore","Target Score",		27, "", "",	"", dataType::_longLong,formatType::f_int,		false,	true,	true,	true}
 		};
 
 		static constexpr int getIndex(const char* key) {
@@ -257,7 +258,7 @@ public:
 			"//(you still can,but you might break it)\n"
 			"//(If you want to reset all settings, just delete this file)\n\n";
 		input += "[Main]";
-		for (const auto& [key, value] : config::application{}.toArray()) {
+		for (const auto& [key, value] : config::application::instance().toArray()) {
 			input += "\n" + key + ";" + value;
 		}
 		input += "\n\n[Display]";
@@ -280,7 +281,7 @@ public:
 			console::writeLog("Reading config file...");
 			int configHeader = -1;
 			for (std::string line; std::getline(file, line); ){
-				if (!line.starts_with("//") && !line.empty())
+				if (line.starts_with("//") || line.empty())
 					continue;
 				if (line.starts_with("[")) {
 					switch (resolve(line)) {
