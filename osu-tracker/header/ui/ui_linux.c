@@ -20,8 +20,6 @@ extern "C" {
 #define NK_INCLUDE_DEFAULT_ALLOCATOR
 #define NK_IMPLEMENTATION
 #define NK_XLIB_IMPLEMENTATION
-#include <nuklear/nuklear.h>
-#include <nuklear/nuklear_xlib.h>
 
 #include "draw.h"
 
@@ -114,6 +112,9 @@ extern "C" {
         req.tv_nsec = ms * 1000000L;
         while (-1 == nanosleep(&req, &req));
     }
+
+#include <nuklear/nuklear.h>
+#include <nuklear/nuklear_xlib.h>
 
     int main(void)
     {
