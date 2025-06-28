@@ -1,4 +1,22 @@
+#ifndef DRAW_H
+#define DRAW_H
+
 #include "extc.h"
+
+#ifdef _WIN32
+
+typedef GdiFont PlatformFont;
+#define set_font nk_gdi_set_font
+#elif defined(__linux__)
+
+typedef struct nk_user_font PlatformFont;
+#define set_font nk_xlib_set_font
+#else
+#error Unsupported platform
+#endif
+
+#include <stddef.h>
+#include <stdbool.h>
 
 // fixed ratio layout 
 float ratio[] = { 0.3, 0.40, 0.3 };
@@ -136,7 +154,7 @@ void data_debug_style(struct nk_context* ctx, GdiFont* fontSmall, int w, int h, 
 	}
 }
 
-void drawContent(struct nk_context* ctx, GdiFont* font, GdiFont* fontSmall, GdiFont* fontHeader, int w, int h, struct appC app, struct userC user, struct dataEntryC* entries, size_t count, bool debug, bool data_debug) {
+void drawContent(struct nk_context* ctx, PlatformFont* font, PlatformFont* fontSmall, PlatformFont* fontHeader, int w, int h, struct appC app, struct userC user, struct dataEntryC* entries, size_t count, bool debug, bool data_debug) {
 	/* GUI */
 	nk_gdi_set_font(fontHeader);
 	if (!data_debug) {
@@ -240,3 +258,5 @@ void drawContent(struct nk_context* ctx, GdiFont* font, GdiFont* fontSmall, GdiF
 	nk_end(ctx);
 	}
 };
+
+#endif // DRAW_H
