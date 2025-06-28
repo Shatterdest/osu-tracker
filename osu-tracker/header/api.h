@@ -175,6 +175,7 @@ private:
 				// Catch any other unknown exceptions
 				console::writeLog("titanic_api() -> Unknown exception occurred", true, 255, 0, 0);
 			}
+			return -1;
 		}	
 	};
 
@@ -518,7 +519,7 @@ public:
 				}
 
 				if (api::instance().init_api_failed && !init) {
-					// The first init failed earlier, but now it worked — re-run with init = true
+					// The first init failed earlier, but now it worked ï¿½ re-run with init = true
 					api::instance().init_api_failed = false;
 					api::pServer::titanic(true); // intentionally re-pull with full init
 				}

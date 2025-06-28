@@ -1,3 +1,8 @@
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wchanges-meaning"
+#pragma GCC diagnostic pop
+
+
 #pragma once
 #include <utility>
 #include <string>
@@ -166,6 +171,10 @@ public:
 		,f_time = 4
 		,f_percent = 5
 	};
+#ifndef _MSC_VER
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wchanges-meaning"
+#endif
 
 	struct dataEntry {
 		std::string key;
@@ -200,6 +209,9 @@ public:
 			};
 		}
 	};
+#ifndef _MSC_VER
+#pragma GCC diagnostic pop
+#endif
 	
 	class data {
 	public:
@@ -245,7 +257,8 @@ public:
 	};
 
 	enum fileHeader {
-		Main
+		None
+		,Main
 		,Display
 		,Sort
 	};
@@ -253,7 +266,9 @@ public:
 		if (str == "[Main]") return Main;
 		if (str == "[Display]") return Display;
 		if (str == "[Sort]") return Sort;
+		return None;
 	}
+
 	// this is basically a csv generator with headers and comments
 	static void writeConfig() {
 		console::writeLog("Writing config file...");

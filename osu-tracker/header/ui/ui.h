@@ -152,6 +152,7 @@ std::string formatPlaytime(const std::string& secondsStr, bool showPlus = false)
 	extern "C" void copyArrayData(struct appC* app, const struct userC* user, const struct dataEntryC* entries, size_t count);
 #elif defined(__linux__)
 	extern "C" int ui_main();
+	extern "C" void copyArrayData(struct appC* app, const struct userC* user, const struct dataEntryC* entries, size_t count);
 #endif
 class ui {
 private:

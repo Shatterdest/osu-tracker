@@ -1,211 +1,239 @@
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#include <assert.h>
+/* nuklear - v1.32.0 - public domain */
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <stdarg.h>
 #include <string.h>
-#include <limits.h>
 #include <math.h>
-#include <sys/time.h>
-#include <unistd.h>
+#include <assert.h>
+#include <limits.h>
 #include <time.h>
-#include <stdbool.h>
+#include <nuklear/glfw3.h>
 
+#define MAX_ENTRIES 100
+#define WINDOW_WIDTH 400
+#define WINDOW_HEIGHT 600
 #define NK_INCLUDE_FIXED_TYPES
 #define NK_INCLUDE_STANDARD_IO
 #define NK_INCLUDE_STANDARD_VARARGS
 #define NK_INCLUDE_DEFAULT_ALLOCATOR
+#define NK_INCLUDE_VERTEX_BUFFER_OUTPUT
+#define NK_INCLUDE_FONT_BAKING
+#define NK_INCLUDE_DEFAULT_FONT
 #define NK_IMPLEMENTATION
-#define NK_XLIB_IMPLEMENTATION
+#define NK_GLFW_GL2_IMPLEMENTATION
+
+
+enum gameMode {
+    osu = 0
+    , taiko = 1
+    , fruits = 2
+    , mania = 3
+};
+
+enum server {
+    bancho = 0
+    , titanic = 1
+};
+
+
+struct appC {
+    int osuId;
+    enum gameMode gameMode;
+    enum server server;
+};
+
+struct userC {
+    const char* username;
+    const char* avatar;
+};
+
+struct dataEntryC {
+    const char* key;
+    const char* name;
+    int sort;
+    const char* init;
+    const char* current;
+    const char* change;
+    bool positive;
+    bool display;
+    bool single;
+    bool banchoSupport;
+    bool titanicSupport;
+};
+
+// Internal storage
+static struct appC _app;
+static struct userC _user;
+static struct dataEntryC _entries[MAX_ENTRIES];
+static size_t _entry_count = 0;
+
+// Track allocated strings for cleanup
+static char* _user_str_copies[2] = { NULL, NULL }; // username, avatar
+static char* _entries_str_copies[MAX_ENTRIES * 5]; // 5 strings per entry
+static size_t _entries_str_copies_count = 0;
+
+static char* strdup_safe(const char* src) {
+    if (!src) return NULL;
+    size_t len = strlen(src);
+    char* dst = malloc(len + 1);
+    if (!dst) return NULL;
+    memcpy(dst, src, len + 1);
+    return dst;
+}
+
+static void free_internal_copies() {
+    for (size_t i = 0; i < _entries_str_copies_count; i++) {
+        free(_entries_str_copies[i]);
+    }
+    _entries_str_copies_count = 0;
+
+    if (_user_str_copies[0]) { free(_user_str_copies[0]); _user_str_copies[0] = NULL; }
+    if (_user_str_copies[1]) { free(_user_str_copies[1]); _user_str_copies[1] = NULL; }
+}
+
+static void copy_data_entry_deep(const struct dataEntryC* src, struct dataEntryC* dst) {
+    dst->sort = src->sort;
+    dst->positive = src->positive;
+    dst->display = src->display;
+    dst->single = src->single;
+    dst->banchoSupport = src->banchoSupport;
+    dst->titanicSupport = src->titanicSupport;
+
+    // List of string fields to copy
+    const char* src_fields[] = { src->key, src->name, src->init, src->current, src->change };
+    const char** dst_fields[] = { &dst->key, &dst->name, &dst->init, &dst->current, &dst->change };
+
+    for (int i = 0; i < 5; i++) {
+        char* copy = strdup_safe(src_fields[i]);
+        if (!copy) {
+            fprintf(stderr, "Out of memory copying string field\n");
+            exit(1);
+        }
+        _entries_str_copies[_entries_str_copies_count++] = copy;
+        *dst_fields[i] = copy;
+    }
+}
+
+void copyArrayData(const struct appC* app, const struct userC* user, const struct dataEntryC* entries, size_t count) {
+    if (count > MAX_ENTRIES) count = MAX_ENTRIES;
+
+    free_internal_copies();
+
+    _app = *app;
+
+    _user_str_copies[0] = strdup_safe(user->username);
+    _user_str_copies[1] = strdup_safe(user->avatar);
+    _user.username = _user_str_copies[0];
+    _user.avatar = _user_str_copies[1];
+
+    _entry_count = count;
+
+    for (size_t i = 0; i < count; i++) {
+        copy_data_entry_deep(&entries[i], &_entries[i]);
+    }
+}
+
+bool show_debug_layout = false;
+bool data_debug_layout = false;
+
+
+#include <nuklear/nuklear.h>
+#include <nuklear/nuklear_glfw_gl2.h>
+
+#define STB_IMAGE_IMPLEMENTATION
+#include <nuklear/stb_image.h>
+
+static void error_callback(int e, const char *d)
+{printf("Error %d: %s\n", e, d);}
+int w = WINDOW_WIDTH;
+int h = WINDOW_HEIGHT;
 
 #include "draw.h"
 
-#define DTIME           20
-#define WINDOW_WIDTH    400
-#define WINDOW_HEIGHT   600
-#define MAX_ENTRIES     100
+int ui_main(void)
+{
+    /* Platform */
+    static GLFWwindow *win;
+    int width = 0, height = 0;
 
-    enum gameMode {
-        osu = 0, taiko = 1, fruits = 2, mania = 3
-    };
+    /* GUI */
+    struct nk_context *ctx;
+    struct nk_colorf bg;
 
-    enum server {
-        bancho = 0, titanic = 1
-    };
+    #ifdef INCLUDE_CONFIGURATOR
+    static struct nk_color color_table[NK_COLOR_COUNT];
+    memcpy(color_table, nk_default_color_style, sizeof(color_table));
+    #endif
 
-    struct appC {
-        int osuId;
-        enum gameMode gameMode;
-        enum server server;
-    };
-
-    struct userC {
-        const char* username;
-        const char* avatar;
-    };
-
-    struct dataEntryC {
-        const char* key;
-        const char* name;
-        int sort;
-        const char* init;
-        const char* current;
-        const char* change;
-        bool positive;
-        bool display;
-        bool single;
-        bool banchoSupport;
-        bool titanicSupport;
-    };
-
-    static struct appC _app = { 123456, osu, bancho };
-    static struct userC _user = { "Neko", "avatar.png" };
-    static struct dataEntryC _entries[MAX_ENTRIES];
-    static size_t _entry_count = 0;
-
-    bool show_debug_layout = false;
-    bool data_debug_layout = false;
-
-    typedef struct XWindow {
-        Display* dpy;
-        Window root;
-        Visual* vis;
-        Colormap cmap;
-        XWindowAttributes attr;
-        XSetWindowAttributes swa;
-        Window win;
-        int screen;
-        XFont* font;
-        XFont* fontHeader;
-        XFont* fontSmall;
-        unsigned int width;
-        unsigned int height;
-        Atom wm_delete_window;
-    } XWindow;
-
-    static void die(const char* fmt, ...)
-    {
-        va_list ap;
-        va_start(ap, fmt);
-        vfprintf(stderr, fmt, ap);
-        va_end(ap);
-        fputs("\n", stderr);
-        exit(EXIT_FAILURE);
+    /* GLFW */
+    glfwSetErrorCallback(error_callback);
+    if (!glfwInit()) {
+        fprintf(stdout, "[GFLW] failed to init!\n");
+        exit(1);
     }
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+    win = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Demo", NULL, NULL);
+    glfwMakeContextCurrent(win);
+    glfwGetWindowSize(win, &width, &height);
 
-    static long timestamp(void)
+    /* GUI */
+    ctx = nk_glfw3_init(win, NK_GLFW3_INSTALL_CALLBACKS);
+    /* Load Fonts: if none of these are loaded a default font will be used  */
+    /* Load Cursor: if you uncomment cursor loading please hide the cursor */
+    
+    struct nk_font_atlas *atlas;
+    nk_glfw3_font_stash_begin(&atlas);
+    struct nk_font *fontDefault;
+    struct nk_font *fontHeader;
+    struct nk_font *fontSmall;
+    // Load fonts with different sizes
+    fontHeader  = nk_font_atlas_add_default(atlas, 22.0f, 0);
+    fontDefault = nk_font_atlas_add_default(atlas, 16.0f, 0);
+    fontSmall   = nk_font_atlas_add_default(atlas, 16.0f, 0);
+
+    nk_glfw3_font_stash_end();    
+
+    bg.r = 0.10f, bg.g = 0.18f, bg.b = 0.24f, bg.a = 1.0f;
+
+    while (!glfwWindowShouldClose(win))
     {
-        struct timeval tv;
-        if (gettimeofday(&tv, NULL) < 0) return 0;
-        return (long)((long)tv.tv_sec * 1000 + (long)tv.tv_usec / 1000);
-    }
+        nk_font_atlas_add_default(atlas, 20.0f, 0);
+        /* Input */
+        glfwPollEvents();
+        nk_glfw3_new_frame();
+        static int f10_was_down = 0;
+        static int f11_was_down = 0;
 
-    static void sleep_for(long t)
-    {
-        struct timespec req;
-        const time_t sec = (int)(t / 1000);
-        const long ms = t - (sec * 1000);
-        req.tv_sec = sec;
-        req.tv_nsec = ms * 1000000L;
-        while (-1 == nanosleep(&req, &req));
-    }
+        int f10_now = glfwGetKey(win, GLFW_KEY_F10) == GLFW_PRESS;
+        int f11_now = glfwGetKey(win, GLFW_KEY_F11) == GLFW_PRESS;
 
-#include <nuklear/nuklear.h>
-#include <nuklear/nuklear_xlib.h>
-
-    int main(void)
-    {
-        long dt;
-        long started;
-        int running = 1;
-        XWindow xw;
-        struct nk_context* ctx;
-
-        memset(&xw, 0, sizeof xw);
-        xw.dpy = XOpenDisplay(NULL);
-        if (!xw.dpy) die("Could not open display; $DISPLAY not set?");
-        xw.root = DefaultRootWindow(xw.dpy);
-        xw.screen = DefaultScreen(xw.dpy);
-        xw.vis = DefaultVisual(xw.dpy, xw.screen);
-        xw.cmap = XCreateColormap(xw.dpy, xw.root, xw.vis, AllocNone);
-
-        xw.swa.colormap = xw.cmap;
-        xw.swa.event_mask =
-            ExposureMask | KeyPressMask | KeyReleaseMask |
-            ButtonPressMask | ButtonReleaseMask | ButtonMotionMask |
-            PointerMotionMask | KeymapStateMask;
-
-        xw.win = XCreateWindow(
-            xw.dpy, xw.root, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, 0,
-            DefaultDepth(xw.dpy, xw.screen), InputOutput, xw.vis,
-            CWEventMask | CWColormap, &xw.swa
-        );
-
-        XStoreName(xw.dpy, xw.win, "osu! Tracker");
-        XMapWindow(xw.dpy, xw.win);
-        xw.wm_delete_window = XInternAtom(xw.dpy, "WM_DELETE_WINDOW", False);
-        XSetWMProtocols(xw.dpy, xw.win, &xw.wm_delete_window, 1);
-        XGetWindowAttributes(xw.dpy, xw.win, &xw.attr);
-        xw.width = (unsigned int)xw.attr.width;
-        xw.height = (unsigned int)xw.attr.height;
-
-        // Fonts (match Windows sizes)
-        xw.font = nk_xfont_create(xw.dpy, "Sans-16");
-        xw.fontHeader = nk_xfont_create(xw.dpy, "Sans-22");
-        xw.fontSmall = nk_xfont_create(xw.dpy, "Sans-14");
-
-        ctx = nk_xlib_init(xw.font, xw.dpy, xw.screen, xw.win, xw.width, xw.height);
-
-        while (running)
-        {
-            XEvent evt;
-            started = timestamp();
-            nk_input_begin(ctx);
-            while (XPending(xw.dpy)) {
-                XNextEvent(xw.dpy, &evt);
-                if (evt.type == ClientMessage && (Atom)evt.xclient.data.l[0] == xw.wm_delete_window)
-                    goto cleanup;
-                if (XFilterEvent(&evt, xw.win)) continue;
-                nk_xlib_handle_event(xw.dpy, xw.screen, xw.win, &evt);
-
-                // Toggle debug layouts with F10/F11
-                if (evt.type == KeyPress) {
-                    KeySym sym = XLookupKeysym(&evt.xkey, 0);
-                    if (sym == XK_F11) show_debug_layout = !show_debug_layout;
-                    if (sym == XK_F10) data_debug_layout = !data_debug_layout;
-                }
-            }
-            nk_input_end(ctx);
-
-            nk_style_default(ctx);
-
-            // GUI rendering
-            drawContent(ctx, xw.font, xw.fontSmall, xw.fontHeader, xw.width, xw.height,
-                _app, _user, _entries, _entry_count, show_debug_layout, data_debug_layout);
-
-            XClearWindow(xw.dpy, xw.win);
-            nk_xlib_render(xw.win, nk_rgb(0, 0, 0));
-            XFlush(xw.dpy);
-
-            dt = timestamp() - started;
-            if (dt < DTIME) sleep_for(DTIME - dt);
+        if (f10_now && !f10_was_down) {
+            show_debug_layout = !show_debug_layout;
         }
+        if (f11_now && !f11_was_down) {
+            data_debug_layout = !data_debug_layout;
+        }
+        f10_was_down = f10_now;
+        f11_was_down = f11_now;
+        // ui
+        nk_style_default(ctx);
+        drawContent(ctx, fontDefault, fontSmall, fontHeader, w, h, _app, _user, _entries, _entry_count, show_debug_layout, data_debug_layout);
 
-    cleanup:
-        nk_xfont_del(xw.dpy, xw.font);
-        nk_xfont_del(xw.dpy, xw.fontHeader);
-        nk_xfont_del(xw.dpy, xw.fontSmall);
-        nk_xlib_shutdown();
-        XUnmapWindow(xw.dpy, xw.win);
-        XFreeColormap(xw.dpy, xw.cmap);
-        XDestroyWindow(xw.dpy, xw.win);
-        XCloseDisplay(xw.dpy);
-        return 0;
+
+        /* Draw */
+        glfwGetWindowSize(win, &width, &height);
+        glViewport(0, 0, width, height);
+        glClear(GL_COLOR_BUFFER_BIT);
+        glClearColor(bg.r, bg.g, bg.b, bg.a);
+        /* IMPORTANT: `nk_glfw_render` modifies some global OpenGL state
+         * with blending, scissor, face culling and depth test and defaults everything
+         * back into a default state. Make sure to either save and restore or
+         * reset your own state after drawing rendering the UI. */
+        nk_glfw3_render(NK_ANTI_ALIASING_ON);
+        glfwSwapBuffers(win);
     }
-
-#ifdef __cplusplus
+    nk_glfw3_shutdown();
+    glfwTerminate();
+    return 0;
 }
-#endif

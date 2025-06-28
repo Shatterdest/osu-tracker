@@ -55,11 +55,19 @@ void debug_style(struct nk_context* ctx) {
 	ctx->style.window.border_color = border;
 
 }
-
-void data_debug_style(struct nk_context* ctx, GdiFont* fontSmall, int w, int h, struct appC app, struct userC user, struct dataEntryC* entries, size_t count) {
+#ifdef _WIN32
+void data_debug_style(struct nk_context* ctx, GdiFont* fontSmall, int w, int h, struct appC app, struct userC user, struct dataEntryC* entries, size_t count)
+#elif __linux__
+void data_debug_style(struct nk_context* ctx, struct nk_font* fontSmall, int w, int h, struct appC app, struct userC user, struct dataEntryC* entries, size_t count)
+#endif
+{
 	nk_style_default(ctx);
 	ext_BG(ctx, 0, 0, 0);
+	#ifdef _WIN32
 	nk_gdi_set_font(fontSmall);
+	#elif __linux__
+	nk_style_set_font(ctx, &fontSmall->handle);
+	#endif
 
 	// Semi-transparent black background
 	ctx->style.window.background = nk_rgba(0, 0, 0, 0);
@@ -72,7 +80,11 @@ void data_debug_style(struct nk_context* ctx, GdiFont* fontSmall, int w, int h, 
 
 	if (nk_begin(ctx, "[color=#FF0000]DEBUG[/color]", nk_rect(0, 0, w, h), NK_WINDOW_TITLE | NK_WINDOW_BACKGROUND))
 	{
-		nk_gdi_set_font(fontSmall);
+		#ifdef _WIN32
+			nk_gdi_set_font(fontSmall);
+		#elif __linux__
+			nk_style_set_font(ctx, &fontSmall->handle);
+		#endif
 		// ui
 				// Print app struct
 		nk_layout_row(ctx, NK_DYNAMIC, 12, 1, ratioFull);
@@ -153,10 +165,17 @@ void data_debug_style(struct nk_context* ctx, GdiFont* fontSmall, int w, int h, 
 		nk_end(ctx);
 	}
 }
-
+#ifdef _WIN32
 void drawContent(struct nk_context* ctx, PlatformFont* font, PlatformFont* fontSmall, PlatformFont* fontHeader, int w, int h, struct appC app, struct userC user, struct dataEntryC* entries, size_t count, bool debug, bool data_debug) {
+#elif __linux__
+void drawContent(struct nk_context* ctx, struct nk_font* font, struct nk_font* fontSmall, struct nk_font* fontHeader, int w, int h, struct appC app, struct userC user, struct dataEntryC* entries, size_t count, bool debug, bool data_debug) {
+#endif
 	/* GUI */
+	#ifdef _WIN32
 	nk_gdi_set_font(fontHeader);
+	#elif __linux__
+	nk_style_set_font(ctx, &fontHeader->handle);
+	#endif
 	if (!data_debug) {
 		if (!debug) {
 			nk_draw_set_color_inline(ctx, NK_COLOR_INLINE_TAG);
@@ -204,7 +223,11 @@ void drawContent(struct nk_context* ctx, PlatformFont* font, PlatformFont* fontS
 
 	if (nk_begin(ctx, "[color=#FFFFFF]Railgun[/color]", nk_rect(0, 0, w, h),NK_WINDOW_TITLE| NK_WINDOW_BACKGROUND))
 	{
+		#ifdef _WIN32
 		nk_gdi_set_font(font);
+		#elif __linux__
+		nk_style_set_font(ctx, &font->handle);
+		#endif
 
 		for (size_t i = 0; i < count; i++) {
 
