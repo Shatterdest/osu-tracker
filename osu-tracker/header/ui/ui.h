@@ -1,101 +1,334 @@
 #pragma once
+enum gameMode {
+	osu = 0
+	, taiko = 1
+	, fruits = 2
+	, mania = 3
+};
+
+enum server {
+	bancho = 0
+	, titanic = 1
+};
+
+struct appC {
+	int osuId;
+	enum gameMode gameMode;
+	enum server server;
+};
+
+// Convert C++ config::gameMode to C enum gameMode
+enum gameMode to_c_gameMode(config::gameMode gm) {
+	switch (gm) {
+	case config::gameMode::osu: return osu;
+	case config::gameMode::taiko: return taiko;
+	case config::gameMode::fruits: return fruits;
+	case config::gameMode::mania: return mania;
+	default: return osu; // fallback default
+	}
+}
+
+// Convert C++ config::server to C enum server
+enum server to_c_server(config::server sv) {
+	switch (sv) {
+	case config::server::bancho: return bancho;
+	case config::server::titanic: return titanic;
+	default: return bancho; // fallback default
+	}
+}
+
+struct appC to_c_appC(const config::application& app) {
+	struct appC c_app;
+	c_app.osuId = app.osuId;
+	c_app.gameMode = to_c_gameMode(app.gameMode);
+	c_app.server = to_c_server(app.server);
+	return c_app;
+}
 
 struct userC {
-    const char* username;
-    const char* avatar;
+	const char* username;
+	const char* avatar;
 };
 
 struct dataEntryC {
-    const char* key;
-    const char* name;
-    int sort;
-    const char* init;
-    const char* current;
-    const char* change;
-    int dataType;
-    int formatType;
-    bool noDiff;
-    bool display;
-    bool banchoSupport;
-    bool titanicSupport;
+	const char* key;
+	const char* name;
+	int sort;
+	const char* init;
+	const char* current;
+	const char* change;
+	bool positive;
+	bool display;
+	bool single;
+	bool banchoSupport;
+	bool titanicSupport;
 };
 
-dataEntryC userToDataEntryC(const config::user& u) {
-    dataEntryC entry{};
-    entry.key = "username";
-    entry.name = u.username.c_str();
-    entry.sort = 0;
-    entry.init = "";
-    entry.current = "";
-    entry.change = "";
-    entry.dataType = 0;
-    entry.formatType = 0;
-    entry.noDiff = false;
-    entry.display = true;
-    entry.banchoSupport = false;
-    entry.titanicSupport = false;
-    return entry;
+std::atomic<bool> fetch;
+
+std::string formatNumber(const std::string& numStr, bool showPlus=false, std::string c = "") {
+	try {
+		long long num = std::stoll(numStr);
+		bool isNegative = num < 0;
+		unsigned long long absNum = isNegative ? -num : num;
+		std::string str = std::to_string(absNum);
+
+		// Add commas
+		int insertPosition = static_cast<int>(str.length()) - 3;
+		while (insertPosition > 0) {
+			str.insert(insertPosition, ",");
+			insertPosition -= 3;
+		}
+
+		if (c == "#")
+			str = "#" + str;
+		if (isNegative){
+			str = "-" + str;
+		}
+		else {
+			if(showPlus)
+				str = "+" + str;
+		}
+		return str;
+	}
+	catch (const std::exception&) {
+		return "Invalid";
+	}
 }
 
-dataEntryC* convertEntriesToC(const std::vector<config::dataEntry>& vec, size_t& outCount) {
-    outCount = vec.size();
-    dataEntryC* out = new dataEntryC[outCount];
-    const auto& app = config::application::instance();
+std::string formatFloat(const std::string& numStr, bool showPlus = false) {
+	char* endPtr = nullptr;
+	double num = std::strtod(numStr.c_str(), &endPtr);
+	if (endPtr == numStr.c_str()) return "Invalid";
 
-    for (size_t i = 0; i < vec.size(); ++i) {
-        out[i].key = vec[i].key.c_str();
-        out[i].name = vec[i].name.c_str();
-        out[i].sort = vec[i].sort;
-        out[i].init = vec[i].init.c_str();
-        out[i].current = vec[i].current.c_str();
-        out[i].change = vec[i].change.c_str();
-        out[i].dataType = static_cast<int>(vec[i].dataType);
-        out[i].formatType = static_cast<int>(vec[i].formatType);
-        out[i].noDiff = vec[i].noDiff;
-        out[i].display = vec[i].display;
-        out[i].banchoSupport = (app.server == config::server::bancho);
-        out[i].titanicSupport = (app.server == config::server::titanic);
-    }
-    return out;
+	char temp[64];
+	snprintf(temp, sizeof(temp), "%.3f", num);
+	std::string str(temp);
+
+	bool isNegative = str[0] == '-';
+	if (isNegative) {
+		str = str.substr(1); // remove the minus for now
+	}
+
+	size_t dotPos = str.find('.');
+	std::string integerPart = str.substr(0, dotPos);
+	std::string decimalPart = str.substr(dotPos); // includes "."
+
+	// Add commas to integer part
+	int insertPosition = integerPart.length() - 3;
+	while (insertPosition > 0) {
+		integerPart.insert(insertPosition, ",");
+		insertPosition -= 3;
+	}
+	if (isNegative) {
+		integerPart = "-" + integerPart;
+	}
+	else {
+		if (showPlus)
+			integerPart = "+" + integerPart;
+	}
+	return integerPart + decimalPart;
 }
 
-userC sharedUser;
-dataEntryC* sharedEntries = nullptr;
-size_t sharedCount = 0;
+std::string formatPlaytime(const std::string& secondsStr, bool showPlus = false) {
+	char* endPtr = nullptr;
+	long seconds = std::strtol(secondsStr.c_str(), &endPtr, 10);
+	if (endPtr == secondsStr.c_str()) return "Invalid";
 
+	int hours = seconds / 3600;
+	int minutes = (seconds % 3600) / 60;
+	int secs = seconds % 60;
+
+	char buffer[64];
+	snprintf(buffer, sizeof(buffer), "%dh %dm %ds", hours, minutes, secs);
+	std::string str = std::string(buffer);
+	if (showPlus)
+		str = "+" + str;
+	return str;
+}
 
 #if defined(_WIN32)
-extern "C" int ui_main(const struct userC* user, const struct dataEntryC* entries, size_t count);
+	extern "C" int ui_main();
+	extern "C" void copyArrayData(struct appC* app, const struct userC* user, const struct dataEntryC* entries, size_t count);
 #elif defined(__linux__)
-extern "C" int ui_main(const struct userC* user, const struct dataEntryC* entries, size_t count);
+	extern "C" int ui_main();
 #endif
 class ui {
-    public:
-    // Function to update shared data (must keep data alive, careful with lifetime)
-    static void updateSharedData(const config::user& user, const std::vector<config::dataEntry>& entries) {
-        sharedUser.username = user.username.c_str();
-        sharedUser.avatar = user.avatar.c_str();
+private:
+	static void fetchApiData(bool init) {
+		while (fetch) {
+			api::fetch_api_data(init);
+			std::this_thread::sleep_for(std::chrono::milliseconds(config::application::instance().apiInterval));
+		}
+	}
+public:
+	static void copyDataOnly() {
+		updateFormat();
 
-        delete[] sharedEntries;
-        sharedEntries = convertEntriesToC(entries, sharedCount);
-    }
+		appC app = to_c_appC(config::application::instance());
 
-    static int open(const config::user& u, const std::vector<config::dataEntry>& entries) {
-        size_t count = 0;
-        dataEntryC* cEntries = convertEntriesToC(entries, count);
+		userC user = {
+			config::user::instance().username.c_str(),
+			config::user::instance().avatar.c_str()
+		};
 
-        userC cUser{
-            u.username.c_str(),
-            u.avatar.c_str()
-        };
+		std::vector<dataEntryC> entriesC;
+		entriesC.reserve(config::data::arrFormatted.size());
 
-        int result = ui_main(&cUser, cEntries, count);
+		for (const config::dataEntry& d : config::data::arrFormatted) {
+			dataEntryC c{
+				d.key.c_str(),
+				d.name.c_str(),
+				d.sort,
+				d.init.c_str(),
+				d.current.c_str(),
+				d.change.c_str(),
+				d.positive,
+				d.display,
+				d.single,
+				d.banchoSupport,
+				d.titanicSupport
+			};
+			entriesC.push_back(c);
+		}
 
-        delete[] cEntries;
-        return result;
-    }
+		copyArrayData(&app, &user, entriesC.data(), entriesC.size());
 
-    int close() {
-        return 0;
-    }
+	}
+	static void updateFormat() {
+		config::data::arrFormatted = config::data::arr;
+
+		for (config::dataEntry& data : config::data::arrFormatted) {
+
+			if (data.init == "" && !data.single) {
+				data.init = "";
+				data.change = "";
+				continue;
+			}
+			switch (config::application::instance().server) {
+				case config::server::bancho:
+					if (!data.banchoSupport)
+						continue;
+					break;
+				case config::server::titanic:
+					if (!data.titanicSupport)
+						continue;
+					break;
+			}
+
+			bool noDiff = false;
+			if ((data.init == data.current) && !data.single) {
+				data.change = "";
+				noDiff = true;
+			}
+			switch (data.dataType) {
+				case config::dataType::_int: {
+					switch (data.formatType) {
+						case config::formatType::f_int: {
+							data.current = formatNumber(data.current);
+							if (noDiff)
+								break;
+							std::string str = formatNumber(data.change, true);
+							if (str[0] == '-') {
+								data.positive = false;
+							}
+							data.change = str;
+							break;
+						}
+						case config::formatType::f_rank: {
+							data.current = formatNumber(data.current, false, "#");
+							if (noDiff)
+								break;
+							std::string str = formatNumber(data.change, true, "#");
+							if (str[0] == '-') {
+								data.positive = false;
+							}
+							data.change = str;
+							break;
+						}
+						case config::formatType::f_time: {
+							data.current = formatPlaytime(data.current);
+							if (noDiff)
+								break;
+							data.change = formatPlaytime(data.change, true);
+							break;
+						}
+					}
+					break;
+				}
+				case config::dataType::_longLong: {
+					switch (data.formatType) {
+						case config::formatType::f_int: {
+							data.current = formatNumber(data.current);
+							if (noDiff)
+								break;
+							std::string str = formatNumber(data.change, true);
+							if (str[0] == '-') {
+								data.positive = false;
+							}
+							data.change = str;
+							break;
+						}
+						case config::formatType::f_rank: {
+							data.current = formatNumber(data.current, false, "#");
+							if (noDiff)
+								break;
+							std::string str = formatNumber(data.change, true, "#");
+							if (str[0] == '-') {
+								data.positive = false;
+							}
+							data.change = str;
+							break;
+						}
+						case config::formatType::f_time: {
+							data.current = formatPlaytime(data.current);
+							if (noDiff)
+								break;
+							data.change = formatPlaytime(data.change, true);
+							break;
+						}
+					}
+					break;
+				}
+				case config::dataType::_float: {
+					switch (data.formatType) {
+						case config::formatType::f_decimal: {
+							data.current = formatFloat(data.current);
+							if (noDiff)
+								break;
+							std::string str = formatFloat(data.change, true);
+							if (str[0] == '-') {
+								data.positive = false;
+							}
+							data.change = str;
+							break;
+						}
+						case config::formatType::f_percent: {
+							data.current = formatFloat(data.current) + "%";
+							if (noDiff)
+								break;
+							std::string str = formatFloat(data.change, true) + "%";;
+							if (str[0] == '-') {
+								data.positive = false;
+							}
+							data.change = str;
+							break;
+						}
+					}
+					break;
+				}
+			}
+		}
+	}
+
+	static int open() {
+		fetch = true;
+		std::thread fetchThread(fetchApiData, false);
+		int result = ui_main();
+		fetch = false;
+		if (fetchThread.joinable()) {
+			fetchThread.join();
+		}
+		return result;
+	}
 };

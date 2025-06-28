@@ -47,6 +47,39 @@ char* custom_strcat(size_t numStrings, ...) {
     return result;
 }
 
+char* custom_strcat_static(size_t numStrings, ...) {
+    static char buffer[1024];  // fixed max size
+    size_t totalLen = 0;
+
+    va_list args;
+    va_start(args, numStrings);
+
+    // clear buffer first
+    buffer[0] = '\0';
+
+    for (size_t i = 0; i < numStrings; i++) {
+        const char* s = va_arg(args, const char*);
+        size_t len = strlen(s);
+
+        if (totalLen + len >= sizeof(buffer) - 1) {
+            // truncate if no space
+            len = sizeof(buffer) - 1 - totalLen;
+        }
+
+        strncat(buffer, s, len);
+        totalLen += len;
+    }
+    va_end(args);
+
+    return buffer;  // valid until next call
+}
+
+const char* intToConst(int i) {
+    static char buf[32];
+    snprintf(buf, sizeof(buf), "%d", i);
+    return buf;
+}
+
 // Function to remove a substring from a string and return it as const char*
 const char* removeSubstring(const char* inputString, const char* substringToRemove) {
     const char* startPos = strstr(inputString, substringToRemove);

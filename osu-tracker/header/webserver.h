@@ -262,7 +262,7 @@ public:
 						api::fetch_api_data(false);
 						json _j;
 						_j["cmd"] = "data";
-						_j["msg"] = api::api_data().dump();
+						//_j["msg"] = api::api_data().dump();
 						// send to client
 						conn.send_text(_j.dump());
 					}

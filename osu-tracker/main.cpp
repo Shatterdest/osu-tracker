@@ -54,11 +54,6 @@ int main()
 	bool run = true;
 	bool skipInit = false;	
 	while (run) {
-		config::user* pUser = &config::user::instance();
-		std::vector<config::dataEntry>* pEntries = &config::data::arr;
-		std::thread uiThread([pUser, pEntries]() {
-			ui::open(*pUser, *pEntries);
-		});
 
 		if (!std::filesystem::exists("config.txt")) {
 			console::writeLog("Config file not found");
@@ -70,8 +65,10 @@ int main()
 			config::readConfig();
 			config::writeConfig();
 		}
+		api::fetch_api_data(true);
+		ui::copyDataOnly();
+		std::thread uiThread([]() { ui::open(); });
 		#if OSU_TRACKER_ENABLE_WEBSERVER == 1
-			api::fetch_api_data(true);
 			run = !webserver::start(skipInit); // blocking
 			skipInit = true;
 		#endif

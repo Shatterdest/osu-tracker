@@ -2,7 +2,6 @@
 #include <iomanip>
 #include <thread>
 #include "../header/config.h"
-#include "../header/ui/ui.h"
 
 class api {
 private: 
@@ -259,7 +258,9 @@ private:
 				config::user::instance().username = _j["username"].get<std::string>();
 
 				if (init) {
-					config::data::arr[config::data::getIndex("level")].init = std::to_string(_j["statistics"]["level"]["current"].get<int>()) + "." + std::to_string(_j["statistics"]["level"]["progress"].get<int>());
+					//config::data::arr[config::data::getIndex("level")].init = std::to_string(_j["statistics"]["level"]["current"].get<int>()) + "." + std::to_string(_j["statistics"]["level"]["progress"].get<int>());
+					// more accurate approach -> calculates level from total score
+					config::data::arr[config::data::getIndex("level")].init = std::to_string(getLevelFromScore(_j["statistics"]["total_score"].get<long long>()));
 					config::data::arr[config::data::getIndex("rankedScore")].init = std::to_string(_j["statistics"]["ranked_score"].get<long long>());
 					config::data::arr[config::data::getIndex("totalScore")].init = std::to_string(_j["statistics"]["total_score"].get<long long>());
 					config::data::arr[config::data::getIndex("ppRank")].init = std::to_string(_j["statistics"]["global_rank"].get<int>());
@@ -277,7 +278,8 @@ private:
 					config::data::arr[config::data::getIndex("clears")].init = std::to_string(std::stoi(config::data::arr[config::data::getIndex("totalSS")].init) + std::stoi(config::data::arr[config::data::getIndex("totalS")].init) + std::stoi(config::data::arr[config::data::getIndex("a")].init));
 				}
 
-				config::data::arr[config::data::getIndex("level")].current = std::to_string(_j["statistics"]["level"]["current"].get<int>()) + "." + std::to_string(_j["statistics"]["level"]["progress"].get<int>());
+				//config::data::arr[config::data::getIndex("level")].current = std::to_string(_j["statistics"]["level"]["current"].get<int>()) + "." + std::to_string(_j["statistics"]["level"]["progress"].get<int>());
+				config::data::arr[config::data::getIndex("level")].current = std::to_string(getLevelFromScore(_j["statistics"]["total_score"].get<long long>()));
 				config::data::arr[config::data::getIndex("rankedScore")].current = std::to_string(_j["statistics"]["ranked_score"].get<long long>());
 				config::data::arr[config::data::getIndex("totalScore")].current = std::to_string(_j["statistics"]["total_score"].get<long long>());
 				config::data::arr[config::data::getIndex("ppRank")].current = std::to_string(_j["statistics"]["global_rank"].get<int>());
@@ -472,7 +474,7 @@ private:
 			long double nextScore = scoreNeeded(level + 1);
 			long double fraction = (totalScore - baseScore) / (nextScore - baseScore);
 
-			return std::round((level + fraction) * 100.0L) / 100.0L;
+			return std::round((level + fraction) * 1000.0L) / 1000.0L;
 		}
 	
 public:
@@ -503,7 +505,6 @@ public:
 				t_osu_api.join();
 				t_respektive_api.join();
 				t_inspector_api.join();
-				ui::updateSharedData(config::user::instance(), config::data::arr);
 				return;
 			}
 			case config::server::titanic: {
@@ -521,30 +522,8 @@ public:
 					api::instance().init_api_failed = false;
 					api::pServer::titanic(true); // intentionally re-pull with full init
 				}
-				ui::updateSharedData(config::user::instance(), config::data::arr);
 				return;
 			}
 		}
-	}
-
-	// data that get send to client
-	static nlohmann::json api_data() {
-		try {
-			// Json probably not needed at this point if 
-			// Create a JSON object
-			nlohmann::json _j;
-			//_j["data"] = config::data::arr;
-			return _j;
-		}
-		catch (const std::exception& e) {
-			console::writeLog(std::string("api_data() -> Exception: ") + e.what(), true, 255, 0, 0);
-		}
-		catch (const nlohmann::json::exception& e) {
-			console::writeLog(std::string("api_data() -> JSON exception: ") + e.what(), true, 255, 0, 0);
-		}
-		catch (...) {
-			console::writeLog("api_data() -> Unknown exception occurred", true, 255, 0, 0);
-		}
-		return nlohmann::json(); // empty json
 	}
 };

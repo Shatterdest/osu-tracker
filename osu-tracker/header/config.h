@@ -164,6 +164,7 @@ public:
 		,f_decimal = 2
 		,f_rank = 3
 		,f_time = 4
+		,f_percent = 5
 	};
 
 	struct dataEntry {
@@ -175,8 +176,9 @@ public:
 		std::string change;
 		dataType dataType;
 		formatType formatType;
-		bool noDiff;
+		bool positive;
 		bool display;
+		bool single;
 		bool banchoSupport;
 		bool titanicSupport;
 
@@ -190,8 +192,9 @@ public:
 				,{"change", change}
 				,{"dataType", std::to_string(static_cast<int>(dataType))}
 				,{"formatType", std::to_string(static_cast<int>(formatType))}
-				,{"noDiff", ext::bool2str(display)}
+				,{"positive", ext::bool2str(positive)}
 				,{"display", ext::bool2str(display)}
+				,{"single", ext::bool2str(single)}
 				,{"banchoSupport", ext::bool2str(banchoSupport)}
 				,{"titanicSupport", ext::bool2str(titanicSupport)}
 			};
@@ -200,38 +203,39 @@ public:
 	
 	class data {
 	public:
-		static inline std::vector<dataEntry> arr {
-			{"level",		"Level",			1, "", "",	"", dataType::_float,	formatType::f_decimal,	true,	true,	true,	true}
-			,{"rankedScore","Ranked Score",		2, "", "",	"", dataType::_longLong,formatType::f_int,		true,	true,	true,	true}
-			,{"totalScore",	"Total Score",		3, "", "",	"", dataType::_longLong,formatType::f_int,		true,	true,	true,	true}
-			,{"ppRank",		"PP Rank",			4, "", "",	"", dataType::_int,		formatType::f_rank,		true,	true,	true,	true}
-			,{"pp",			"PP",				5, "", "",	"", dataType::_float,	formatType::f_decimal,	true,	true,	true,	true}
-			,{"ppv1",		"PPv1",				6, "", "",	"", dataType::_float,	formatType::f_decimal,	true,	true,	false,	true}
-			,{"acc",		"Accuracy",			7, "", "",	"", dataType::_float,	formatType::f_decimal,	true,	true,	true,	true}
-			,{"playtime",	"Play Time",		8, "", "",	"", dataType::_longLong,formatType::f_time,		true,	true,	true,	true} //long long just in case
-			,{"playcount",	"Play Count",		9, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	true,	true}
-			,{"totalHits",	"Total Hits",		10, "", "",	"", dataType::_longLong,formatType::f_int,		true,	true,	true,	true} //long long just in case
-																													  
-			,{"silverSS",	"Rank SSH",			11, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	true,	true}
-			,{"goldSS",		"Rank SS",			12, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	true,	true}
-			,{"silverS",	"Rank SH",			13, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	true,	true}
-			,{"goldS",		"Rank S",			14, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	true,	true}
-			,{"a",			"Rank A",			15, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	true,	true}
-			,{"b",			"Rank B",			16, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	true,	true}
-			,{"c",			"Rank C",			17, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	true,	true}
-			,{"d",			"Rank D",			18, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	true,	true}
-			,{"totalSS",	"Total SS",			19, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	true,	true}
-			,{"totalS",		"Total S",			20, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	true,	true}
-																													  
-			,{"clears",		"Profile Clears",	21, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	true,	true}
-			,{"totalClears","Total Clears",		22, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	true,	true}
-			,{"completion",	"Completion%",		23, "", "",	"", dataType::_float,	formatType::f_decimal,	true,	true,	true,	true}
-			,{"scoreRank",	"Score Rank",		24, "", "",	"", dataType::_int,		formatType::f_rank,		true,	true,	true,	false}
-																													  
-			,{"targetRank",	"Target Rank",		25, "", "",	"", dataType::_int,		formatType::f_rank,		false,	true,	true,	true}
-			,{"targetUser",	"Target Player",	26, "", "",	"", dataType::_string,	formatType::f_string,	false,	true,	true,	true}
-			,{"targetScore","Target Score",		27, "", "",	"", dataType::_longLong,formatType::f_int,		false,	true,	true,	true}
+		static inline std::vector<dataEntry> arr {																				   //bancho  titanic
+			{"level",		"Level",			1, "", "",	"", dataType::_float,	formatType::f_decimal,	true,	true,	false,	true,	true}
+			,{"rankedScore","Ranked Score",		2, "", "",	"", dataType::_longLong,formatType::f_int,		true,	true,	false,	true,	true}
+			,{"totalScore",	"Total Score",		3, "", "",	"", dataType::_longLong,formatType::f_int,		true,	true,	false,	true,	true}
+			,{"ppRank",		"PP Rank",			4, "", "",	"", dataType::_int,		formatType::f_rank,		true,	true,	false,	true,	true}
+			,{"pp",			"PP",				5, "", "",	"", dataType::_float,	formatType::f_decimal,	true,	true,	false,	true,	true}
+			,{"ppv1",		"PPv1",				6, "", "",	"", dataType::_float,	formatType::f_decimal,	true,	true,	false,	false,	true}
+			,{"acc",		"Accuracy",			7, "", "",	"", dataType::_float,	formatType::f_percent,	true,	true,	false,	true,	true}
+			,{"playtime",	"Play Time",		8, "", "",	"", dataType::_longLong,formatType::f_time,		true,	true,	false,	true,	true} //long long just in case
+			,{"playcount",	"Play Count",		9, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	false,	true,	true}
+			,{"totalHits",	"Total Hits",		10, "", "",	"", dataType::_longLong,formatType::f_int,		true,	true,	false,	false,	true} //long long just in	case
+
+			,{"silverSS",	"Rank SSH",			11, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	false,	true,	true}
+			,{"goldSS",		"Rank SS",			12, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	false,	true,	true}
+			,{"silverS",	"Rank SH",			13, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	false,	true,	true}
+			,{"goldS",		"Rank S",			14, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	false,	true,	true}
+			,{"a",			"Rank A",			15, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	false,	true,	true}
+			,{"b",			"Rank B",			16, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	false,	true,	true}
+			,{"c",			"Rank C",			17, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	false,	true,	true}
+			,{"d",			"Rank D",			18, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	false,	true,	true}
+			,{"totalSS",	"Total SS",			19, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	false,	true,	true}
+			,{"totalS",		"Total S",			20, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	false,	true,	true}
+
+			,{"clears",		"Profile Clears",	21, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	false,	true,	true}
+			,{"totalClears","Total Clears",		22, "", "",	"", dataType::_int,		formatType::f_int,		true,	true,	false,	true,	true}
+			,{"completion",	"Completion%",		23, "", "",	"", dataType::_float,	formatType::f_percent,	true,	true,	false,	true,	true}
+			,{"scoreRank",	"Score Rank",		24, "", "",	"", dataType::_int,		formatType::f_rank,		true,	true,	false,	true,	false}
+
+			,{"targetRank",	"Target Rank",		25, "", "",	"", dataType::_int,		formatType::f_rank,		false,	true,	true,	true,	true}
+			,{"targetUser",	"Target Player",	26, "", "",	"", dataType::_string,	formatType::f_string,	false,	true,	true,	true,	true}
+			,{"targetScore","Target Score",		27, "", "",	"", dataType::_longLong,formatType::f_int,		false,	true,	true,	true,	true}
 		};
+		static inline std::vector<dataEntry> arrFormatted;
 
 		static constexpr int getIndex(const char* key) {
 		#define INDEX_CASE(name) GEN_CASE(name, __COUNTER__)
