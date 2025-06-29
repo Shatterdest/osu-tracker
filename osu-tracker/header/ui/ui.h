@@ -159,6 +159,7 @@ private:
 	static void fetchApiData(bool init) {
 		while (fetch) {
 			api::fetch_api_data(init);
+			copyDataOnly();
 			std::this_thread::sleep_for(std::chrono::milliseconds(config::application::instance().apiInterval));
 		}
 	}
