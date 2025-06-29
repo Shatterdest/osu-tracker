@@ -98,11 +98,18 @@
 		</div>
 		<div class="container" style="margin-top:50px">
 			<h1>osu! Tracker</h1>
-			<div class="card" style="width: fit-content">
-				<h5 class="card-header">Maintenance</h5>
-				<div class="card-body">
-					<a href="#" class="btn btn-warning" onclick="sendMessage('#restart')">Restart osu! Tracker</a>
-					<a href="#" class="btn btn-danger" onclick="sendMessage('#shutdown')">Shutdown osu! Tracker</a>
+			<div class="card rounded-0 mt-3" style="width: fit-content">
+				<h5 class="card-header bg-primary rounded-0">Main</h5>
+				<div class="card-body rounded-0">
+					<a href="#" class="btn btn-primary rounded-0" onclick="sendMessage('#open_ui')">Open osu! Tracker GUI</a>
+				</div>
+			</div>
+			<div class="card rounded-0 mt-3" style="width: fit-content">
+				<h5 class="card-header rounded-0 bg-danger">Maintenance</h5>
+				<div class="card-body rounded-0">
+					<a href="#" class="btn btn-info rounded-0" onclick="sendMessage('#update')">Update osu! Tracker</a>
+					<a href="#" class="btn btn-warning rounded-0" onclick="sendMessage('#restart')">Restart osu! Tracker</a>
+					<a href="#" class="btn btn-danger rounded-0" onclick="sendMessage('#shutdown')">Shutdown osu! Tracker</a>
 				</div>
 			</div>
 		</div>

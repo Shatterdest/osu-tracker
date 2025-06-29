@@ -185,9 +185,8 @@ int ui_main(void)
 
     /* GUI */
     ctx = nk_glfw3_init(win, NK_GLFW3_INSTALL_CALLBACKS);
-    /* Load Fonts: if none of these are loaded a default font will be used  */
-    /* Load Cursor: if you uncomment cursor loading please hide the cursor */
     
+    // Fonts
     struct nk_font_atlas *atlas;
     nk_glfw3_font_stash_begin(&atlas);
     struct nk_font *fontDefault;

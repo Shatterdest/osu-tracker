@@ -325,7 +325,7 @@ public:
 			}
 		}
 	}
-
+	static inline std::atomic<bool> isOpen;
 	static void startFetchThread() {
 		fetch = true;
 		fetchThread = std::thread(fetchApiData, false);
@@ -339,9 +339,12 @@ public:
 	}
 	static void close() {
 		ui_mainTerminate();
+		isOpen = false;
 	}
 	static int open() {
+		isOpen = true;
 		int result = ui_main();
+		isOpen = false;
 		return result;
 	}
 };

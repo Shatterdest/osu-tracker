@@ -118,7 +118,7 @@ private:
 	inline static std::mutex ws_mutex;
 	inline static std::unordered_set<crow::websocket::connection*> clients;
 	inline static std::unordered_set<crow::websocket::connection*> clients_settings;
-	int counter = 0;
+	long long counter = 0;
 
 	// send Toast to client
 	json sendToast(std::string msg) {
@@ -177,6 +177,8 @@ public:
 					if(cmd == "#restart")
 						shutdown(true);
 					if(cmd == "#shutdown")
+						shutdown(false);
+					if(cmd == "#open_ui")
 						shutdown(false);
 					if (cmd == "#count") {
 						instance().counter++;

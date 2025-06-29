@@ -20,28 +20,40 @@
 			function connectWebSocket() {
 				socket = new WebSocket("ws://{{hostname}}:{{port}}/ws/log/");
 
-				socket.onmessage = (event) => {
-					const el = document.getElementById(`ws-conn-lost`);
-					el.hidden = true;
-					const data = JSON.parse(event.data);
-					if (data["cmd"]) {
-						if (data["cmd"] == "toast"){
-							sendNotif(data["msg"]);
-						}
-					}else{
-						for (const key in data) {
-							const logContainer = document.getElementById('log-container');
-							if (logContainer) {
-								const code = document.createElement('code');
-								const p = document.createElement('p');
-								p.classList.add("mb-0");
-								code.textContent = data[key];
-								p.appendChild(code);
-								logContainer.appendChild(p);
-							}
-						}
-					}
-				};
+                const MAX_LOG_LINES = 1000;
+                const logLines = [];
+
+                socket.onmessage = (event) => {
+                    const el = document.getElementById('ws-conn-lost');
+                    el.hidden = true;
+
+                    const data = JSON.parse(event.data);
+
+                    if (data["cmd"]) {
+                        if (data["cmd"] === "toast") {
+                            sendNotif(data["msg"]);
+                        }
+                        return;
+                    }
+
+                    for (const key in data) {
+                        logLines.push(data[key]);
+
+                        // Keep only the last 1000 lines
+                        if (logLines.length > MAX_LOG_LINES) {
+                            logLines.splice(0, logLines.length - MAX_LOG_LINES);
+                        }
+                    }
+
+                    // Render logs
+                    const logContainer = document.getElementById('log-container');
+                    if (logContainer) {
+                        logContainer.textContent = logLines.join('\n');
+
+                        // Scroll to bottom
+                        logContainer.parentElement.scrollTop = logContainer.parentElement.scrollHeight;
+                    }
+                };
 				socket.onopen = () => {
 					const el = document.getElementById(`ws-conn-lost`);
 					el.hidden = true;
@@ -101,9 +113,10 @@
 		<span>Websocket connection got closed, reconnecting...</span>
 	</div>
 	<div class="container" style="margin-top:50px">
-		<div class="card">
-			<h5 class="card-header">Log</h5>
-			<div id="log-container" class="card-body">
+		<div class="card rounded-0">
+			<h5 class="card-header bg-dark rounded-0">Log (Last 1000 lines)</h5>
+			<div class="card-body bg-black text-white">
+				<pre><code id="log-container"></code></pre>
 			</div>
 		</div>
 	</div>

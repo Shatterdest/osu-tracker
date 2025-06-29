@@ -65,14 +65,14 @@
 
 	<div class="container" style="margin-top:50px">
 		<h1>Info</h1>
-		<ul class="list-group">
+		<ul class="list-group rounded-0">
 			<a href="{{github}}" target="_blank" class="list-group-item list-group-item-info list-group-item-action">
 				<div class="d-flex w-100 justify-content-between">
 					<h5 class="mb-1">
 						{{title}}
-						<span class="badge rounded-pill text-bg-warning">{{release_type}}</span>
-						<span class="badge rounded-pill text-bg-success">{{build_type}}</span>
-						<span class="badge rounded-pill text-bg-secondary">{{version}}</span>
+						<span class="badge text-bg-warning">{{release_type}}</span>
+						<span class="badge text-bg-success">{{build_type}}</span>
+						<span class="badge text-bg-primary">{{version}}</span>
 					</h5>
 				</div>
 			</a>
@@ -80,7 +80,7 @@
 				<div class="d-flex w-100 justify-content-between">
 					<h5 class="mb-1">
 						Creator
-						<span class="badge rounded-pill text-bg-secondary">{{creator}}</span>
+						<span class="badge text-bg-primary">{{creator}}</span>
 					</h5>
 				</div>
 			</a>
@@ -111,7 +111,7 @@
 
 
 		<h2 class="mt-3">CMake Info</h2>
-		<ul class="list-group">
+		<ul class="list-group rounded-0">
 			<li class="list-group-item list-group-item-dark list-group-item-action">
 				<div class="ms-2 me-auto">
 					<div class="fw-bold">Generator</div>
@@ -169,12 +169,12 @@
 		</ul>
 
 		<h2 class="mt-3">Library Info</h2>
-		<ul class="list-group mb-5">
+		<ul class="list-group mb-5 rounded-0">
 			<a href="{{crow_repo_url}}" target="_blank" class="list-group-item list-group-item-info list-group-item-action">
 				<div class="ms-2 me-auto">
 					<div class="fw-bold">
 						<span>crow</span>
-						<span class="badge rounded-pill text-bg-primary">{{crow_version}}</span>
+						<span class="badge text-bg-primary">{{crow_version}}</span>
 					</div>
 					<span>A Fast and Easy to use microframework for the web.</span>
 				</div>
@@ -183,7 +183,7 @@
 				<div class="ms-2 me-auto">
 					<div class="fw-bold">
 						<span>libcurl</span>
-						<span class="badge rounded-pill text-bg-primary">{{libcurl_version}}</span>
+						<span class="badge text-bg-primary">{{libcurl_version}}</span>
 					</div>
 					<span>A command line tool and library for transferring data with URL syntax, libcurl offers a myriad of powerful features</span>
 				</div>
@@ -192,7 +192,7 @@
 				<div class="ms-2 me-auto">
 					<div class="fw-bold">
 						<span>asio</span>
-						<span class="badge rounded-pill text-bg-primary">{{asio_version}}</span>
+						<span class="badge text-bg-primary">{{asio_version}}</span>
 					</div>
 					<span>Asio C++ Library</span>
 				</div>
@@ -201,7 +201,7 @@
 				<div class="ms-2 me-auto">
 					<div class="fw-bold">
 						<span>cpr</span>
-						<span class="badge rounded-pill text-bg-primary">{{cpr_version}}</span>
+						<span class="badge text-bg-primary">{{cpr_version}}</span>
 					</div>
 					<span>C++ Requests: Curl for People, a spiritual port of Python Requests.</span>
 				</div>
@@ -210,7 +210,7 @@
 				<div class="ms-2 me-auto">
 					<div class="fw-bold">
 						<span>zlib</span>
-						<span class="badge rounded-pill text-bg-primary">{{zlib_version}}</span>
+						<span class="badge text-bg-primary">{{zlib_version}}</span>
 					</div>
 					<span>A massively spiffy yet delicately unobtrusive compression library.</span>
 				</div>
@@ -219,7 +219,7 @@
 				<div class="ms-2 me-auto">
 					<div class="fw-bold">
 						<span>nlohmann json</span>
-						<span class="badge rounded-pill text-bg-primary">{{nlohmannJson_version}}</span>
+						<span class="badge text-bg-primary">{{nlohmannJson_version}}</span>
 					</div>
 					<span>JSON for Modern C++</span>
 				</div>

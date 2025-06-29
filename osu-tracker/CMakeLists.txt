@@ -17,8 +17,6 @@ include_directories(${BASE_INCLUDE_PATH})
 
 # CMAKE
 option(USE_STATIC_LIB "Use static library" ON)
-# disabled test, not needed really , but nice to have if needed
-option(BUILD_TEST "Build Test" OFF) # You can disable compilation of test executable
 
 file(COPY ${CMAKE_SOURCE_DIR}/www DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/osu-tracker/")
 file(COPY ${CMAKE_SOURCE_DIR}/tracker_txt DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/osu-tracker/")
@@ -58,18 +56,14 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 		header/ui/ui_windows.c
 	)
 	target_sources(osu-tracker PRIVATE "${CMAKE_SOURCE_DIR}/res/resources.rc")
-	if(BUILD_TEST)
-		add_executable(test-tracker test.cpp
-			${CPR_SOURCES}
-			${CPR_HEADERS}
-			${CURL_HEADERS}
-			${ZLIB_SOURCES}
-			${ZLIB_HEADERS}
-			includes/catch_amalgamated.cpp
-		)
-		# static link for test, ws2_32 is required for catch2
-		target_link_libraries(test-tracker PRIVATE ws2_32 crypt32 advapi32 ${LIBCRYPTO_LIBRARY} ${LIBSSL_LIBRARY} ${LIBCURL_LIBRARY} )
-	endif()
+	add_executable(update-tracker update.cpp
+		${CPR_SOURCES}
+		${CPR_HEADERS}
+		${CURL_HEADERS}
+		${ZLIB_SOURCES}
+		${ZLIB_HEADERS}
+	)
+	target_link_libraries(update-tracker PRIVATE ws2_32 crypt32 advapi32 ${LIBCRYPTO_LIBRARY} ${LIBSSL_LIBRARY} ${LIBCURL_LIBRARY} )
 	# static libcurl
 	add_definitions(-DCURL_STATICLIB)
 	# static link for tracker
@@ -97,14 +91,11 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 		header/ui/ui_linux.c
 		
 	)
-	if(BUILD_TEST)
-		add_executable(test-tracker test.cpp
-			${CPR_SOURCES}
-			${CPR_HEADERS}
-			includes/catch_amalgamated.cpp
-		)
-		target_link_libraries(test-tracker PRIVATE ${CURL_LIBRARIES} ${ZLIB_LIBRARIES})
-	endif()
+	add_executable(update-tracker update.cpp
+		${CPR_SOURCES}
+		${CPR_HEADERS}
+	)
+	target_link_libraries(update-tracker PRIVATE ${CURL_LIBRARIES} ${ZLIB_LIBRARIES})
 	
 	# Include system headers
 	include_directories(${CURL_INCLUDE_DIRS} ${ZLIB_INCLUDE_DIRS} ${X11_INCLUDE_DIR})
@@ -116,9 +107,7 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 endif()
 	
 set_target_properties(osu-tracker PROPERTIES OUTPUT_NAME "osu-tracker" RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/osu-tracker")
-if(BUILD_TEST)
-set_target_properties(test-tracker PROPERTIES OUTPUT_NAME "osu-tracker-test" RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/osu-tracker")
-endif()
+set_target_properties(update-tracker PROPERTIES OUTPUT_NAME "update-tracker" RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/osu-tracker")
 	
 # CMAKE BUILD AND COMPILER DEFINITIONS
 add_compile_definitions(OSU_TRACKER_CMAKE_BUILD_TYPE="${CMAKE_BUILD_TYPE}")
