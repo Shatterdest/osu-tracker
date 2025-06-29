@@ -66,13 +66,17 @@ int main()
 			config::writeConfig();
 		}
 		api::fetch_api_data(true);
+		ui::startFetchThread();
 		ui::copyDataOnly();
 		std::thread uiThread([]() { ui::open(); });
 		#if OSU_TRACKER_ENABLE_WEBSERVER == 1
 			run = !webserver::start(skipInit); // blocking
 			skipInit = true;
+			// close ui
+			ui::close();
 		#endif
 		uiThread.join();
+		ui::stopFetchThread();
 	}
 	return 0;
 }

@@ -65,6 +65,7 @@ struct dataEntryC {
 };
 
 std::atomic<bool> fetch;
+static std::thread fetchThread;
 
 std::string formatNumber(const std::string& numStr, bool showPlus=false, std::string c = "") {
 	try {
@@ -149,9 +150,11 @@ std::string formatPlaytime(const std::string& secondsStr, bool showPlus = false)
 
 #if defined(_WIN32)
 	extern "C" int ui_main();
+	extern "C" void ui_mainTerminate();
 	extern "C" void copyArrayData(struct appC* app, const struct userC* user, const struct dataEntryC* entries, size_t count);
 #elif defined(__linux__)
 	extern "C" int ui_main();
+	extern "C" void ui_mainTerminate();
 	extern "C" void copyArrayData(struct appC* app, const struct userC* user, const struct dataEntryC* entries, size_t count);
 #endif
 class ui {
@@ -323,14 +326,22 @@ public:
 		}
 	}
 
-	static int open() {
+	static void startFetchThread() {
 		fetch = true;
-		std::thread fetchThread(fetchApiData, false);
-		int result = ui_main();
+		fetchThread = std::thread(fetchApiData, false);
+	}
+	static int stopFetchThread() {
 		fetch = false;
 		if (fetchThread.joinable()) {
 			fetchThread.join();
 		}
+		return 1;
+	}
+	static void close() {
+		ui_mainTerminate();
+	}
+	static int open() {
+		int result = ui_main();
 		return result;
 	}
 };

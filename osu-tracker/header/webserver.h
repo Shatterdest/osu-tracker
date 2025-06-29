@@ -239,36 +239,6 @@ public:
 				}
 			});
 
-			CROW_WEBSOCKET_ROUTE(app, "/ws/tracker/")
-			.onopen([&](crow::websocket::connection& conn) {
-				// Add & Open WS Connection
-				std::lock_guard<std::mutex> _(ws_mutex);
-				clients_settings.insert(&conn);
-				api::fetch_api_data(false);
-			})
-			.onclose([&](crow::websocket::connection& conn, const std::string& reason, uint16_t) {
-				// Close Websocket Connection
-				std::lock_guard<std::mutex> _(ws_mutex);
-				clients_settings.erase(&conn);
-			})
-			.onmessage([&](crow::websocket::connection& conn, const std::string& data, bool is_binary) {
-				std::lock_guard<std::mutex> _(ws_mutex);
-				nlohmann::json j = json::parse(data);
-				std::string cmd = j["cmd"];
-				console::writeLog("Command received: " + cmd);
-
-				if (cmd[0] == '#') {
-					if (cmd == "#data") {
-						api::fetch_api_data(false);
-						json _j;
-						_j["cmd"] = "data";
-						//_j["msg"] = api::api_data().dump();
-						// send to client
-						conn.send_text(_j.dump());
-					}
-				}
-			});
-
 			CROW_WEBSOCKET_ROUTE(app, "/ws/log/")
 			.onopen([&](crow::websocket::connection& conn) {
 				// Add & Open WS Connection
@@ -298,40 +268,6 @@ public:
 				return page;
 			});
 
-			CROW_ROUTE(app, "/tracker")([]() {
-				crow::mustache::context ctx;
-				ctx["hostname"] = OSU_TRACKER_WEBSERVER_IP;
-				ctx["port"] = OSU_TRACKER_WEBSERVER_PORT;
-				ctx["username"] = config::user::instance().username;
-				ctx["refreshInterval"] = config::application::instance().apiInterval;
-
-				std::vector<crow::json::wvalue> elements;
-				for (const config::dataEntry _vecData : config::data::arr) {
-					if (_vecData.display) {
-						crow::json::wvalue el;
-						switch (config::application::instance().server){
-							case config::server::bancho:
-								if (!_vecData.banchoSupport)
-									continue;
-								el["id"] = _vecData.key;
-								el["label"] = _vecData.name;
-								elements.push_back(std::move(el));
-								break;
-							case config::server::titanic:
-								if (!_vecData.titanicSupport)
-									continue;
-								el["id"] = _vecData.key;
-								el["label"] = _vecData.name;
-								elements.push_back(std::move(el));
-								break;
-						}
-					}
-				}
-				ctx["trackerElements"] = std::move(elements);
-
-				auto page = crow::mustache::load("tracker.html").render(ctx);
-				return page;
-			});
 
 			CROW_ROUTE(app, "/settings")([]() {
 				crow::mustache::context ctx;

@@ -151,10 +151,15 @@ int h = WINDOW_HEIGHT;
 
 #include "draw.h"
 
+static GLFWwindow* win;
+
+void ui_mainTerminate() {
+    glfwSetWindowShouldClose(win, GLFW_TRUE);
+}
+
 int ui_main(void)
 {
     /* Platform */
-    static GLFWwindow *win;
     int width = 0, height = 0;
 
     /* GUI */

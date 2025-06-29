@@ -167,11 +167,16 @@ WindowProc(HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam)
 
     return DefWindowProcW(wnd, msg, wparam, lparam);
 }
+static volatile int running = 1;
+void ui_mainTerminate() {
+    running = 0;
+}
 
 int ui_main()
 {
-    struct nk_context* ctx;
 
+    running = 1;
+    struct nk_context* ctx;
     WNDCLASSW wc;
     ATOM atom;
     RECT rect = { 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT };
@@ -179,7 +184,6 @@ int ui_main()
     DWORD exstyle = WS_EX_APPWINDOW;
     HWND wnd;
     HDC dc;
-    int running = 1;
     int needs_refresh = 1;
 
     /* Win32 */
