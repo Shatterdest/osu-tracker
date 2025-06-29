@@ -179,7 +179,7 @@ int ui_main(void)
         exit(1);
     }
     glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-    win = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Demo", NULL, NULL);
+    win = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, OSU_TRACKER_TITLE, NULL, NULL);
     glfwMakeContextCurrent(win);
     glfwGetWindowSize(win, &width, &height);
 
