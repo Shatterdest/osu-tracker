@@ -1,5 +1,6 @@
 /* nuklear - v1.32.0 - public domain */
 #include <stdio.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdarg.h>

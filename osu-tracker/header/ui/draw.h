@@ -165,6 +165,7 @@ void data_debug_style(struct nk_context* ctx, struct nk_font* fontSmall, int w, 
 		nk_end(ctx);
 	}
 }
+
 #ifdef _WIN32
 void drawContent(struct nk_context* ctx, PlatformFont* font, PlatformFont* fontSmall, PlatformFont* fontHeader, int w, int h, struct appC app, struct userC user, struct dataEntryC* entries, size_t count, bool debug, bool data_debug) {
 #elif __linux__
@@ -180,7 +181,7 @@ void drawContent(struct nk_context* ctx, struct nk_font* font, struct nk_font* f
 		if (!debug) {
 			nk_draw_set_color_inline(ctx, NK_COLOR_INLINE_TAG);
 
-			ctx->style.window.header.active = nk_style_item_color(nk_rgb(51, 51, 51));
+			ctx->style.window.header.active = nk_style_item_color(nk_rgb(21, 133, 181));
 
 			ext_TextColor(ctx, 255, 255, 255);
 			ext_BG(ctx, 35, 35, 35);
