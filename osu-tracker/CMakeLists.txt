@@ -135,6 +135,7 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
 endif()
 	
 # WEB SERVER DEFINITIONS 
+add_compile_definitions(OSU_TRACKER_UPDATE_EQUAL=1) # Debug flag to download update on same signed version
 add_compile_definitions(OSU_TRACKER_ENABLE_WEBSERVER=1) # Legacy flag due to webserver was an optional feature
 add_compile_definitions(OSU_TRACKER_WEBSERVER_IP="127.0.0.1")
 add_compile_definitions(OSU_TRACKER_WEBSERVER_PORT=10727)
@@ -151,6 +152,7 @@ add_compile_definitions(OSU_TRACKER_CMAKE_SYSTEM_NAME="${CMAKE_SYSTEM_NAME}")
 
 # OSU_TRACKER PROJECT STATIC STRINGS
 add_compile_definitions(OSU_TRACKER_NAME="osu! Tracker")
+add_compile_definitions(OSU_TRACKER_VERSION_SIGNED="40")
 add_compile_definitions(OSU_TRACKER_VERSION="v0.4.0")
 add_compile_definitions(OSU_TRACKER_TITLE="osu! Tracker v0.4.0")
 add_compile_definitions(OSU_TRACKER_RELEASE_TYPE="Beta")

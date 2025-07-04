@@ -479,8 +479,7 @@ private:
 		}
 	
 public:
-		static void fetch_api_data(bool init) {
-
+	static void fetch_api_data(bool init) {
 		switch (config::application::instance().server) {
 			case config::server::bancho: {
 				// bancho
@@ -526,5 +525,74 @@ public:
 				return;
 			}
 		}
+	}
+	// to do parse and compare
+	// update program
+	// replace current and web files
+	static bool update() {
+		try {
+			cpr::Response r = cpr::Post(cpr::Url{ "https://api.github.com/repos/nyaruku/osu-tracker/releases/latest" });
+			if (r.status_code != 200) {
+				console::writeLog("Failed to get latest release.", true, 255, 0, 0);
+				return false;
+			}
+			nlohmann::json request = nlohmann::json::parse(r.text);
+			const std::string tag_name = request["tag_name"];
+			// Get the tag ref to find tag SHA
+			r = cpr::Get(cpr::Url{ "https://api.github.com/repos/nyaruku/osu-tracker/git/refs/tags/" + tag_name });
+			if (r.status_code != 200) {
+				console::writeLog("Failed to get tag ref.", true, 255, 0, 0);
+				return false;
+			}
+			nlohmann::json tag_ref_json = nlohmann::json::parse(r.text);
+			const std::string tag_sha = tag_ref_json["object"]["sha"];
+			// 3. Check if tag is annotated or lightweight
+			r = cpr::Get(cpr::Url{ "https://api.github.com/repos/nyaruku/osu-tracker/git/tags/" + tag_sha });
+			std::string commit_sha;
+			if (r.status_code == 200) {
+				nlohmann::json tag_obj_json = nlohmann::json::parse(r.text);
+				commit_sha = tag_obj_json["object"]["sha"];
+			}
+			else {
+				// Lightweight tag — commit SHA = tag SHA
+				commit_sha = tag_sha;
+			}
+			console::writeLog((std::string)"Latest release tag: " + tag_name, true, 0, 255, 0);
+			console::writeLog((std::string)"Commit SHA: " + commit_sha, true, 0, 255, 0);
+			// 4. Download version.txt from commit SHA
+			r = cpr::Get(cpr::Url{ "https://raw.githubusercontent.com/nyaruku/osu-tracker/" + commit_sha + "/version.txt" });
+			if (r.status_code != 200) {
+				console::writeLog("Failed to download version.txt", true, 255, 0, 0);
+				return false;
+			}
+
+			/*
+			#if OSU_TRACKER_UPDATE_EQUAL == 1
+				if(r.text)
+				run = !webserver::start(skipInit); // blocking
+				skipInit = true;
+				// close ui
+				ui::close();
+			#endif
+			*/
+			return r.status_code;
+		}
+		catch (const nlohmann::json::exception& e) {
+			console::writeLog(std::string("update() -> JSON exception: ") + e.what(), true, 255, 0, 0);
+			return false;
+		}
+		catch (const cpr::Error& e) {
+			console::writeLog(std::string("update() -> CPR exception: ") + e.message, true, 255, 0, 0);
+			return false;
+		}
+		catch (const std::exception& e) {
+			console::writeLog(std::string("update() -> Standard exception: ") + e.what(), true, 255, 0, 0);
+			return false;
+		}
+		catch (...) {
+			console::writeLog("update() -> Unknown exception occurred", true, 255, 0, 0);
+			return false;
+		}
+		return false;
 	}
 };

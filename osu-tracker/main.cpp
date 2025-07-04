@@ -39,6 +39,7 @@ int main()
 	console::writeLog("                                                             ", true, 246, 12, 250);
 	console::writeLog("-------------------------------------------------------------", true, 255, 255, 255);
 	console::writeLog((std::string)"Version Number: " + (OSU_TRACKER_VERSION), true, 111, 163, 247);
+	console::writeLog((std::string)"Signed Update Version: " + (OSU_TRACKER_VERSION_SIGNED), true, 111, 163, 247);
 	console::writeLog((std::string)"Release Type: " + (OSU_TRACKER_RELEASE_TYPE), true, 111, 163, 247);
 	#ifdef DEBUG_BUILD
 		console::writeLog((std::string)"Build: DEBUG", true, 111, 163, 247);
@@ -46,6 +47,8 @@ int main()
 		console::writeLog((std::string)"Build: RELEASE", true, 111, 163, 247);
 	#endif
 	console::writeLog("-------------------------------------------------------------", true, 255, 255, 255);
+	console::writeLog("Checking for update...", true, 255, 255, 0);
+	api::update();
 	
 	bool run = true;
 	bool skipInit = false;	
