@@ -24,11 +24,13 @@ file(COPY ${CMAKE_SOURCE_DIR}/tracker_txt DESTINATION "${CMAKE_CURRENT_BINARY_DI
 # Sources
 file(GLOB_RECURSE CPR_SOURCES CONFIGURE_DEPENDS lib/cpr/*.cpp)
 file(GLOB_RECURSE ZLIB_SOURCES CONFIGURE_DEPENDS lib/zlib/*.c)
+file(GLOB_RECURSE MINIZ_SOURCES CONFIGURE_DEPENDS lib/miniz.c)
 
 # Headers
 file(GLOB_RECURSE CPR_HEADERS CONFIGURE_DEPENDS lib/cpr/*.h)
 file(GLOB_RECURSE CURL_HEADERS CONFIGURE_DEPENDS lib/curl/lib/*.h)
 file(GLOB_RECURSE ZLIB_HEADERS CONFIGURE_DEPENDS lib/zlib/*.h)
+file(GLOB_RECURSE MINIZ_HEADERS CONFIGURE_DEPENDS includes/miniz.h)
 file(GLOB_RECURSE NUKLEAR_HEADER CONFIGURE_DEPENDS includes/nuklear/nuklear.h)
 file(GLOB_RECURSE NUKLEAR_HEADER_WIN CONFIGURE_DEPENDS includes/nuklear/nuklear_gdi.h)
 file(GLOB_RECURSE NUKLEAR_HEADER_LINUX CONFIGURE_DEPENDS includes/nuklear/nuklear_glfw_gl2.h)
@@ -37,6 +39,7 @@ file(GLOB_RECURSE NUKLEAR_HEADER_GLFW_NATIVE CONFIGURE_DEPENDS includes/nuklear/
 
 # No MacOS support
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+	add_compile_definitions(OSU_TRACKER_PLATFORM="windows")
 	add_compile_definitions(_WIN32)
 	add_compile_definitions(OSU_TRACKER_CMAKE_CXX_COMPILER_ARCHITECTURE_ID="${CMAKE_CXX_COMPILER_ARCHITECTURE_ID}")
 
@@ -56,14 +59,13 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 		header/ui/ui_windows.c
 	)
 	target_sources(osu-tracker PRIVATE "${CMAKE_SOURCE_DIR}/res/resources.rc")
-	add_executable(update-tracker update.cpp
-		${CPR_SOURCES}
-		${CPR_HEADERS}
-		${CURL_HEADERS}
+	add_executable(update update.cpp
 		${ZLIB_SOURCES}
 		${ZLIB_HEADERS}
+		${MINIZ_SOURCES}
+		${MINIZ_HEADERS}
 	)
-	target_link_libraries(update-tracker PRIVATE ws2_32 crypt32 advapi32 ${LIBCRYPTO_LIBRARY} ${LIBSSL_LIBRARY} ${LIBCURL_LIBRARY} )
+	target_link_libraries(update)
 	# static libcurl
 	add_definitions(-DCURL_STATICLIB)
 	# static link for tracker
@@ -77,6 +79,7 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 		${CMAKE_SOURCE_DIR}/lib/zlib
 	)
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+	add_compile_definitions(OSU_TRACKER_PLATFORM="linux")
 	add_compile_definitions(__linux__)
 	set(LIBGLFW3 "${CMAKE_SOURCE_DIR}/lib/static/libglfw3.a")
 	add_compile_definitions(OSU_TRACKER_CMAKE_CXX_COMPILER_ARCHITECTURE_ID="${CMAKE_SYSTEM_PROCESSOR}")
@@ -89,13 +92,14 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 		${NUKLEAR_HEADER}
 		${NUKLEAR_HEADER_LINUX}
 		header/ui/ui_linux.c
-		
 	)
-	add_executable(update-tracker update.cpp
+	add_executable(update update.cpp
 		${CPR_SOURCES}
 		${CPR_HEADERS}
+		${MINIZ_SOURCES}
+		${MINIZ_HEADERS}
 	)
-	target_link_libraries(update-tracker PRIVATE ${CURL_LIBRARIES} ${ZLIB_LIBRARIES})
+	target_link_libraries(update PRIVATE ${ZLIB_LIBRARIES})
 	
 	# Include system headers
 	include_directories(${CURL_INCLUDE_DIRS} ${ZLIB_INCLUDE_DIRS} ${X11_INCLUDE_DIR})
@@ -107,7 +111,7 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 endif()
 	
 set_target_properties(osu-tracker PROPERTIES OUTPUT_NAME "osu-tracker" RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/osu-tracker")
-set_target_properties(update-tracker PROPERTIES OUTPUT_NAME "update-tracker" RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/osu-tracker")
+set_target_properties(update PROPERTIES OUTPUT_NAME "update" RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/osu-tracker")
 	
 # CMAKE BUILD AND COMPILER DEFINITIONS
 add_compile_definitions(OSU_TRACKER_CMAKE_BUILD_TYPE="${CMAKE_BUILD_TYPE}")
@@ -135,7 +139,6 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
 endif()
 	
 # WEB SERVER DEFINITIONS 
-add_compile_definitions(OSU_TRACKER_UPDATE_EQUAL=1) # Debug flag to download update on same signed version
 add_compile_definitions(OSU_TRACKER_ENABLE_WEBSERVER=1) # Legacy flag due to webserver was an optional feature
 add_compile_definitions(OSU_TRACKER_WEBSERVER_IP="127.0.0.1")
 add_compile_definitions(OSU_TRACKER_WEBSERVER_PORT=10727)
@@ -150,9 +153,13 @@ add_compile_definitions(OSU_TRACKER_CMAKE_CXX_COMPILER_VERSION="${CMAKE_CXX_COMP
 add_compile_definitions(OSU_TRACKER_CMAKE_CXX_COMPILER="${CMAKE_CXX_COMPILER}")
 add_compile_definitions(OSU_TRACKER_CMAKE_SYSTEM_NAME="${CMAKE_SYSTEM_NAME}")
 
+# Auto Update Control
+add_compile_definitions(OSU_TRACKER_VERSION_SIGNED="40")
+add_compile_definitions(OSU_TRACKER_UPDATE_EQUAL=1) # Debug flag to download update on same signed version
+add_compile_definitions(OSU_TRACKER_UPDATE_MASTER=1) # Debug flag to check master branch
+
 # OSU_TRACKER PROJECT STATIC STRINGS
 add_compile_definitions(OSU_TRACKER_NAME="osu! Tracker")
-add_compile_definitions(OSU_TRACKER_VERSION_SIGNED="40")
 add_compile_definitions(OSU_TRACKER_VERSION="v0.4.0")
 add_compile_definitions(OSU_TRACKER_TITLE="osu! Tracker v0.4.0")
 add_compile_definitions(OSU_TRACKER_RELEASE_TYPE="Beta")

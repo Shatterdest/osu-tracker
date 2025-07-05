@@ -478,6 +478,36 @@ private:
 			return std::round((level + fraction) * 1000.0L) / 1000.0L;
 		}
 	
+	static bool download(const nlohmann::json& releaseJson) {
+		std::string target_asset = "x86-release-" + std::string(OSU_TRACKER_PLATFORM) + ".zip";
+		for (const auto& asset : releaseJson["assets"]) {
+			std::string name = asset["name"];
+			if (name == target_asset) {
+				std::string download_url = asset["browser_download_url"];
+				console::writeLog("Downloading " + name + "...", true, 173, 216, 230);
+				cpr::Response zip_response = cpr::Get(cpr::Url{ download_url });
+				if (zip_response.status_code == 200) {
+					std::ofstream out("update.zip", std::ios::binary);
+					if (!out) {
+						console::writeLog("Failed to open update.zip for writing.", true, 255, 0, 0);
+						return false;
+					}
+					out.write(zip_response.text.c_str(), zip_response.text.size());
+					out.close();
+
+					console::writeLog(name + " downloaded > update.zip.", true, 0, 255, 0);
+					return true;
+				}
+				else {
+					console::writeLog("Failed to download " + name + ". Status: " + std::to_string(zip_response.status_code), true, 255, 0, 0);
+					return false;
+				}
+			}
+		}
+		console::writeLog("Invalid Target: " + target_asset, true, 255, 0, 0);
+		return false;
+	}
+
 public:
 	static void fetch_api_data(bool init) {
 		switch (config::application::instance().server) {
@@ -531,7 +561,7 @@ public:
 	// replace current and web files
 	static bool update() {
 		try {
-			cpr::Response r = cpr::Post(cpr::Url{ "https://api.github.com/repos/nyaruku/osu-tracker/releases/latest" });
+			cpr::Response r = cpr::Get(cpr::Url{ "https://api.github.com/repos/nyaruku/osu-tracker/releases/latest" });
 			if (r.status_code != 200) {
 				console::writeLog("Failed to get latest release.", true, 255, 0, 0);
 				return false;
@@ -563,19 +593,51 @@ public:
 			r = cpr::Get(cpr::Url{ "https://raw.githubusercontent.com/nyaruku/osu-tracker/" + commit_sha + "/version.txt" });
 			if (r.status_code != 200) {
 				console::writeLog("Failed to download version.txt", true, 255, 0, 0);
+				#if OSU_TRACKER_UPDATE_MASTER==1
+					// check master version.txt
+					console::writeLog("Checking master...", true, 255, 255, 0);
+					r = cpr::Get(cpr::Url{ "https://raw.githubusercontent.com/nyaruku/osu-tracker/refs/heads/master/version.txt" });
+					if (r.status_code != 200) {
+						console::writeLog("master -> no version.txt found", true, 255, 0, 0);
+						return false;
+					}
+					// master found
+					#if OSU_TRACKER_UPDATE_EQUAL==1
+						if (std::stoi(r.text) == std::stoi(OSU_TRACKER_VERSION_SIGNED)) {
+							console::writeLog("Signed Version found : " + r.text, true, 111, 163, 247);
+							if (download(request)) {
+								return true;
+							}
+							return false;
+						}
+					#endif
+					if (std::stoi(r.text) > std::stoi(OSU_TRACKER_VERSION_SIGNED)) {
+						console::writeLog("Signed Version found : " + r.text, true, 111, 163, 247);
+						if (download(request)) {
+							return true;
+						}
+						return false;
+					}
+				#endif
 				return false;
 			}
-
-			/*
-			#if OSU_TRACKER_UPDATE_EQUAL == 1
-				if(r.text)
-				run = !webserver::start(skipInit); // blocking
-				skipInit = true;
-				// close ui
-				ui::close();
+			#if OSU_TRACKER_UPDATE_EQUAL==1
+				if (std::stoi(r.text) == std::stoi(OSU_TRACKER_VERSION_SIGNED)) {
+					console::writeLog("Signed Version found : " + r.text, true, 111, 163, 247);
+					if (download(request)) {
+						return true;
+					}
+					return false;
+				}
 			#endif
-			*/
-			return r.status_code;
+			if (std::stoi(r.text) > std::stoi(OSU_TRACKER_VERSION_SIGNED)) {
+				console::writeLog("Signed Version found : " + r.text, true, 111, 163, 247);
+				if (download(request)) {
+					return true;
+				}
+				return false;
+			}
+			return false;
 		}
 		catch (const nlohmann::json::exception& e) {
 			console::writeLog(std::string("update() -> JSON exception: ") + e.what(), true, 255, 0, 0);

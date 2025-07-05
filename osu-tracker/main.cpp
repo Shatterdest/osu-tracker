@@ -48,8 +48,19 @@ int main()
 	#endif
 	console::writeLog("-------------------------------------------------------------", true, 255, 255, 255);
 	console::writeLog("Checking for update...", true, 255, 255, 0);
-	api::update();
-	
+	if (api::update()) {
+		console::writeLog("Updaing...", true, 0, 255, 0);
+		#if defined(_WIN32)
+				system("start update.exe");
+		#elif defined(__linux__)
+				system("./update &");
+		#endif
+		return 0;
+	}
+	else {
+		console::writeLog("No updates found.", true, 0, 255, 0);
+	}
+	console::writeLog("-------------------------------------------------------------", true, 255, 255, 255);
 	bool run = true;
 	bool skipInit = false;	
 	while (run) {
