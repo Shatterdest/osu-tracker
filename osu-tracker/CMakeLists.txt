@@ -94,8 +94,6 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 		header/ui/ui_linux.c
 	)
 	add_executable(update update.cpp
-		${CPR_SOURCES}
-		${CPR_HEADERS}
 		${MINIZ_SOURCES}
 		${MINIZ_HEADERS}
 	)
