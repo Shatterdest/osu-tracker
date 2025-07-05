@@ -153,8 +153,8 @@ add_compile_definitions(OSU_TRACKER_CMAKE_SYSTEM_NAME="${CMAKE_SYSTEM_NAME}")
 
 # Auto Update Control
 add_compile_definitions(OSU_TRACKER_VERSION_SIGNED="40")
-add_compile_definitions(OSU_TRACKER_UPDATE_EQUAL=1) # Debug flag to download update on same signed version
-add_compile_definitions(OSU_TRACKER_UPDATE_MASTER=1) # Debug flag to check master branch
+add_compile_definitions(OSU_TRACKER_UPDATE_EQUAL=0) # Debug flag to download update on same signed version
+add_compile_definitions(OSU_TRACKER_UPDATE_MASTER=0) # Debug flag to check master branch
 
 # OSU_TRACKER PROJECT STATIC STRINGS
 add_compile_definitions(OSU_TRACKER_NAME="osu! Tracker")
