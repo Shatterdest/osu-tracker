@@ -559,6 +559,7 @@ public:
 	// to do parse and compare
 	// update program
 	// replace current and web files
+
 	static bool update() {
 		try {
 			cpr::Response r = cpr::Get(cpr::Url{ "https://api.github.com/repos/nyaruku/osu-tracker/releases/latest" });
@@ -567,59 +568,14 @@ public:
 				return false;
 			}
 			nlohmann::json request = nlohmann::json::parse(r.text);
-			const std::string tag_name = request["tag_name"];
-			// Get the tag ref to find tag SHA
-			r = cpr::Get(cpr::Url{ "https://api.github.com/repos/nyaruku/osu-tracker/git/refs/tags/" + tag_name });
-			if (r.status_code != 200) {
-				console::writeLog("Failed to get tag ref.", true, 255, 0, 0);
-				return false;
-			}
-			nlohmann::json tag_ref_json = nlohmann::json::parse(r.text);
-			const std::string tag_sha = tag_ref_json["object"]["sha"];
-			// 3. Check if tag is annotated or lightweight
-			r = cpr::Get(cpr::Url{ "https://api.github.com/repos/nyaruku/osu-tracker/git/tags/" + tag_sha });
-			std::string commit_sha;
-			if (r.status_code == 200) {
-				nlohmann::json tag_obj_json = nlohmann::json::parse(r.text);
-				commit_sha = tag_obj_json["object"]["sha"];
-			}
-			else {
-				// Lightweight tag — commit SHA = tag SHA
-				commit_sha = tag_sha;
-			}
-			console::writeLog((std::string)"Latest release tag: " + tag_name, true, 0, 255, 0);
-			console::writeLog((std::string)"Commit SHA: " + commit_sha, true, 0, 255, 0);
-			// 4. Download version.txt from commit SHA
-			r = cpr::Get(cpr::Url{ "https://raw.githubusercontent.com/nyaruku/osu-tracker/" + commit_sha + "/version.txt" });
-			if (r.status_code != 200) {
-				console::writeLog("Failed to download version.txt", true, 255, 0, 0);
-				#if OSU_TRACKER_UPDATE_MASTER==1
-					// check master version.txt
-					console::writeLog("Checking master...", true, 255, 255, 0);
-					r = cpr::Get(cpr::Url{ "https://raw.githubusercontent.com/nyaruku/osu-tracker/refs/heads/master/version.txt" });
-					if (r.status_code != 200) {
-						console::writeLog("master -> no version.txt found", true, 255, 0, 0);
-						return false;
-					}
-					// master found
-					#if OSU_TRACKER_UPDATE_EQUAL==1
-						if (std::stoi(r.text) == std::stoi(OSU_TRACKER_VERSION_SIGNED)) {
-							console::writeLog("Signed Version found : " + r.text, true, 111, 163, 247);
-							if (download(request)) {
-								return true;
-							}
-							return false;
-						}
-					#endif
-					if (std::stoi(r.text) > std::stoi(OSU_TRACKER_VERSION_SIGNED)) {
-						console::writeLog("Signed Version found : " + r.text, true, 111, 163, 247);
-						if (download(request)) {
-							return true;
-						}
-						return false;
-					}
-				#endif
-				return false;
+			std::string signedVesion = ext::replace(ext::replace(request["tag_name"],"v",""),".","");
+			for (size_t i = 0; i < signedVesion.length(); i++) {
+				if (signedVesion[i] == '0') {
+					signedVesion.substr(1, signedVesion.length()-1);
+				}
+				else {
+					break;
+				}
 			}
 			#if OSU_TRACKER_UPDATE_EQUAL==1
 				if (std::stoi(r.text) == std::stoi(OSU_TRACKER_VERSION_SIGNED)) {

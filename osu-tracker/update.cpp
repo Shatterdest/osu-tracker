@@ -21,11 +21,32 @@ bool extract_zip(const std::string& zip_path) {
             mz_zip_reader_end(&zip);
             return false;
         }
+
+        std::string filename = file_stat.m_filename;
+
+        // Skip entries that start with "_" in any path segment
+        bool skip = false;
+        size_t pos = 0;
+        while (pos < filename.length()) {
+            size_t next = filename.find_first_of("/\\", pos);
+            std::string segment = filename.substr(pos, next - pos);
+            if (!segment.empty() && segment[0] == '_') {
+                skip = true;
+                break;
+            }
+            if (next == std::string::npos) break;
+            pos = next + 1;
+        }
+
+        if (skip) {
+            continue;
+        }
+
         // Skip directories
         if (mz_zip_reader_is_file_a_directory(&zip, i)) {
             continue;
         }
-        std::string filename = file_stat.m_filename;
+
         // Extract to disk (overwrite mode)
         if (!mz_zip_reader_extract_to_file(&zip, i, filename.c_str(), 0)) {
             std::cerr << "Failed to extract: " << filename << "\n";
