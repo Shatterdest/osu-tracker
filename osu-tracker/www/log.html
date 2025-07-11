@@ -16,11 +16,34 @@
 
 	<script>
 			let socket;
+			function highlightLogLine(line) {
+				return line.replace(/^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) (\[)([^\]]+)(\])(.*)$/,
+					(_, ts, lb, level, rb, rest) => {
+						// Map log levels to Bootstrap text color classes
+						const levelClassMap = {
+							debug: 'text-secondary',
+							info: 'text-info',
+							warning: 'text-warning',
+							error: 'text-danger',
+							critical: 'text-white bg-danger px-1 rounded',
+							'osu-tracker': 'text-success'
+						};
+
+						const cleanLevel = level.toLowerCase().replace(/[^a-z-]/g, '');
+                        const bsColorClass = levelClassMap[cleanLevel] || 'text-white'; // fallback
+
+                        return `<span class="timestamp text-secondary">${ts}</span> ` +
+							`<span class="bracket">${lb}</span>` +
+							`<span class="level ${bsColorClass}">${level}</span>` +
+							`<span class="bracket">${rb}</span>` +
+                            `<span class="rest ${bsColorClass}">${rest}</span>`;
+					});
+			}
 
 			function connectWebSocket() {
 				socket = new WebSocket("ws://{{hostname}}:{{port}}/ws/log/");
 
-                const MAX_LOG_LINES = 1000;
+                const MAX_LOG_LINES = 250;
                 const logLines = [];
 
                 socket.onmessage = (event) => {
@@ -39,7 +62,7 @@
                     for (const key in data) {
                         logLines.push(data[key]);
 
-                        // Keep only the last 1000 lines
+                        // Keep only the last 250 lines
                         if (logLines.length > MAX_LOG_LINES) {
                             logLines.splice(0, logLines.length - MAX_LOG_LINES);
                         }
@@ -47,8 +70,9 @@
 
                     // Render logs
                     const logContainer = document.getElementById('log-container');
-                    if (logContainer) {
-                        logContainer.textContent = logLines.join('\n');
+					if (logContainer) {
+                        const highlighted = logLines.map(highlightLogLine).join('\n');
+                        logContainer.innerHTML = highlighted;;
 
                         // Scroll to bottom
                         logContainer.parentElement.scrollTop = logContainer.parentElement.scrollHeight;
@@ -114,9 +138,9 @@
 	</div>
 	<div class="container" style="margin-top:50px">
 		<div class="card rounded-0">
-			<h5 class="card-header bg-dark rounded-0">Log (Last 1000 lines)</h5>
+			<h5 class="card-header bg-dark rounded-0">Log (Last 250 lines)</h5>
 			<div class="card-body bg-black text-white">
-				<pre><code id="log-container"></code></pre>
+				<pre class="lh-1"><code id="log-container"></code></pre>
 			</div>
 		</div>
 	</div>

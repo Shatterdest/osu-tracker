@@ -1,3 +1,4 @@
+# THIS IS A PILE OF JUNK
 cmake_minimum_required(VERSION 3.15)
 project(osu-tracker LANGUAGES C CXX)
 
@@ -12,6 +13,7 @@ set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
 
 # Base directories
 set(BASE_INCLUDE_PATH "${CMAKE_SOURCE_DIR}/includes")
+
 # Add the include directories for the project
 include_directories(${BASE_INCLUDE_PATH})
 
@@ -37,7 +39,7 @@ file(GLOB_RECURSE NUKLEAR_HEADER_LINUX CONFIGURE_DEPENDS includes/nuklear/nuklea
 file(GLOB_RECURSE NUKLEAR_HEADER_GLFW CONFIGURE_DEPENDS includes/nuklear/glfw3.h)
 file(GLOB_RECURSE NUKLEAR_HEADER_GLFW_NATIVE CONFIGURE_DEPENDS includes/nuklear/glfw3native.h)
 
-# No MacOS support
+# No MacOS support, cant test
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
 	add_compile_definitions(OSU_TRACKER_PLATFORM="windows")
 	add_compile_definitions(_WIN32)
