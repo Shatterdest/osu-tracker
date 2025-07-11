@@ -64,7 +64,7 @@ public:
 		std::stringstream ss;
 		ss << (std::string)dateBuffer + " " + timeBuffer << " " << "[osu-tracker] " << msg;
 		console::instance().vec_log.push_back(ss.str());
-		if (console::instance().vec_log.size() > 100) {
+		while(console::instance().vec_log.size() > 100) {
 			console::instance().vec_log.pop_front();
 		}
 		#if RELEASE_BUILD

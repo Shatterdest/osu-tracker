@@ -226,11 +226,16 @@ public:
 				data.change = "";
 				noDiff = true;
 			}
+			bool noCurrent = false;
+			if (data.current == "") {
+				noCurrent = true;
+			}
 			switch (data.dataType) {
 				case config::dataType::_int: {
 					switch (data.formatType) {
 						case config::formatType::f_int: {
-							data.current = formatNumber(data.current);
+							if(!noCurrent)
+								data.current = formatNumber(data.current);
 							if (noDiff)
 								break;
 							std::string str = formatNumber(data.change, true);
@@ -241,7 +246,8 @@ public:
 							break;
 						}
 						case config::formatType::f_rank: {
-							data.current = formatNumber(data.current, false, "#");
+							if (!noCurrent)
+								data.current = formatNumber(data.current, false, "#");
 							if (noDiff)
 								break;
 							std::string str = formatNumber(data.change, true, "#");
@@ -252,7 +258,8 @@ public:
 							break;
 						}
 						case config::formatType::f_time: {
-							data.current = formatPlaytime(data.current);
+							if (!noCurrent)
+								data.current = formatPlaytime(data.current);
 							if (noDiff)
 								break;
 							data.change = formatPlaytime(data.change, true);
@@ -264,7 +271,8 @@ public:
 				case config::dataType::_longLong: {
 					switch (data.formatType) {
 						case config::formatType::f_int: {
-							data.current = formatNumber(data.current);
+							if (!noCurrent)
+								data.current = formatNumber(data.current);
 							if (noDiff)
 								break;
 							std::string str = formatNumber(data.change, true);
@@ -275,7 +283,8 @@ public:
 							break;
 						}
 						case config::formatType::f_rank: {
-							data.current = formatNumber(data.current, false, "#");
+							if (!noCurrent)
+								data.current = formatNumber(data.current, false, "#");
 							if (noDiff)
 								break;
 							std::string str = formatNumber(data.change, true, "#");
@@ -286,7 +295,8 @@ public:
 							break;
 						}
 						case config::formatType::f_time: {
-							data.current = formatPlaytime(data.current);
+							if (!noCurrent)
+								data.current = formatPlaytime(data.current);
 							if (noDiff)
 								break;
 							data.change = formatPlaytime(data.change, true);
@@ -298,7 +308,8 @@ public:
 				case config::dataType::_float: {
 					switch (data.formatType) {
 						case config::formatType::f_decimal: {
-							data.current = formatFloat(data.current);
+							if (!noCurrent)
+								data.current = formatFloat(data.current);
 							if (noDiff)
 								break;
 							std::string str = formatFloat(data.change, true);
@@ -309,7 +320,8 @@ public:
 							break;
 						}
 						case config::formatType::f_percent: {
-							data.current = formatFloat(data.current) + "%";
+							if (!noCurrent)
+								data.current = formatFloat(data.current) + "%";
 							if (noDiff)
 								break;
 							std::string str = formatFloat(data.change, true) + "%";;

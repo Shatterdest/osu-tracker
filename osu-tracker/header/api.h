@@ -356,6 +356,12 @@ private:
 					config::data::arr[config::data::getIndex("targetRank")].current = std::to_string(_target[0]["rank"].get<int>());
 					config::data::arr[config::data::getIndex("targetUser")].current = _target[0]["username"].get<std::string>();
 					config::data::arr[config::data::getIndex("targetScore")].current = std::to_string(_target[0]["score"].get<long long>() - _user[0]["score"].get<long long>());
+					if (config::data::arr[config::data::getIndex("targetRank")].current == "Invalid") {
+						config::data::arr[config::data::getIndex("targetRank")].current == "";
+					}
+					if (config::data::arr[config::data::getIndex("targetScore")].current == "Invalid") {
+						config::data::arr[config::data::getIndex("targetScore")].current == "";
+					}
 					return;
 				}
 				catch (const nlohmann::json::exception& e) {

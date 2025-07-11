@@ -207,9 +207,10 @@ int ui_main()
     GdiFont* fontHeader;
     GdiFont* fontSmall;
 
-    fontHeader = nk_gdifont_create("Arial", 22);
-    font = nk_gdifont_create("Arial", 16);
-    fontSmall = nk_gdifont_create("Arial", 16);
+    int fontSizeOffset = 2;
+    fontHeader = nk_gdifont_create("Segoe UI", 24 + fontSizeOffset);
+    font = nk_gdifont_create("Segoe UI", 16 + fontSizeOffset);
+    fontSmall = nk_gdifont_create("Segoe UI", 16 + fontSizeOffset);
 
     ctx = nk_gdi_init(font, dc, WINDOW_WIDTH, WINDOW_HEIGHT);
     int w = WINDOW_WIDTH;
