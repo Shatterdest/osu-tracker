@@ -5,7 +5,7 @@ public:
 		static console ctx;
 		return ctx;
 	}
-	std::vector<std::string> vec_log;
+	std::deque<std::string> vec_log;
 	// ansi console color codes
 	enum conCol {
 		f_black = 30,
@@ -45,6 +45,14 @@ public:
 	static void resetColor() {
 		std::cout << "\033[0m";
 	}
+
+	static inline std::string getLogAtIndex(int i) {
+		return console::instance().vec_log[i];
+	}
+
+	static inline std::string getLastLog() {
+		return console::instance().vec_log.back();
+	}
 	
 	static void writeLog(std::string msg, bool alwaysPrint = false, int r = 255, int g = 255, int b = 255) {
 		time_t currentTime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
@@ -54,8 +62,11 @@ public:
 		char timeBuffer[9];
 		strftime(timeBuffer, sizeof(timeBuffer), "%H:%M:%S", timeInfo);
 		std::stringstream ss;
-		ss << (std::string)dateBuffer + " " + timeBuffer << " " << "[" << "Internal" << "] " << msg;
+		ss << (std::string)dateBuffer + " " + timeBuffer << " " << "[osu-tracker] " << msg;
 		console::instance().vec_log.push_back(ss.str());
+		if (console::instance().vec_log.size() > 100) {
+			console::instance().vec_log.pop_front();
+		}
 		#if RELEASE_BUILD
 			if(!alwaysPrint) // Dont print on release if not explicity
 				return;
