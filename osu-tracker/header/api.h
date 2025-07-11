@@ -568,26 +568,23 @@ public:
 				return false;
 			}
 			nlohmann::json request = nlohmann::json::parse(r.text);
-			std::string signedVesion = ext::replace(ext::replace(request["tag_name"],"v",""),".","");
-			for (size_t i = 0; i < signedVesion.length(); i++) {
-				if (signedVesion[i] == '0') {
-					signedVesion.substr(1, signedVesion.length()-1);
-				}
-				else {
+			std::string _signedVersion = ext::replace(ext::replace(request["tag_name"],"v",""),".","");
+			for (size_t i = 0; i < _signedVersion.length(); i++) {
+				if (_signedVersion[0] != '0')
 					break;
-				}
+				_signedVersion = _signedVersion.substr(1, std::string::npos);
 			}
+			console::writeLog("Signed Version found : " + _signedVersion + " (" + std::string(request["tag_name"]) + ")", true, 111, 163, 247);
+			const int signedVersion = std::stoi(_signedVersion);
 			#if OSU_TRACKER_UPDATE_EQUAL==1
-				if (std::stoi(r.text) == std::stoi(OSU_TRACKER_VERSION_SIGNED)) {
-					console::writeLog("Signed Version found : " + r.text, true, 111, 163, 247);
+				if (signedVersion == std::stoi(OSU_TRACKER_VERSION_SIGNED)) {
 					if (download(request)) {
 						return true;
 					}
 					return false;
 				}
 			#endif
-			if (std::stoi(r.text) > std::stoi(OSU_TRACKER_VERSION_SIGNED)) {
-				console::writeLog("Signed Version found : " + r.text, true, 111, 163, 247);
+			if (signedVersion > std::stoi(OSU_TRACKER_VERSION_SIGNED)) {
 				if (download(request)) {
 					return true;
 				}
