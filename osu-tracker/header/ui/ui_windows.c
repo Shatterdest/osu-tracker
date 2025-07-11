@@ -252,12 +252,16 @@ int ui_main()
         // Always draw
         nk_style_default(ctx);
         drawContent(ctx, font, fontSmall, fontHeader, w, h, _app, _user, _entries, _entry_count, show_debug_layout, data_debug_layout);
+        nk_end(ctx);
         nk_gdi_render(nk_rgb(0, 0, 0));
     }
 
     // Cleanup
     nk_gdifont_del(font);
+    nk_gdifont_del(fontHeader);
+    nk_gdifont_del(fontSmall);
     ReleaseDC(wnd, dc);
     UnregisterClassW(wc.lpszClassName, wc.hInstance);
+    nk_gdi_shutdown();
     return 0;
 }

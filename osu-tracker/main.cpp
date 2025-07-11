@@ -46,21 +46,8 @@ int main()
 	#else
 		console::writeLog((std::string)"Build: RELEASE", true, 111, 163, 247);
 	#endif
-	console::writeLog("-------------------------------------------------------------", true, 255, 255, 255);
-	console::writeLog("Checking for update...", true, 255, 255, 0);
-	if (api::update()) {
-		console::writeLog("Updaing...", true, 0, 255, 0);
-		#if defined(_WIN32)
-				system("start update.exe");
-		#elif defined(__linux__)
-				system("./update &");
-		#endif
+	if (webserver::instance().performUpdateCheck() == 0)
 		return 0;
-	}
-	else {
-		console::writeLog("No updates found.", true, 0, 255, 0);
-	}
-	console::writeLog("-------------------------------------------------------------", true, 255, 255, 255);
 	bool run = true;
 	bool skipInit = false;	
 	while (run) {
@@ -78,14 +65,15 @@ int main()
 		api::fetch_api_data(true);
 		ui::startFetchThread();
 		ui::copyDataOnly();
-		std::thread uiThread([]() { ui::open(); });
+		webserver::startUiThread();
 		#if OSU_TRACKER_ENABLE_WEBSERVER == 1
 			run = !webserver::start(skipInit); // blocking
 			skipInit = true;
 			// close ui
-			ui::close();
 		#endif
-		uiThread.join();
+		console::writeLog("Stopping UI Thread...", true, 255, 0, 0);
+		webserver::stopUiThread();
+		console::writeLog("Stopping Fetch Thread...", true, 255, 0, 0);
 		ui::stopFetchThread();
 	}
 	return 0;

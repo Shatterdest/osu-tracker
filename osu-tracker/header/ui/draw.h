@@ -161,8 +161,6 @@ void data_debug_style(struct nk_context* ctx, struct nk_font* fontSmall, int w, 
 				nk_label(ctx, custom_strcat_static(1, "[color=#FFFF00]\"[/color][color=#0000FF]titanicSupport[/color][color=#FFFF00]\"[/color][color=#FFFFFF]:([/color][color=#FF0000]false[/color][color=#FFFFFF])[/color]"), NK_TEXT_ALIGN_LEFT);
 			}
 		}
-
-		nk_end(ctx);
 	}
 }
 
@@ -279,7 +277,6 @@ void drawContent(struct nk_context* ctx, struct nk_font* font, struct nk_font* f
 				ctx->style.edit.text_normal = nk_rgb(255, 255, 255);
 			}
 		}
-	nk_end(ctx);
 	}
 };
 

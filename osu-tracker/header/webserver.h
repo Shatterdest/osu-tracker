@@ -2,11 +2,12 @@
 #define CROW_ENFORCE_WS_SPEC
 
 #include "crow.h"
-#include <filesystem>
 #include "json.hpp"
+#include <filesystem>
 #include <unordered_set>
 #include <mutex>
 #include "config.h"
+#include "ui/ui.h"
 
 class CustomLogger : public crow::ILogHandler {
 public:
@@ -107,11 +108,6 @@ public:
 
 class webserver {
 private:
-	static webserver& instance() {
-		static webserver ctx;
-		return ctx;
-	}
-
 	bool shutdown_webServer = false;
 	using json = nlohmann::json;
 	inline static crow::SimpleApp app;
@@ -128,6 +124,56 @@ private:
 		return _j;
 	}
 public:
+	std::thread uiThread;
+
+	static void startUiThread() {
+		stopUiThread();
+		console::writeLog("Check if UI Thread is joinable (to run UI)", false, 255, 255, 0);
+		if (!instance().uiThread.joinable()) {
+			console::writeLog("Running UI Thread...", false, 255, 255, 0);
+			instance().uiThread = std::thread(ui::open);
+		}
+		else {
+			console::writeLog("UI Thread is running.", false, 255, 255, 0);
+		}
+	}
+
+	static void stopUiThread() {
+		console::writeLog("Check if UI Thread is joinable (to close UI)", false, 255, 255, 0);
+		if (instance().uiThread.joinable()) {
+			console::writeLog("UI Thread is joinable", false, 255, 255, 0);
+			ui::close();
+			instance().uiThread.join();
+		}
+		else {
+			console::writeLog("UI Thread is not joinable", false, 255, 255, 0);
+		}
+	}
+
+	static webserver& instance() {
+		static webserver ctx;
+		return ctx;
+	}
+
+	int performUpdateCheck() {
+		console::writeLog("-------------------------------------------------------------", true, 255, 255, 255);
+		console::writeLog("Checking for update...", true, 255, 255, 0);
+		if (api::update()) {
+			console::writeLog("Updaing...", true, 0, 255, 0);
+		#if defined(_WIN32)
+			system("start update.exe");
+		#elif defined(__linux__)
+			system("./update &");
+		#endif
+			return 0;
+		}
+		else {
+			console::writeLog("No updates found.", true, 0, 255, 0);
+		}
+		console::writeLog("-------------------------------------------------------------", true, 255, 255, 255);
+		return 1;
+	}
+
 	static void shutdown(bool restart = false) {
 		console::writeLog("Web Server termination initiated...", false, 255, 255, 0);
 		instance().shutdown_webServer = !restart;
@@ -135,16 +181,15 @@ public:
 	}
 
 	/*
-	* blocking function
-	return true - shutdown
-	return false - restart
+		- blocking function
+		return true - shutdown
+		return false - restart
 	*/
 	static bool start(bool skipInit = false)
 	{	
 		// Skip Initialization -> crash
-	
-			CustomLogger logger;
-			crow::logger::setHandler(&logger);
+		CustomLogger logger;
+		crow::logger::setHandler(&logger);
 
 		if (!skipInit)
 		{
@@ -152,7 +197,6 @@ public:
 			std::string www_path = std::filesystem::current_path().string() + "/www/";
 			crow::mustache::set_base("./www/");
 			crow::mustache::set_global_base("./www/");
-
 
 			// websocket routes
 			CROW_WEBSOCKET_ROUTE(app, "/ws/main/")
@@ -174,15 +218,20 @@ public:
 				console::writeLog("Command received: " + cmd);
 		
 				if (cmd[0] == '#') {
-					if(cmd == "#restart")
+					if (cmd == "#restart")
 						shutdown(true);
-					if(cmd == "#shutdown")
+					if (cmd == "#shutdown")
 						shutdown(false);
-					if(cmd == "#open_ui")
-						shutdown(false);
+					if (cmd == "#open_ui")
+						startUiThread();
 					if (cmd == "#count") {
 						instance().counter++;
 						conn.send_text(instance().sendToast(std::to_string(instance().counter)).dump());
+					}
+					if (cmd == "#update") {
+						if (instance().performUpdateCheck() == 0)
+							shutdown(false);
+						conn.send_text(instance().sendToast((std::string)"No updates found.").dump());
 					}
 				}
 			});
